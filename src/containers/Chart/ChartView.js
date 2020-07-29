@@ -233,7 +233,8 @@ export default function ChartView(props) {
     return () => {
       x.dispose();
     };
-  }, []);
+  }, [ChartData]);
+
   useLayoutEffect(() => {
     chart.current.data = ChartData;
 
