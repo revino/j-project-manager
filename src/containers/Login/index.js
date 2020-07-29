@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link as withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 
 import validate from 'validate.js';
 
@@ -167,9 +167,6 @@ function SignIn(props) {
   const handleSignIn = async(event) => {
 
     window.location.assign(AUTHORIZE_URI + "?" + queryStr);
-
-    //event.preventDefault();
-    //history.push('/');
   };
 
   return (
