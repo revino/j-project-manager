@@ -75,10 +75,11 @@ export default function ItemTable(props) {
     let   item = [];
 
     let cbCon = ``
-    cbArray.map((el,idx) => {
+
+    for (const [idx, el] of cbArray) {
       if(el === true && cbCon !== '' )cbCon += " or ";
       if(el === true) cbCon += `B='${progressData[idx]}'`;
-    })
+    }
     console.log(`select * where  (A is not null) and (${cbCon}) order by C`);
     const queryStr = qs.stringify({
       tq: `select * where  (A is not null) and (${cbCon}) order by C`,
@@ -99,7 +100,7 @@ export default function ItemTable(props) {
     console.log("아이템 요청");
     console.log(resjson);
 
-    resjson.table.rows.map( (el,idx) => {
+    for (var el of resjson.table.rows) {
       //createData(id, progress, company, line, pl, pic, start, end, pjtno, pjtname,content )
       const i = new createData(
         el.c[0].v,
@@ -114,7 +115,7 @@ export default function ItemTable(props) {
         el.c[9].v,
         el.c[10].v)
       item.push(i);
-    });
+    };
     setTableData(item);
   }
 
