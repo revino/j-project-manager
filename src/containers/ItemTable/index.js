@@ -75,7 +75,7 @@ export default function ItemTable(props) {
     let   item = [];
 
     let cbCon = ``
-    cbArray.foreach((el,idx) => {
+    cbArray.map((el,idx) => {
       if(el === true && cbCon !== '' )cbCon += " or ";
       if(el === true) cbCon += `B='${progressData[idx]}'`;
     })
@@ -99,7 +99,7 @@ export default function ItemTable(props) {
     console.log("아이템 요청");
     console.log(resjson);
 
-    resjson.table.rows.foreach( (el,idx) => {
+    resjson.table.rows.map( (el,idx) => {
       //createData(id, progress, company, line, pl, pic, start, end, pjtno, pjtname,content )
       const i = new createData(
         el.c[0].v,

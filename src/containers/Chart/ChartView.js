@@ -79,20 +79,20 @@ export default function ChartView(props) {
     let colorbright = 1;
     if(Object.keys(initData).length > 0){
       console.log("init 데이터 초기화");
-      initData.table.rows.foreach( (el,idx) => {
+      initData.table.rows.map( (el,idx) => {
           let item = new ChartItem(null,el.c[0].v,null,null,null,null,null,null,null,YCategory)
           data.push(item);
       });
-      console.log(data);
     }
 
     //A, F, J, G, H, C, D, I
     //id,charger,pjt name,start,end, company, line, pjtNo
-    resdata.rows.foreach( (el,idx) => {
+    resdata.table.rows.map( (el,idx,array) => {
       if(lastName !== el.c[1].v) {color++; colorbright=1;lastName=el.c[1].v;}
       if(lastName === el.c[1].v ) {colorbright-=0.2;}
       let item = new ChartItem(el.c[0].v,el.c[1].v,el.c[2].v,el.c[3].f,el.c[4].f,el.c[5].v,el.c[6].v,el.c[7].v,colorSet.getIndex(color).brighten(colorbright),YCategory)
       data.push(item);
+      return item;
     });
     //console.log(data);
     setChartData(data);
@@ -151,7 +151,7 @@ export default function ChartView(props) {
     const resjson = await JSON.parse(resText);
     console.log(resjson);
 
-    parseChartData(resjson.table,initData);
+    parseChartData(resjson,initData);
 
 
   }

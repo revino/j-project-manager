@@ -22,7 +22,7 @@ const SCOPE_URI = "https://www.googleapis.com/auth/spreadsheets";
 
 const queryStr = qs.stringify({
     client_id: CLIENT_ID,
-    redirect_uri: `${window.location.href}/google/`,
+    redirect_uri: `${window.location.protocol}//${window.location.host}/login/google/`,
     response_type: "token",
     scope: SCOPE_URI
   });
