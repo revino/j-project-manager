@@ -75,11 +75,11 @@ export default function ItemTable(props) {
     let   item = [];
 
     let cbCon = ``
-
-    for (const [idx, el] of cbArray) {
-      if(el === true && cbCon !== '' )cbCon += " or ";
-      if(el === true) cbCon += `B='${progressData[idx]}'`;
+    for(let i=0; i<cbArray.length; i++) {
+      if(cbArray[i] === true && cbCon !== '' )cbCon += " or ";
+      if(cbArray[i] === true) cbCon += `B='${progressData[i]}'`;
     }
+
     console.log(`select * where  (A is not null) and (${cbCon}) order by C`);
     const queryStr = qs.stringify({
       tq: `select * where  (A is not null) and (${cbCon}) order by C`,
