@@ -1,5 +1,4 @@
 import React, {useState,useLayoutEffect, useRef} from 'react';
-import dotenv from 'dotenv';
 
 import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
@@ -38,7 +37,6 @@ const useStyles = makeStyles(theme => ({
   }));
 
 am4core.useTheme(am4themes_animated);
-dotenv.config();
 
 let colorSet = new am4core.ColorSet();
 colorSet.saturation = 0.4;
@@ -81,7 +79,7 @@ export default function ChartView(props) {
     let colorbright = 1;
     if(Object.keys(initData).length > 0){
       console.log("init 데이터 초기화");
-      initData.table.rows.map( (el,idx) => {
+      initData.table.rows.foreach( (el,idx) => {
           let item = new ChartItem(null,el.c[0].v,null,null,null,null,null,null,null,YCategory)
           data.push(item);
       });
@@ -90,7 +88,7 @@ export default function ChartView(props) {
 
     //A, F, J, G, H, C, D, I
     //id,charger,pjt name,start,end, company, line, pjtNo
-    resdata.rows.map( (el,idx) => {
+    resdata.rows.foreach( (el,idx) => {
       if(lastName !== el.c[1].v) {color++; colorbright=1;lastName=el.c[1].v;}
       if(lastName === el.c[1].v ) {colorbright-=0.2;}
       let item = new ChartItem(el.c[0].v,el.c[1].v,el.c[2].v,el.c[3].f,el.c[4].f,el.c[5].v,el.c[6].v,el.c[7].v,colorSet.getIndex(color).brighten(colorbright),YCategory)

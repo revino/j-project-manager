@@ -66,10 +66,7 @@ export default function ItemTable(props) {
   };
   const { cb1, cb2, cb3, cb4, cb5 } = state;
   const error = [cb1, cb2, cb3, cb4, cb5].filter((v) => v).length < 1;
-  const clickRefresh = (event) => {
-    console.log("클릭");
-    getTableData();
-  };
+
   const getTableData = async() =>{
     const token = localStorage.getItem('ACCESS_TOKEN');
     const tokeType = localStorage.getItem('TOKEN_TYPE');
@@ -78,7 +75,7 @@ export default function ItemTable(props) {
     let   item = [];
 
     let cbCon = ``
-    cbArray.map((el,idx) => {
+    cbArray.foreach((el,idx) => {
       if(el === true && cbCon !== '' )cbCon += " or ";
       if(el === true) cbCon += `B='${progressData[idx]}'`;
     })
@@ -102,7 +99,7 @@ export default function ItemTable(props) {
     console.log("아이템 요청");
     console.log(resjson);
 
-    resjson.table.rows.map( (el,idx) => {
+    resjson.table.rows.foreach( (el,idx) => {
       //createData(id, progress, company, line, pl, pic, start, end, pjtno, pjtname,content )
       const i = new createData(
         el.c[0].v,
@@ -159,7 +156,7 @@ export default function ItemTable(props) {
           size="large" 
           color = "primary"
           variant="contained"
-          onClick={clickRefresh}
+          onClick={getTableData}
         > 갱신
         </Button>
         <FormControl required error={error} component="fieldset" className={classes.formControl}>

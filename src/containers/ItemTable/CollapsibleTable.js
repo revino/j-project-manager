@@ -1,4 +1,4 @@
-import React, {useState}from 'react';
+import React from 'react';
 
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
@@ -36,28 +36,10 @@ const StyledTableCell = withStyles((theme) => ({
   const StyledTableRow = withStyles((theme) => ({
     root: {
       '&:nth-of-type(odd)': {
-        
-      },
+      }
     },
   }))(TableRow);
   
-
-function createData(id, progress, company, line, pl, pic, start, end, pjtno, pjtname,content ) {
-  return {
-    id, 
-    progress, 
-    company, 
-    line, 
-    pl, 
-    pic, 
-    start, 
-    end, 
-    pjtno, 
-    pjtname,
-    content
-  };
-}
-
 function Row(props) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
@@ -98,21 +80,9 @@ function Row(props) {
   );
 }
 
-const rows = [
-  createData(1, "진행중", "Hynix", "mvp", "PL01", "사람01", "2020-07-30", "2020-08-30", "E-HYN 1", "PJT NAME 01","asdfasdf\ndsafa\n" ),
-  createData(1, "진행중", "Hynix", "mvp", "PL01", "사람01", "2020-07-30", "2020-08-30", "E-HYN 1", "PJT NAME 01","asdfasdf\ndsafa\n" ),
-  createData(1, "진행중", "Hynix", "mvp", "PL01", "사람01", "2020-07-30", "2020-08-30", "E-HYN 1", "PJT NAME 01","asdfasdf\ndsafa\n" ),
-  createData(1, "진행중", "Hynix", "mvp", "PL01", "사람01", "2020-07-30", "2020-08-30", "E-HYN 1", "PJT NAME 01","asdfasdf\ndsafa\n" ),
-  createData(1, "진행중", "Hynix", "mvp", "PL01", "사람01", "2020-07-30", "2020-08-30", "E-HYN 1", "PJT NAME 01","asdfasdf\ndsafa\n" ),
-  createData(1, "진행중", "Hynix", "mvp", "PL01", "사람01", "2020-07-30", "2020-08-30", "E-HYN 1", "PJT NAME 01","asdfasdf\ndsafa\n" ),
-  createData(1, "진행중", "Hynix", "mvp", "PL01", "사람01", "2020-07-30", "2020-08-30", "E-HYN 1", "PJT NAME 01","asdfasdf\ndsafa\n" ),
-  createData(1, "진행중", "Hynix", "mvp", "PL01", "사람01", "2020-07-30", "2020-08-30", "E-HYN 1", "PJT NAME 01","asdfasdf\ndsafa\n" ),
-];
-
 export default function CollapsibleTable(props) {
-  const [tableData,setTableData] = useState(props.data);
+
   return (
-    
     <TableContainer component={Paper}>
       <Table aria-label="collapsible table">
         <TableHead>

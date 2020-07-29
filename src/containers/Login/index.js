@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link as RouterLink, withRouter } from 'react-router-dom';
+import { Link as withRouter } from 'react-router-dom';
 
 import validate from 'validate.js';
 
@@ -8,13 +8,11 @@ import {
   Grid,
   Button,
   IconButton,
-  TextField,
-  Link,
   Typography
 } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
-import { Facebook as FacebookIcon, Google as GoogleIcon } from '../../icons';
+import { Google as GoogleIcon } from '../../icons';
  
 import qs from "qs";
 
@@ -166,25 +164,6 @@ function SignIn(props) {
     history.goBack();
   };
 
-  const handleChange = event => {
-    event.persist();
-
-    setFormState(formState => ({
-      ...formState,
-      values: {
-        ...formState.values,
-        [event.target.name]:
-          event.target.type === 'checkbox'
-            ? event.target.checked
-            : event.target.value
-      },
-      touched: {
-        ...formState.touched,
-        [event.target.name]: true
-      }
-    }));
-  };
-
   const handleSignIn = async(event) => {
 
     window.location.assign(AUTHORIZE_URI + "?" + queryStr);
@@ -192,9 +171,6 @@ function SignIn(props) {
     //event.preventDefault();
     //history.push('/');
   };
-
-  const hasError = field =>
-    formState.touched[field] && formState.errors[field] ? true : false;
 
   return (
     <div className={classes.root}>
