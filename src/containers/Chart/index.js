@@ -1,22 +1,156 @@
-import React from 'react';
+import React,{useState} from 'react';
+
+//Component
 import ChartView from "./ChartView"
 
+//Material UI
+import 'date-fns';
+import { Button, FormControl, InputLabel, MenuItem, Select, Grid } from '@material-ui/core';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
 import { makeStyles } from '@material-ui/styles';
-import { Grid } from '@material-ui/core';
 
+//Time
+import moment from 'moment'
+
+//API
+import SheetApi from '../../api/SpreadSheetApi'
+
+
+//Style
 const useStyles = makeStyles(theme => ({
-    root: {
-      padding: theme.spacing(4)
-    }
-  }));
+  root: {
+    padding: theme.spacing(4)
+  }
+}));
+
+//data
+const SortGroup = [{ id:"A", label: "ID"}, {id:"F", label:"담당자"}, {id:"J", label:"PJT 이름"}, {id:"C", label:"사이트"}, {id:"I", label:"PJT No"}]
+
+//function
+function ChartItem(id, pic, pjtName, start, end, company, line, pjtno, category ) {
+       if(category === 0)  this.category=pjtName;
+  else if(category === 1)  this.category=pic;
+  else if(category === 2)  this.category=company;
+  this.id = id;
+  this.pic = pic;
+  this.pjtName = pjtName;
+  this.start = start;
+  this.end = end;
+  this.company = company;
+  this.line = line;
+  this.pjtno = pjtno
+  this.sort = category;
+}
 
 export default function Chart() {
     const classes = useStyles();
+    const [ChartData, setChartData] = useState(null);
+    const [SortCategory, setSortCategory] = useState("J");
+    const [YCategory, setYCategory] = useState(0);
+    const [selectedStartDate, setSelectedStartDate] = useState(moment());
+    const [selectedEndDate, setSelectedEndDate] = useState(moment().add(20, 'days'));
+
+    //Get Data
+    const getChartData = async() =>{
+      const queryObject  = {tq: `select A, F, J, G, H, C, D, I where G <= date '${moment(selectedEndDate).format("YYYY-MM-DD")}' and H >= date '${moment(selectedStartDate).format("YYYY-MM-DD")}' order by ${SortCategory} asc`}
+      const queryObject2 = {tq: `select A where A is not null offset 1`, sheet: `Prop_Types`}
+      
+      //API REQUEST
+      const resChartDataJson  = await SheetApi.getQueryData(queryObject);
+      const chartDataArray = resChartDataJson.table.rows.map(el => {
+        return new ChartItem(el.c[0].v,el.c[1].v,el.c[2].v,el.c[3].f,el.c[4].f,el.c[5].v,el.c[6].v,el.c[7].v,YCategory);
+      });
+
+      //API REQUEST 
+      if(YCategory === 1){
+        const resNameDataJson  = await SheetApi.getQueryData(queryObject2);
+        const chartDataArray = resNameDataJson.table.rows.map(el => {
+          return new ChartItem(null,el.c[0].v,null,null,null,null,null,null,null,YCategory);
+        });
+        chartDataArray.concat(chartDataArray);
+      }
+
+      setChartData(chartDataArray);
+    }
+    
+    //handle
+    const handleStartDateChange = (date) => {
+      setSelectedStartDate(date);
+    };
+  
+    const handleEndDateChange = (date) => {
+      setSelectedEndDate(date);
+    };
+
     return (
     <div className={classes.root}>
-      <ChartView /> 
-      <Grid container spacing={4}>
-        <Grid item lg={12} sm={12} xl={12} xs={12}>         </Grid>
+      <Grid container spacing={2}
+        direction="row"
+        alignItems="center">
+
+        <Grid item lg={2} md ={2} sm={4} xl={1} xs={4} container justify="space-around">
+          <Button className={classes.refreshButton} size="large" color = "primary" variant="contained" onClick={getChartData}> 갱신</Button>
+        </Grid>  
+
+        <Grid item lg={4} md ={4} sm={8} xl={2} xs={8} container justify="space-around">
+          <FormControl className={classes.formControl}>
+            <InputLabel id="select-sort">정렬</InputLabel>
+            <Select labelId="select-sort" id="sort-select" value={SortCategory} onChange={({ target: { value } }) => setSortCategory(value)}>
+              {SortGroup.map(el => (
+                <MenuItem value={el.id}>{el.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        
+          <FormControl className={classes.formControl}>
+            <InputLabel id="select-category">기준</InputLabel>
+            <Select labelId="select-category" id="category-select" value={YCategory} onChange={({ target: { value } }) => setYCategory(value)}>
+              <MenuItem value={0}>PJT 이름</MenuItem>
+              <MenuItem value={1}>담당자</MenuItem>
+              <MenuItem value={2}>사이트</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item lg={3} md={3} sm={6} xl={2} xs={6} container justify="space-around">  
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <KeyboardDatePicker className={classes.formControl}
+              disableToolbar
+              variant="inline"
+              format="yyyy-MM-dd"
+              margin="normal"
+              id="date-picker-inline"
+              label="시작일"
+              value={selectedStartDate}
+              onChange={handleStartDateChange}
+              KeyboardButtonProps={{
+                'aria-label': 'change date',
+              }}
+            />
+          </MuiPickersUtilsProvider>
+        </Grid>
+        
+        <Grid item lg={3} md={3} sm={6} xl={2} xs={6} container justify="space-around">  
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <KeyboardDatePicker className={classes.formControl}
+              margin="normal"
+              id="date-picker-dialog"
+              label="종료일"
+              format="yyyy-MM-dd"
+              value={selectedEndDate}
+              onChange={handleEndDateChange}
+              KeyboardButtonProps={{
+                'aria-label': 'change date',
+              }}
+            />
+          </MuiPickersUtilsProvider>
+        </Grid>
+
+        <Grid item lg={12} sm={12} xl={12} xs={12}>
+          <ChartView data={ChartData}/>
+        </Grid>
+
       </Grid>
     </div>
     );
