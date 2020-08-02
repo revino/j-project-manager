@@ -1,17 +1,12 @@
 import React, {useState, useEffect} from 'react';
 
 //Material
-import FormLabel from '@material-ui/core/FormLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+import { Grid,FormLabel,FormControl,FormGroup,Checkbox,Button,FormControlLabel } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { Grid } from '@material-ui/core';
-import { Button} from '@material-ui/core';
 
 //View
 import CollapsibleTable from './CollapsibleTable';
+import AddModal from '../../components/AddModal'
 
 //API
 import SheetApi from '../../api/SpreadSheetApi';
@@ -41,16 +36,20 @@ function createData(id, progress, company, line, pl, pic, start, end, pjtno, pjt
 
 export default function ItemTable(props) {
   const classes = useStyles();
+  
+  //State
   const [tableData,setTableData] = useState([]);
   const [progressData,setProgessData] = useState(["완료","진행중","진행대기","접수","접수대기"]);
   const [state, setState] = useState({ cb1: false, cb2: true, cb3: true, cb4: true, cb5: true,});
+  const [modalOpen, setModalOpen] = useState(false);
+  
   const { cb1, cb2, cb3, cb4, cb5 } = state;
   const error = [cb1, cb2, cb3, cb4, cb5].filter((v) => v).length < 1;
   
   //handle
-  const handleChange = (event) => {
-    setState({ ...state, [event.target.name]: event.target.checked });
-  };
+  const handleChange = (event) => { setState({ ...state, [event.target.name]: event.target.checked }); };
+  const handleOpen = () => { setModalOpen(true); };
+  const handleClose = () => { setModalOpen(false); };
   
   //Request Data
   const getTableData = async() =>{
@@ -80,12 +79,22 @@ export default function ItemTable(props) {
     setProgessData(proGressArray);
   }
 
-  useEffect(() => {
-    getProgressData();
+  //Update Data
+  const updateData = async(newData, oldData) =>{
+    await SheetApi.setData(newData.id,newData);
+    await getTableData();
+  }
+
+  const deleteData = async(oldData) =>{
+  }
+
+  useEffect(() => { 
+    getProgressData(); 
   }, []);
 
   return (
   <div className={classes.root}>
+    <AddModal open={modalOpen} handleClose={handleClose}/>
     <Grid container spacing={4}>
       <Grid item lg={1} md={1} sm={2} xl={1} xs={2} container>
         <Button className={classes.refreshButton}
@@ -95,7 +104,15 @@ export default function ItemTable(props) {
         > 갱신
         </Button>
       </Grid>
-      <Grid item lg={11} md={11} sm={10} xl={11} xs={10} container>
+      <Grid item lg={1} md={1} sm={2} xl={1} xs={2} container>
+        <Button className={classes.refreshButton}
+          color = "primary"
+          variant="contained"
+          onClick={handleOpen}
+        > 추가
+        </Button>
+      </Grid>
+      <Grid item lg={10} md={10} sm={8} xl={10} xs={8} container>
         <FormControl required error={error} component="fieldset" className={classes.formControl}>
           <FormLabel component="legend">1개 이상 선택</FormLabel>
           <FormGroup className={classes.formGroup}>
@@ -109,7 +126,7 @@ export default function ItemTable(props) {
       </Grid>
   
       <Grid item lg={12} sm={12} xl={12} xs={12}>
-        <CollapsibleTable data={tableData}/>
+        <CollapsibleTable data={tableData} onRowUpdate={updateData} onRowDelete={deleteData}/>
       </Grid>
     </Grid>
   </div>

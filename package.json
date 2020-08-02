@@ -18,6 +18,7 @@
     "dotenv": "^8.2.0",
     "google-spreadsheet": "^3.0.11",
     "http-proxy-middleware": "^1.0.5",
+    "material-table": "^1.67.1",
     "moment": "^2.27.0",
     "qs": "^6.9.4",
     "react": "^16.13.1",
@@ -28,7 +29,6 @@
     "underscore": "^1.10.2",
     "validate.js": "^0.13.1"
   },
-  "proxy": "https://cors-anywhere.herokuapp.com/",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

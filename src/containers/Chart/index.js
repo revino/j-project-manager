@@ -21,6 +21,11 @@ import SheetApi from '../../api/SpreadSheetApi'
 const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(4)
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+    float: "left"
   }
 }));
 
@@ -98,7 +103,7 @@ export default function Chart() {
             <InputLabel id="select-sort">정렬</InputLabel>
             <Select labelId="select-sort" id="sort-select" value={SortCategory} onChange={({ target: { value } }) => setSortCategory(value)}>
               {SortGroup.map(el => (
-                <MenuItem value={el.id}>{el.label}</MenuItem>
+                <MenuItem key={el.id} value={el.id}>{el.label}</MenuItem>
               ))}
             </Select>
           </FormControl>

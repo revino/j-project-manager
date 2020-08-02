@@ -8,7 +8,7 @@ export default function WrapRoute(props) {
     return (
         <Route
             render={matchProps => (
-                localStorage.getItem('ACCESS_TOKEN') || (moment() > moment(localStorage.getItem('EXPIRE')))? 
+                localStorage.getItem('ACCESS_TOKEN') && (moment() < moment(localStorage.getItem('EXPIRE')))? 
                 <Wrap haistory={props.history}><Component {...matchProps} /></Wrap>
                 :
                 <Redirect to={{ pathname: '/login', state: { from: props.location } }} />

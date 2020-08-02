@@ -8,15 +8,6 @@ const useStyles = makeStyles(theme => ({
   root: {
     backgroundColor: colors.grey[50]
   },
-  media: {
-    paddingTop: theme.spacing(2),
-    height: 80,
-    textAlign: 'center',
-    '& > img': {
-      height: '100%',
-      width: 'auto'
-    }
-  },
   content: {
     padding: theme.spacing(1, 2)
   },
@@ -37,27 +28,16 @@ export default function UpgradePlan(props) {
       {...rest}
       className={clsx(classes.root, className)}
     >
-      <div className={classes.media}>
-        <img
-          alt="업데이트 폼"
-          src="/"
-        />
-      </div>
       <div className={classes.content}>
         <Typography
           align="center"
           gutterBottom
-          variant="h6"
-        >
-          여기에는 데이터 업로드
+          variant="h5"
+        >테스트 중~
         </Typography>
-        <Typography
-          align="center"
-          variant="body2"
-        >
-          Edit 폼으로 업데이트
-        </Typography>
+
       </div>
+
       <div className={classes.actions}>
         <Button
           color="primary"
@@ -65,7 +45,6 @@ export default function UpgradePlan(props) {
           href="/"
           variant="contained"
         >
-          업로드
         </Button>
       </div>
     </div>
