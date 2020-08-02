@@ -7,12 +7,16 @@ import {
 
 //Material
 import MaterialTable from 'material-table'
-import {makeStyles, Typography } from '@material-ui/core';
+import {makeStyles, Typography, TextareaAutosize } from '@material-ui/core';
 
 //Style
 const useStyles = makeStyles(theme => ({
   typo: {
     padding: theme.spacing(4),
+  },
+  textarea: {
+    margin: theme.spacing(1),
+    width: "98%"
   }
 }));
 
@@ -49,9 +53,12 @@ const cloumns = [
 ]
 
 export default function CollapsibleTable(props) {
-  const tableData = props.data;
   const {onRowUpdate, onRowDelete} = props;
   const classes = useStyles();
+
+  const handleChange = (e) => {
+    //tableData[e.target.id-1].content = e.target.value
+  }
 
   const detailContent = (rowData) =>{
     return (
@@ -59,6 +66,8 @@ export default function CollapsibleTable(props) {
         { rowData.content &&
           <div dangerouslySetInnerHTML={ {__html: rowData.content.replace(/(\n|\r\n)/g, '<br>')} }></div>
         }
+        <TextareaAutosize id={rowData.id} className={classes.textarea} aria-label="minimum height" rowsMin={5} rowsMax={16} placeholder="내용 입력" value={rowData.content} onChange={handleChange}/>
+        
       </Typography>
     )
   }
@@ -67,7 +76,7 @@ export default function CollapsibleTable(props) {
     <MaterialTable
       icons={tableIcons}
       columns={cloumns}
-      data={tableData}
+      data={props.data}
       title="전체 아이템"
       detailPanel={detailContent}
       editable={{onRowUpdate: onRowUpdate, onRowDelete: onRowDelete}}
