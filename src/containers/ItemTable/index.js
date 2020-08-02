@@ -39,8 +39,8 @@ export default function ItemTable(props) {
   
   //State
   const [tableData,setTableData] = useState([]);
-  const [progressData,setProgessData] = useState(["완료","진행중","진행대기","접수","접수대기"]);
-  const [state, setState] = useState({ cb1: false, cb2: true, cb3: true, cb4: true, cb5: true,});
+  const [progressData,setProgessData] = useState(["접수","진행중","진행대기","완료","접수대기"]);
+  const [state, setState] = useState({ cb1: true, cb2: true, cb3: true, cb4: false, cb5: true,});
   const [modalOpen, setModalOpen] = useState(false);
   
   const { cb1, cb2, cb3, cb4, cb5 } = state;
@@ -94,7 +94,9 @@ export default function ItemTable(props) {
 
   return (
   <div className={classes.root}>
+    { modalOpen &&
     <AddModal open={modalOpen} handleClose={handleClose}/>
+    }
     <Grid container spacing={4}>
       <Grid item lg={1} md={1} sm={2} xl={1} xs={2} container>
         <Button className={classes.refreshButton}

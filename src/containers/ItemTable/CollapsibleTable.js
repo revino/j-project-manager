@@ -37,11 +37,12 @@ const tableIcons = {
 };
 
 const cloumns = [
-  { title: 'ID'      , field: 'id'      , editable: 'never' },
-  { title: '상태'    , field: 'progress', editable: 'onUpdate' },
+  { title: 'ID',field: 'id', editable: 'never', width: 15
+  },
+  { title: '상태'    , field: 'progress', editable: 'onUpdate' , width: 100},
   { title: 'PJT 이름', field: 'pjtname' , editable: 'onUpdate' },
-  { title: '사이트'  , field: 'company' , editable: 'onUpdate' },
-  { title: '담당자'  , field: 'pic'     , editable: 'onUpdate' },
+  { title: '사이트'  , field: 'company' , editable: 'onUpdate' , width: 110},
+  { title: '담당자'  , field: 'pic'     , editable: 'onUpdate' , width: 110},
   { title: '시작일'  , field: 'start'   , editable: 'onUpdate'},
   { title: '종료일'  , field: 'end'     , editable: 'onUpdate'},
   { title: '번호'    , field: 'pjtno'   , editable: 'onUpdate'}
@@ -55,8 +56,9 @@ export default function CollapsibleTable(props) {
   const detailContent = (rowData) =>{
     return (
       <Typography className={classes.typo} variant="h7" display="block" gutterBottom component="div">
-        내용물<br />
-        {rowData.content}
+        { rowData.content &&
+          <div dangerouslySetInnerHTML={ {__html: rowData.content.replace(/(\n|\r\n)/g, '<br>')} }></div>
+        }
       </Typography>
     )
   }

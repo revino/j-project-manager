@@ -36,7 +36,6 @@ async function getQueryData(queryObject) {
   //Parsing
   const resText = await resData.text();
   const resJson = await JSON.parse(resText.substring(47,resText.length-2));
-  console.log(resText);
   console.log("getQueryData 리스폰 :");
   console.log(resJson);
 
