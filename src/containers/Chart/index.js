@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 
 //Component
 import ChartView from "./ChartView"
@@ -24,8 +24,17 @@ const useStyles = makeStyles(theme => ({
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
+    minWidth: "140px",
     float: "left"
+  },
+  formDate: {
+    margin: theme.spacing(1),
+    width: "140px",
+    float: "left"
+  },
+  refreshButton:{
+    width: "100%",
+    padding: theme.spacing(2),
   }
 }));
 
@@ -52,12 +61,12 @@ export default function Chart() {
     const classes = useStyles();
     const [ChartData, setChartData] = useState(null);
     const [SortCategory, setSortCategory] = useState("J");
-    const [YCategory, setYCategory] = useState(0);
+    const [YCategory, setYCategory] = useState(1);
     const [selectedStartDate, setSelectedStartDate] = useState(moment());
     const [selectedEndDate, setSelectedEndDate] = useState(moment().add(20, 'days'));
-
-    //Get Data
-    const getChartData = async() =>{
+    
+    //Get Data 
+    const getChartData = useCallback(async() =>{
       const queryObject  = {tq: `select A, F, J, G, H, C, D, I where G <= date '${moment(selectedEndDate).format("YYYY-MM-DD")}' and H >= date '${moment(selectedStartDate).format("YYYY-MM-DD")}' order by ${SortCategory} asc`}
       const queryObject2 = {tq: `select A where A is not null offset 1`, sheet: `Prop_Types`}
       
@@ -77,8 +86,8 @@ export default function Chart() {
       }
 
       setChartData(chartDataArray);
-    }
-    
+    }, [YCategory,selectedStartDate,selectedEndDate,SortCategory])
+
     //handle
     const handleStartDateChange = (date) => {
       setSelectedStartDate(date);
@@ -88,17 +97,19 @@ export default function Chart() {
       setSelectedEndDate(date);
     };
 
+    useEffect(() =>{
+      getChartData();
+    }, [getChartData])
+
     return (
     <div className={classes.root}>
-      <Grid container spacing={2}
-        direction="row"
-        alignItems="center">
+      <Grid container spacing={2}>
 
-        <Grid item lg={2} md ={2} sm={4} xl={1} xs={4} container justify="space-around">
-          <Button className={classes.refreshButton} size="large" color = "primary" variant="contained" onClick={getChartData}> 갱신</Button>
+        <Grid item lg={2} md ={2} sm={2} xl={1} xs={12} container>
+          <Button className={classes.refreshButton} size="large" color = "primary" variant="outlined" onClick={getChartData}> 갱신</Button>
         </Grid>  
 
-        <Grid item lg={4} md ={4} sm={8} xl={2} xs={8} container justify="space-around">
+        <Grid item lg={3} md ={4} sm={4} xl={2} xs={12} container>
           <FormControl className={classes.formControl}>
             <InputLabel id="select-sort">정렬</InputLabel>
             <Select labelId="select-sort" id="sort-select" value={SortCategory} onChange={({ target: { value } }) => setSortCategory(value)}>
@@ -107,7 +118,6 @@ export default function Chart() {
               ))}
             </Select>
           </FormControl>
-        
           <FormControl className={classes.formControl}>
             <InputLabel id="select-category">기준</InputLabel>
             <Select labelId="select-category" id="category-select" value={YCategory} onChange={({ target: { value } }) => setYCategory(value)}>
@@ -118,9 +128,9 @@ export default function Chart() {
           </FormControl>
         </Grid>
 
-        <Grid item lg={3} md={3} sm={6} xl={2} xs={6} container justify="space-around">  
+        <Grid item lg={7} md={6} sm={6} xl={9} xs={12} container>  
           <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <KeyboardDatePicker className={classes.formControl}
+            <KeyboardDatePicker className={classes.formDate}
               disableToolbar
               variant="inline"
               format="yyyy-MM-dd"
@@ -133,12 +143,9 @@ export default function Chart() {
                 'aria-label': 'change date',
               }}
             />
-          </MuiPickersUtilsProvider>
-        </Grid>
-        
-        <Grid item lg={3} md={3} sm={6} xl={2} xs={6} container justify="space-around">  
+          </MuiPickersUtilsProvider> 
           <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <KeyboardDatePicker className={classes.formControl}
+            <KeyboardDatePicker className={classes.formDate}
               margin="normal"
               id="date-picker-dialog"
               label="종료일"

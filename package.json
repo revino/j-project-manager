@@ -29,6 +29,7 @@
     "underscore": "^1.10.2",
     "validate.js": "^0.13.1"
   },
+  "proxy": "https://docs.google.com",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

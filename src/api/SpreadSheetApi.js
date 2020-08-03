@@ -20,6 +20,7 @@ async function getQueryData(queryObject) {
   const tokeType = localStorage.getItem('TOKEN_TYPE');
 
   const path = `${PROXY}${GETGOOGLESHEETURL}${SHEET_ID}/gviz/tq`
+  //const path = `/spreadsheets/d/${SHEET_ID}/gviz/tq`
   const queryStr = qs.stringify(queryObject);
   const fullpath =  path + "?" + queryStr
 
@@ -48,7 +49,7 @@ async function setData(id,newData) {
 
   const queryObject = { valueInputOption: "USER_ENTERED"}
 
-  const path  =`${PROXY}${testapi}${SHEET_ID}/values/${SHEETNAME}!${getRange(id)}`
+  const path  =`${testapi}${SHEET_ID}/values/${SHEETNAME}!${getRange(id)}`
   const queryStr = qs.stringify(queryObject);
   const fullpath =  path + "?" + queryStr
 

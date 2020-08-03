@@ -7,15 +7,15 @@ import {
 
 //Material
 import MaterialTable from 'material-table'
-import {makeStyles, Typography, TextareaAutosize } from '@material-ui/core';
+import {makeStyles, TextareaAutosize, Button, Typography} from '@material-ui/core';
+import withWidth, {isWidthDown } from '@material-ui/core/withWidth';
 
 //Style
 const useStyles = makeStyles(theme => ({
   typo: {
-    padding: theme.spacing(4),
+    padding: theme.spacing(2),
   },
   textarea: {
-    margin: theme.spacing(1),
     width: "98%"
   }
 }));
@@ -40,47 +40,114 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
 
-const cloumns = [
-  { title: 'ID',field: 'id', editable: 'never', width: 15
-  },
-  { title: '상태'    , field: 'progress', editable: 'onUpdate' , width: 100},
-  { title: 'PJT 이름', field: 'pjtname' , editable: 'onUpdate' },
-  { title: '사이트'  , field: 'company' , editable: 'onUpdate' , width: 110},
-  { title: '담당자'  , field: 'pic'     , editable: 'onUpdate' , width: 110},
-  { title: '시작일'  , field: 'start'   , editable: 'onUpdate'},
-  { title: '종료일'  , field: 'end'     , editable: 'onUpdate'},
-  { title: '번호'    , field: 'pjtno'   , editable: 'onUpdate'}
+const columns = [
+  { title: 'ID'      ,field: 'id'       , editable: 'never', width: '50'},
+  
+  { title: '상태'    , field: 'progress', editable: 'onUpdate',
+    cellStyle: {minWidth: '100px'},
+    headerStyle: {minWidth: '100px'}},
+  { title: 'PJT 이름', field: 'pjtname' , editable: 'onUpdate',
+    cellStyle: {minWidth: '450px'},
+    headerStyle: {minWidth: '450px'}},
+  { title: '사이트'  , field: 'company' , editable: 'onUpdate',
+    cellStyle: {minWidth: '100px'},
+    headerStyle: {minWidth: '100px'}},
+  { title: '라인'    , field: 'line'    , editable: 'onUpdate',
+    cellStyle: {minWidth: '140px'},
+    headerStyle: {minWidth: '140px'}},
+  { title: '담당자'  , field: 'pic'     , editable: 'onUpdate',
+    cellStyle: {minWidth: '90px'},
+    headerStyle: {minWidth: '90px'}},
+  { title: 'PL'      , field: 'pl'     , editable: 'onUpdate',
+    cellStyle: {minWidth: '90px'},
+    headerStyle: {minWidth: '90px'}},
+  { title: '시작일'  , field: 'start'   , editable: 'onUpdate',
+    cellStyle: {minWidth: '120px'},
+    headerStyle: {minWidth: '120px'}},
+  { title: '종료일'  , field: 'end'     , editable: 'onUpdate',
+    cellStyle: {minWidth: '120px'},
+    headerStyle: {minWidth: '120px'}},
+  { title: '번호'    , field: 'pjtno'   , editable: 'onUpdate',
+    cellStyle: {minWidth: '300px'},
+    headerStyle: {minWidth: '300px'}}
 ]
 
-export default function CollapsibleTable(props) {
-  const {onRowUpdate, onRowDelete} = props;
-  const classes = useStyles();
+const mobileColumns = [
+  { title: '상태'    , field: 'progress', editable: 'onUpdate',
+    cellStyle: {minWidth: '100px'},
+    headerStyle: {minWidth: '100px'}},
+  { title: '사이트'  , field: 'company' , editable: 'onUpdate',
+    cellStyle: {minWidth: '100px'},
+    headerStyle: {minWidth: '100px'}},
+  { title: '라인'    , field: 'line'    , editable: 'onUpdate',
+    cellStyle: {minWidth: '140px'},
+    headerStyle: {minWidth: '140px'}},
+  { title: 'PJT 이름', field: 'pjtname' , editable: 'onUpdate',
+    cellStyle: {minWidth: '450px'},
+    headerStyle: {minWidth: '450px'}},
+  { title: '담당자'  , field: 'pic'     , editable: 'onUpdate',
+  cellStyle: {minWidth: '90px'},
+  headerStyle: {minWidth: '90px'}},
+  { title: '시작일'  , field: 'start'   , editable: 'onUpdate',
+  cellStyle: {minWidth: '120px'},
+  headerStyle: {minWidth: '120px'}},
+  { title: '종료일'  , field: 'end'     , editable: 'onUpdate',
+  cellStyle: {minWidth: '120px'},
+  headerStyle: {minWidth: '120px'}},
+  { title: '번호'    , field: 'pjtno'   , editable: 'onUpdate',
+  cellStyle: {minWidth: '300px'},
+  headerStyle: {minWidth: '300px'}}
+]
 
-  const handleChange = (e) => {
-    //tableData[e.target.id-1].content = e.target.value
-  }
+function CollapsibleTable(props) {
+  const {onRowUpdate, onRowDelete, data} = props;
+  const classes = useStyles();
+  const isMobile = isWidthDown('sm', props.width);
 
   const detailContent = (rowData) =>{
+    let content;
+    const handleChange = (e) => {
+      content = e.target.value;
+    }
+
+    const handleContentUpdate = () => { 
+      rowData.content = content;
+      onRowUpdate(rowData)
+    };
     return (
-      <Typography className={classes.typo} variant="h7" display="block" gutterBottom component="div">
-        { rowData.content &&
+      <div className={classes.typo} display="block" >
+        { /*rowData.content &&
           <div dangerouslySetInnerHTML={ {__html: rowData.content.replace(/(\n|\r\n)/g, '<br>')} }></div>
-        }
-        <TextareaAutosize id={rowData.id} className={classes.textarea} aria-label="minimum height" rowsMin={5} rowsMax={16} placeholder="내용 입력" value={rowData.content} onChange={handleChange}/>
+        */}
+        <Typography variant="h5" component="div">내용</Typography>
+        <TextareaAutosize id={rowData.id} className={classes.textarea} aria-label="minimum height" rowsMin={5} rowsMax={16} placeholder="내용 입력" onChange={handleChange}>
+        {rowData.content}
+        </TextareaAutosize>
+        <Button
+          variant="outlined"
+          color="primary"
+          size="large"
+          className={classes.button}
+          startIcon={<Edit/>}
+          onClick={handleContentUpdate}
+        > 수정
+        </Button>
         
-      </Typography>
+      </div>
     )
   }
 
   return (
-    <MaterialTable
-      icons={tableIcons}
-      columns={cloumns}
-      data={props.data}
-      title="전체 아이템"
-      detailPanel={detailContent}
-      editable={{onRowUpdate: onRowUpdate, onRowDelete: onRowDelete}}
-      options={{draggable: true, pageSize:10}}
-    />
+      <MaterialTable
+        icons={tableIcons}
+        columns={isMobile? mobileColumns:columns}
+        data={data}
+        title="전체 아이템"
+        detailPanel={detailContent}
+        editable={{onRowUpdate: onRowUpdate, onRowDelete: isMobile?null:onRowDelete}}
+        options={{draggable: isMobile?false:true,sorting: isMobile?false:true, pageSize:isMobile?5:10, showTitle:isMobile?false:true }}
+      />
   );
 }
+
+export default withWidth()(CollapsibleTable);
