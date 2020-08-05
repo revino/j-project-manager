@@ -16,6 +16,7 @@ import moment from 'moment'
 //API
 import SheetApi from '../../api/SpreadSheetApi'
 
+import * as am4core from "@amcharts/amcharts4/core";
 
 //Style
 const useStyles = makeStyles(theme => ({
@@ -40,12 +41,15 @@ const useStyles = makeStyles(theme => ({
 
 //data
 const SortGroup = [{ id:"A", label: "ID"}, {id:"F", label:"담당자"}, {id:"J", label:"PJT 이름"}, {id:"C", label:"사이트"}, {id:"I", label:"PJT No"}]
+const defaultSort = "F";
+const defaultYAxis = 1;
+const defaultEndTime = 20;
 
 //function
-function ChartItem(id, pic, pjtName, start, end, company, line, pjtno, category ) {
+function ChartItem(id, pic, pjtName, start, end, company, line, pjtno,progress, category, color ) {
        if(category === 0)  this.category=pjtName;
-  else if(category === 1)  this.category=pic;
-  else if(category === 2)  this.category=company;
+  else if(category === 1)  this.category=pic + ":" + id;
+  else if(category === 2)  this.category=company + ":" + id;;
   this.id = id;
   this.pic = pic;
   this.pjtName = pjtName;
@@ -55,50 +59,58 @@ function ChartItem(id, pic, pjtName, start, end, company, line, pjtno, category 
   this.line = line;
   this.pjtno = pjtno
   this.sort = category;
+  this.color = color;
+  this.progress = progress;
 }
 
 export default function Chart() {
     const classes = useStyles();
     const [ChartData, setChartData] = useState(null);
-    const [SortCategory, setSortCategory] = useState("J");
-    const [YCategory, setYCategory] = useState(1);
+    const [SortCategory, setSortCategory] = useState(defaultSort);
+    const [YCategory, setYCategory] = useState(defaultYAxis);
     const [selectedStartDate, setSelectedStartDate] = useState(moment());
     const [selectedEndDate, setSelectedEndDate] = useState(moment().add(20, 'days'));
     
     //Get Data 
-    const getChartData = useCallback(async() =>{
-      const queryObject  = {tq: `select A, F, J, G, H, C, D, I where G <= date '${moment(selectedEndDate).format("YYYY-MM-DD")}' and H >= date '${moment(selectedStartDate).format("YYYY-MM-DD")}' order by ${SortCategory} asc`}
+    const getChartData = useCallback(async(yAxis,start,end,sort) =>{
+      const queryObject  = {tq: `select A, F, J, G, H, C, D, I, B where G <= date '${moment(end).format("YYYY-MM-DD")}' and H >= date '${moment(start).format("YYYY-MM-DD")}' order by ${sort} asc`}
       const queryObject2 = {tq: `select A where A is not null offset 1`, sheet: `Prop_Types`}
+      let colorSet = new am4core.ColorSet();
+      colorSet.saturation = 0.4;
+      let colorIndex = -1, colorBrighten = 1;
+      let lastName;
       
       //API REQUEST
       const resChartDataJson  = await SheetApi.getQueryData(queryObject);
       const chartDataArray = resChartDataJson.table.rows.map(el => {
-        return new ChartItem(el.c[0].v,el.c[1].v,el.c[2].v,el.c[3].f,el.c[4].f,el.c[5].v,el.c[6].v,el.c[7].v,YCategory);
+        if(lastName !== el.c[1].v) {colorIndex+=2; colorBrighten =1; }
+        else                       colorBrighten -=0.2;
+        lastName = el.c[1].v;
+        return new ChartItem(el.c[0].v,el.c[1].v,el.c[2].v,el.c[3].f,el.c[4].f,el.c[5].v,el.c[6].v,el.c[7].v,el.c[8].v,yAxis, colorSet.getIndex(colorIndex).brighten(colorBrighten));
       });
 
       //API REQUEST 
-      if(YCategory === 1){
+      if(yAxis === 1){
         const resNameDataJson  = await SheetApi.getQueryData(queryObject2);
         const chartDataArray = resNameDataJson.table.rows.map(el => {
-          return new ChartItem(null,el.c[0].v,null,null,null,null,null,null,null,YCategory);
+          return new ChartItem(null,el.c[0].v,null,null,null,null,null,null,null,yAxis);
         });
         chartDataArray.concat(chartDataArray);
       }
 
       setChartData(chartDataArray);
-    }, [YCategory,selectedStartDate,selectedEndDate,SortCategory])
+    }, [])
 
     //handle
-    const handleStartDateChange = (date) => {
-      setSelectedStartDate(date);
-    };
-  
-    const handleEndDateChange = (date) => {
-      setSelectedEndDate(date);
+    const handleStartDateChange = (date) => {setSelectedStartDate(date);};
+    const handleEndDateChange = (date) => { setSelectedEndDate(date);};
+    const handleRefreshClick = (e) => { 
+      if(YCategory === 1 ) setSortCategory("F");
+      getChartData(YCategory,selectedStartDate,selectedEndDate,SortCategory);
     };
 
     useEffect(() =>{
-      getChartData();
+      getChartData(defaultYAxis,moment(),moment().add(defaultEndTime, 'days'),defaultSort);
     }, [getChartData])
 
     return (
@@ -106,11 +118,11 @@ export default function Chart() {
       <Grid container spacing={2}>
 
         <Grid item lg={2} md ={2} sm={2} xl={1} xs={12} container>
-          <Button className={classes.refreshButton} size="large" color = "primary" variant="outlined" onClick={getChartData}> 갱신</Button>
+          <Button className={classes.refreshButton} size="large" color = "primary" variant="outlined" onClick={handleRefreshClick}> 갱신</Button>
         </Grid>  
 
         <Grid item lg={3} md ={4} sm={4} xl={2} xs={12} container>
-          <FormControl className={classes.formControl}>
+          <FormControl className={classes.formControl} disabled={YCategory === 1}>
             <InputLabel id="select-sort">정렬</InputLabel>
             <Select labelId="select-sort" id="sort-select" value={SortCategory} onChange={({ target: { value } }) => setSortCategory(value)}>
               {SortGroup.map(el => (

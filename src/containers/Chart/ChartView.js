@@ -7,6 +7,7 @@ import { makeStyles } from '@material-ui/styles';
 //Am Chart
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
+import am4themes_material from "@amcharts/amcharts4/themes/material";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 
 //Style
@@ -29,9 +30,10 @@ const useStyles = makeStyles(theme => ({
 
 
 const colorSet = new am4core.ColorSet();
-const tooltip = "[bold]기간: [/]{openDateX} ~ [/]{dateX}\n[bold]사이트: [/]{company} {line}\n[bold]이름: [/]{pjtName}\n[bold]No: [/]{pjtno}\n[bold]담당자: [/]{pic}";
+const tooltip = "[bold]기간: [/]{openDateX} ~ [/]{dateX}\n[bold]상태: [/]{progress}\n[bold]사이트: [/]{company} {line}\n[bold]이름: [/]{pjtName}\n[bold]No: [/]{pjtno}\n[bold]담당자: [/]{pic}";
 
 colorSet.saturation = 0.4;
+am4core.useTheme(am4themes_material);
 am4core.useTheme(am4themes_animated);
 
 export default function ChartView(props) {
