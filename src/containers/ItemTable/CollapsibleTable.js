@@ -1,4 +1,4 @@
-import React, {forwardRef} from 'react';
+import React, {forwardRef, useEffect, useState} from 'react';
 
 //Material Icons
 import {
@@ -9,6 +9,7 @@ import {
 import MaterialTable from 'material-table'
 import {makeStyles, TextareaAutosize, Button, Typography} from '@material-ui/core';
 import withWidth, {isWidthDown } from '@material-ui/core/withWidth';
+
 
 //Style
 const useStyles = makeStyles(theme => ({
@@ -40,7 +41,7 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
 
-const columns = [
+const pcColumns = [
   { title: 'ID'      ,field: 'id'       , editable: 'never', width: '50'},
   
   { title: '상태'    , field: 'progress', editable: 'onUpdate',
@@ -100,9 +101,28 @@ const mobileColumns = [
 ]
 
 function CollapsibleTable(props) {
-  const {onRowUpdate, onRowDelete, data} = props;
+  const {onRowUpdate, onRowDelete, data, fieldData} = props;
+  const [columns, setColumns] = useState([]);
   const classes = useStyles();
   const isMobile = isWidthDown('sm', props.width);
+  
+  useEffect(() =>{
+
+    const getHeader = (column) => (
+      column.map(el =>{
+        let item = el;
+        for(var fieldKey in fieldData){
+          if(el.field === fieldKey) {
+            let lookup = {};
+            for(var v of fieldData[fieldKey]){ lookup[v] = v;}
+            item.lookup = lookup;
+            }
+        }
+        return item
+    }));
+  
+    setColumns(getHeader(isMobile? mobileColumns:pcColumns));
+  }, [fieldData,isMobile]);
 
   const detailContent = (rowData) =>{
     let content;
@@ -116,12 +136,14 @@ function CollapsibleTable(props) {
     };
     return (
       <div className={classes.typo} display="block" >
-        { /*rowData.content &&
+        
+        { //HTML 출력 기능
+        /*rowData.content &&
           <div dangerouslySetInnerHTML={ {__html: rowData.content.replace(/(\n|\r\n)/g, '<br>')} }></div>
         */}
         <Typography variant="h5" component="div">내용</Typography>
         <TextareaAutosize id={rowData.id} className={classes.textarea} aria-label="minimum height" rowsMin={5} rowsMax={16} placeholder="내용 입력" onChange={handleChange}>
-        {rowData.content}
+          {rowData.content}
         </TextareaAutosize>
         <Button
           variant="outlined"
@@ -140,7 +162,7 @@ function CollapsibleTable(props) {
   return (
       <MaterialTable
         icons={tableIcons}
-        columns={isMobile? mobileColumns:columns}
+        columns={columns}
         data={data}
         title="전체 아이템"
         detailPanel={detailContent}

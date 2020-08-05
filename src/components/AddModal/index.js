@@ -1,4 +1,4 @@
-import React, {useState,useEffect} from 'react';
+import React, {useState} from 'react';
 
 //Material UI
 import 'date-fns';
@@ -63,22 +63,15 @@ root: {
 
 }));
 
-const defaultData = ["LOADING"]
 
 function createData(id, progress, company, line, pl, pic, start, end, pjtno, pjtname,content ) {
     return {id, progress, company, line, pl, pic, start, end, pjtno, pjtname,content};
   }
 
 export default function AddModal(props) {
+  const {fieldData} = props;
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
-
-  //Field
-  const [progessField, setProgessField] = useState(defaultData);
-  const [companyField, setCompanyField] = useState(defaultData);
-  const [plField, setPlField] = useState(defaultData);
-  const [picField, setPicField] = useState(defaultData);
-  const [lineField, setLineField] = useState(defaultData);
 
   //data
   const [progress, setProgress] = useState(0);
@@ -95,40 +88,17 @@ export default function AddModal(props) {
   const [selectedEndDate, setSelectedEndDate] = useState(moment().add(20, 'days'));
   
 
-  const getField = async(filed) =>{
-    let filedCol;
-    let handleState;
-         if(filed === "progress") {filedCol="C"; handleState=setProgessField}
-    else if(filed === "company" ) {filedCol="D"; handleState=setCompanyField}
-    else if(filed === "pl"      ) {filedCol="E"; handleState=setPlField}
-    else if(filed === "pic"     ) {filedCol="A"; handleState=setPicField}
-    else if(filed === "site"    ) {filedCol="B"; handleState=setLineField}
-    
-    const queryObject   = { tq: `select ${filedCol} where ${filedCol} is not null offset 1`, sheet: `Prop_Types`};
-    const resJson       = await SheetApi.getQueryData(queryObject);
-    const progressArray = resJson.table.rows.map(el => el.c[0].v);
-    handleState(progressArray);
-  }
-
   const handleSubmit= async(event) => {
     const start = moment(selectedStartDate).format("YYYY-MM-DD");
     const end = moment(selectedEndDate).format("YYYY-MM-DD");
     
-    const data = createData(1,progessField[progress],companyField[company],lineField[line],plField[pl],picField[pic],start,end,pjtno,pjtname,content);
+    const data = createData(1,fieldData.progress[progress],fieldData.company[company],fieldData.line[line],fieldData.pl[pl],fieldData.pic[pic],start,end,pjtno,pjtname,content);
     
     await SheetApi.addData(data);
     
     props.handleClose();
     event.preventDefault();
   }
-
-  useEffect(() => { 
-    getField("progress");
-    getField("company");
-    getField("pl");
-    getField("pic");
-    getField("site");
-  }, []);
 
   const SelectForm = (field,label,data,onChange)=>{
       const id = `select-${label}`;
@@ -149,11 +119,11 @@ export default function AddModal(props) {
       <h2 id="simple-modal-title">아이템 추가</h2>
         <form className={classes.root} noValidate autoComplete="off">
         <Grid container >
-            {SelectForm(progessField,"진행도",progress,setProgress)}
-            {SelectForm(companyField,"사이트",company ,setCompnay)}
-            {SelectForm(plField     ,"PL"   ,pl,setPl)}
-            {SelectForm(picField    ,"담당자",pic,setPic)}
-            {SelectForm(lineField   ,"라인"  ,line,setLine)}
+            {SelectForm(fieldData.progress,"진행도",progress,setProgress)}
+            {SelectForm(fieldData.company ,"사이트",company ,setCompnay)}
+            {SelectForm(fieldData.pl      ,"PL"   ,pl,setPl)}
+            {SelectForm(fieldData.pic     ,"담당자",pic,setPic)}
+            {SelectForm(fieldData.line     ,"라인"  ,line,setLine)}
             <Divider light/>
             <Grid item lg={2} md={4} sm={4} xl={2} xs={12} container>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>

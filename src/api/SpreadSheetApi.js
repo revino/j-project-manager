@@ -55,8 +55,6 @@ async function setData(id,newData) {
 
   newData.id = "=ROW()-1";
   const dataArray = createData(newData);
-  //const dataArray = [ newData.id, newData.progress, newData.company, "윈팩", "유현준", "김지웅", "2020-09-09", "2020-09-19","change test No","change name", "변경내용"];
-
 
   const data = { 
     range: `${SHEETNAME}!${getRange(id)}`,
