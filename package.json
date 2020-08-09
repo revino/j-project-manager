@@ -24,6 +24,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-google-charts": "^3.0.15",
+    "react-perfect-scrollbar": "^1.5.8",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "underscore": "^1.10.2",

@@ -45,20 +45,20 @@ const pcColumns = [
   { title: 'ID'      ,field: 'id'       , editable: 'never', width: '50'},
   
   { title: '상태'    , field: 'progress', editable: 'onUpdate',
-    cellStyle: {minWidth: '100px'},
+    cellStyle: {minWidth: '160px'},
     headerStyle: {minWidth: '100px'}},
   { title: 'PJT 이름', field: 'pjtname' , editable: 'onUpdate',
     cellStyle: {minWidth: '450px'},
     headerStyle: {minWidth: '450px'}},
   { title: '사이트'  , field: 'company' , editable: 'onUpdate',
-    cellStyle: {minWidth: '100px'},
-    headerStyle: {minWidth: '100px'}},
+    cellStyle: {minWidth: '120px'},
+    headerStyle: {minWidth: '120px'}},
   { title: '라인'    , field: 'line'    , editable: 'onUpdate',
     cellStyle: {minWidth: '140px'},
     headerStyle: {minWidth: '140px'}},
   { title: '담당자'  , field: 'pic'     , editable: 'onUpdate',
-    cellStyle: {minWidth: '90px'},
-    headerStyle: {minWidth: '90px'}},
+    cellStyle: {minWidth: '120'},
+    headerStyle: {minWidth: '120px'}},
   { title: 'PL'      , field: 'pl'     , editable: 'onUpdate',
     cellStyle: {minWidth: '90px'},
     headerStyle: {minWidth: '90px'}},
@@ -75,10 +75,10 @@ const pcColumns = [
 
 const mobileColumns = [
   { title: '상태'    , field: 'progress', editable: 'onUpdate',
-    cellStyle: {minWidth: '100px'},
+    cellStyle: {minWidth: '160px'},
     headerStyle: {minWidth: '100px'}},
   { title: '사이트'  , field: 'company' , editable: 'onUpdate',
-    cellStyle: {minWidth: '100px'},
+    cellStyle: {minWidth: '120px'},
     headerStyle: {minWidth: '100px'}},
   { title: '라인'    , field: 'line'    , editable: 'onUpdate',
     cellStyle: {minWidth: '140px'},
@@ -87,8 +87,8 @@ const mobileColumns = [
     cellStyle: {minWidth: '450px'},
     headerStyle: {minWidth: '450px'}},
   { title: '담당자'  , field: 'pic'     , editable: 'onUpdate',
-  cellStyle: {minWidth: '90px'},
-  headerStyle: {minWidth: '90px'}},
+  cellStyle: {minWidth: '120px'},
+  headerStyle: {minWidth: '120px'}},
   { title: '시작일'  , field: 'start'   , editable: 'onUpdate',
   cellStyle: {minWidth: '120px'},
   headerStyle: {minWidth: '120px'}},
@@ -101,7 +101,7 @@ const mobileColumns = [
 ]
 
 function CollapsibleTable(props) {
-  const {onRowUpdate, onRowDelete, data, fieldData} = props;
+  const {onRowUpdate, onRowDelete, data, fieldData, summary} = props;
   const [columns, setColumns] = useState([]);
   const classes = useStyles();
   const isMobile = isWidthDown('sm', props.width);
@@ -121,8 +121,8 @@ function CollapsibleTable(props) {
         return item
     }));
   
-    setColumns(getHeader(isMobile? mobileColumns:pcColumns));
-  }, [fieldData,isMobile]);
+    setColumns(getHeader((isMobile && !summary)? mobileColumns:pcColumns));
+  }, [fieldData,isMobile, summary]);
 
   const detailContent = (rowData) =>{
     let content;
@@ -145,6 +145,7 @@ function CollapsibleTable(props) {
         <TextareaAutosize id={rowData.id} className={classes.textarea} aria-label="minimum height" rowsMin={5} rowsMax={16} placeholder="내용 입력" onChange={handleChange}>
           {rowData.content}
         </TextareaAutosize>
+        { !summary &&
         <Button
           variant="outlined"
           color="primary"
@@ -154,6 +155,7 @@ function CollapsibleTable(props) {
           onClick={handleContentUpdate}
         > 수정
         </Button>
+        }
         
       </div>
     )
@@ -167,7 +169,17 @@ function CollapsibleTable(props) {
         title="전체 아이템"
         detailPanel={detailContent}
         editable={{onRowUpdate: onRowUpdate, onRowDelete: isMobile?null:onRowDelete}}
-        options={{draggable: isMobile?false:true,sorting: isMobile?false:true, pageSize:isMobile?5:10, showTitle:isMobile?false:true }}
+        options={{
+          draggable: isMobile?false:true,
+          sorting: isMobile?false:true, 
+          pageSize:isMobile?5:10, 
+          showTitle:(isMobile||summary)?false:true,
+          search: summary?false:true,
+          exportAllData: summary? false:true,
+          exportButton: summary? false:true,
+          paging: summary?false:true,
+          toolbar: summary?false:true,
+        }}
       />
   );
 }

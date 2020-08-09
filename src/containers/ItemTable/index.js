@@ -31,7 +31,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const checkBoxDefault = { cb1: true, cb2: true, cb3: true, cb4: false, cb5: true};
-const defaultProgressData = ["접수","진행중","진행대기","완료","접수대기"];
+const defaultProgressData = ["접수(작지X)","진행중","접수 완료(작지O)","완료","모니터링中"];
 const defaultFieldData = {pic:[],line:[],progress:defaultProgressData,company:[],pl:[]};
 
 function createData(id, progress, company, line, pl, pic, start, end, pjtno, pjtname,content ) {
@@ -55,10 +55,10 @@ export default function ItemTable(props) {
   const ModalError = Object.keys(fieldData).filter(v => v == null || v === []).length > 0;
 
   //handle
-  const handleChange = (event) => { setState({ ...state, [event.target.name]: event.target.checked }); };
-  const handleOpen   = ()      => { setModalOpen(true); };
-  const handleClose  = ()      => { setModalOpen(false); };
-
+  const handleChange   = (event) => { setState({ ...state, [event.target.name]: event.target.checked }); }
+  const handleOpen     = ()      => { setModalOpen(true); }
+  const handleClose    = ()      => { setModalOpen(false); }
+  const onRefreshClick = ()      => {const cbState = state; getTableData(cbState); }
   
   //Request Data
   const getTableData = useCallback(async(cbState) =>{
@@ -125,10 +125,7 @@ export default function ItemTable(props) {
     getTableData(checkBoxDefault)
   }, [getTableData])
 
-  const onRefreshClick = () => {
-    const cbState = state;
-    getTableData(cbState);
-  }
+
 
   return (
   <div className={classes.root}>
