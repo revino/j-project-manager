@@ -180,6 +180,13 @@ function CollapsibleTable(props) {
           paging: summary?false:true,
           toolbar: summary?false:true,
         }}
+        localization={{
+          body:{
+            editRow:{
+              deleteText: "삭제할까요?"
+            }
+          }
+        }}
       />
   );
 }

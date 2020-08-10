@@ -80,6 +80,7 @@ async function setData(id,newData) {
 
   return resJson;
 }
+
 async function addData(newData) {
   const token = localStorage.getItem('ACCESS_TOKEN');
   const tokeType = localStorage.getItem('TOKEN_TYPE');
@@ -119,8 +120,47 @@ async function addData(newData) {
 }
 
 
+async function deleteData(idx) {
+  const token = localStorage.getItem('ACCESS_TOKEN');
+  const tokeType = localStorage.getItem('TOKEN_TYPE');
+
+  const path  =`${testapi}${SHEET_ID}:batchUpdate`
+  const fullpath =  path;
+
+  const data = { 
+    requests: [{deleteDimension: {
+          range: {
+            dimension: "ROWS",
+            sheetId: 0,
+            startIndex: idx,
+            endIndex: idx+1
+          }
+    }}]
+  }
+
+  console.log("삭제 데이터 :");
+  console.log(data);
+
+  //Get Request
+  const resData = await fetch(fullpath, {
+    headers: { Authorization: tokeType + " " + token},
+    method : 'POST',
+    body: JSON.stringify(data)
+  })
+
+  //Parsing
+  const resJson = await resData.json();
+
+  console.log("deleteData 리스폰 :");
+  console.log(resJson);
+
+  return resJson;
+}
+
+
 export default {
   getQueryData,
   setData,
-  addData
+  addData,
+  deleteData
 };

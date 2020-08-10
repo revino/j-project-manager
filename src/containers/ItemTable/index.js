@@ -108,6 +108,9 @@ export default function ItemTable(props) {
   }
 
   const deleteData = async(oldData) =>{
+    console.log("삭제콜백");
+    await SheetApi.deleteData(oldData.id);
+    await getTableData(state);
   }
   const changeContent  = async(e) =>{
     const array = tableData;
