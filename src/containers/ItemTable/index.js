@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const checkBoxDefault = { cb1: true, cb2: true, cb3: true, cb4: false, cb5: true};
+const checkBoxDefault = { cb1: true, cb2: true, cb3: true, cb4: false, cb5: true, cb6: true};
 const defaultProgressData = ["접수(작지X)","진행중","접수 완료(작지O)","완료","모니터링中"];
 const defaultFieldData = {pic:[],line:[],progress:defaultProgressData,company:[],pl:[]};
 
@@ -51,7 +51,8 @@ export default function ItemTable(props) {
   const [fieldData, setFieldData] = useState(defaultFieldData);
   
   //error con
-  const error = [state.cb1, state.cb2, state.cb3, state.cb4, state.cb5].filter((v) => v).length < 1;
+  //const error = [state.cb1, state.cb2, state.cb3, state.cb4, state.cb5, satte.cb6].filter((v) => v).length < 1;
+  const error = [state].filter((v) => v).length < 1;
   const ModalError = Object.keys(fieldData).filter(v => v == null || v === []).length > 0;
 
   //handle
