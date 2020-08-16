@@ -10,7 +10,7 @@ import { Edit, Delete, Save, Link, Cancel} from '@material-ui/icons';
 
 //Material
 import {makeStyles, Button, Typography, Divider , Accordion, AccordionDetails, 
-AccordionSummary, AccordionActions, TextareaAutosize, FormControl, Input,CircularProgress} from '@material-ui/core';
+AccordionSummary, AccordionActions, TextareaAutosize, FormControl, Input,CircularProgress, Popover} from '@material-ui/core';
 
 //API
 import SheetApi from '../../api/SpreadSheetApi';
@@ -99,6 +99,12 @@ const useStyles = makeStyles((theme) => ({
   },
   textarea: {
     width: "100%"
+  },
+  typography: {
+    padding: theme.spacing(2),
+  },
+  popover:{
+    overflow: "scroll",
   }
 }));
 
@@ -117,22 +123,26 @@ export default function MemoItem(props) {
   const [loading, setLoading] = useState(false);
   const [memoTitle, setMemoTitle] = useState("");
   const [memoContent, setMemoContent] = useState("");
-  const [link, setLink] = useState("");
+  const [linkTitle, setLinkTitle] = useState("");
+  const [linkContent, setLinkContent] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
 
   //Request Data
   const getTableData = async(id) =>{
     try{
     setLoading(true);
 
-    const queryObject = { tq: `select A, J where A = ${id}`, sheet: `Item_Tables`}
+    const queryObject = { tq: `select A, J, K where A = ${id}`, sheet: `Item_Tables`}
     
     //API REQUEST
     const resJson = await SheetApi.getQueryData(queryObject);
 
-    //make Array
-    //const itemArray = resJson.table.rows.map(el => new createData( el.c[0].v,el.c[1].v))
+    setLinkTitle(resJson.table.rows[0].c[1].v);
+    setLinkContent(resJson.table.rows[0].c[2].v);
 
-    setLink(resJson.table.rows[0].c[1].v);
     setLoading(false);
     }catch(err){
       console.log(err);
@@ -148,6 +158,9 @@ export default function MemoItem(props) {
   };
   const handleTitleChange   = (e) => { setMemoTitle(e.target.value)};
   const handleContentChange = (e) => { setMemoContent(e.target.value)};
+  const handleLinkClick     = (e) => { setAnchorEl(e.currentTarget);};
+  const handleClose         = ()  => { setAnchorEl(null);
+  };
 
   const handleEditSave = async(e) => {
     try{
@@ -212,7 +225,31 @@ export default function MemoItem(props) {
         </div>
         { !!item.linkId &&
         <div className={classes.detailsLink}>
-            <React.Fragment><Link color="primary"/><Typography color="primary"> {link}</Typography></React.Fragment>
+            <React.Fragment>
+              <Link color="primary"/><Typography color="primary" onClick={handleLinkClick}> {linkTitle}</Typography>
+              <Popover
+                id={id}
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+              >
+                <div className={classes.popover}>
+                  <Typography className={classes.typography}>
+                    {linkContent.split('\n').map( (line,idx) => {
+                        return (<span key={idx}>{line}<br/></span>)
+                    })}
+                  </Typography>
+                </div>
+              </Popover>
+            </React.Fragment>
         </div>
         }
         <div className={classes.detailsBody}>

@@ -52,7 +52,7 @@ export default function ItemTable(props) {
   
   //error con
   //const error = [state.cb1, state.cb2, state.cb3, state.cb4, state.cb5, satte.cb6].filter((v) => v).length < 1;
-  const error = [state].filter((v) => v).length < 1;
+  const error = Object.values(state).filter((v) => v).length < 1;
   const ModalError = Object.keys(fieldData).filter(v => v == null || v === []).length > 0;
 
   //handle
