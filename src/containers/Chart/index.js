@@ -73,6 +73,7 @@ export default function Chart() {
     
     //Get Data 
     const getChartData = useCallback(async(yAxis,start,end,sort) =>{
+      try{
       const queryObject  = {tq: `select A, F, J, G, H, C, D, I, B where G <= date '${moment(end).format("YYYY-MM-DD")}' and H >= date '${moment(start).format("YYYY-MM-DD")}' order by ${sort} asc`}
       const queryObject2 = {tq: `select A where A is not null offset 1`, sheet: `Prop_Types`}
       let colorSet = new am4core.ColorSet();
@@ -99,6 +100,9 @@ export default function Chart() {
       }
 
       setChartData(chartDataArray);
+    }catch(err){
+      console.log(err);
+    }
     }, [])
 
     //handle

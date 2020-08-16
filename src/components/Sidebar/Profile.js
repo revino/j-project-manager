@@ -5,6 +5,10 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
 import { Avatar, Typography } from '@material-ui/core';
 
+import {getUserPicture, getUserName} from '../../auth'
+
+
+
 const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
@@ -13,8 +17,8 @@ const useStyles = makeStyles(theme => ({
     minHeight: 'fit-content'
   },
   avatar: {
-    width: 60,
-    height: 60
+    width: 120,
+    height: 120
   },
   name: {
     marginTop: theme.spacing(1)
@@ -23,32 +27,33 @@ const useStyles = makeStyles(theme => ({
 
 export default function Profile(props) {
 
-  const { className, ...rest } = props;
+  const { className,user , ...rest } = props;
 
   const classes = useStyles();
-
-  const user = {
-    name: '사람 이름',
-    avatar: '/',
-  };
+  /*
+    const user = {
+      avatar: process.env.PUBLIC_URL + '/favicon.ico',
+    };
+  */
 
   return (
     <div
       {...rest}
       className={clsx(classes.root, className)}
     >
-      <Avatar
+      {<Avatar
         alt="Person"
         className={classes.avatar}
         component={RouterLink}
-        src={user.avatar}
+        src={getUserPicture()}
         to="/settings"
-      />
+      />}
+      
       <Typography
         className={classes.name}
         variant="h4"
       >
-        {user.name}
+        {getUserName()}
       </Typography>
     </div>
   );

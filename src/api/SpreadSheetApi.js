@@ -1,5 +1,7 @@
 import qs from "qs";
 
+import {getToken, removeUserInfo} from '../auth';
+
 //const PROXY = "https://cors-anywhere.herokuapp.com/"
 const PROXY = "https://revino.herokuapp.com/"
 const GETGOOGLESHEETURL= "https://docs.google.com/spreadsheets/d/"
@@ -16,145 +18,150 @@ function createData({id, progress, company, line, pl, pic, start, end, pjtno, pj
   }
 
 async function getQueryData(queryObject) {
-  const token = localStorage.getItem('ACCESS_TOKEN');
-  const tokeType = localStorage.getItem('TOKEN_TYPE');
+  try{
+    const token = getToken();
+    const tokeType = "Bearer";
+  
+    const path = `${PROXY}${GETGOOGLESHEETURL}${SHEET_ID}/gviz/tq`
+    //const path = `/spreadsheets/d/${SHEET_ID}/gviz/tq`
+    const queryStr = qs.stringify(queryObject);
+    const fullpath =  path + "?" + queryStr
+  
+    //Get Request
+    const response = await fetch(fullpath, {
+      headers: { Authorization: tokeType + " " + token, AccessControlAllowOrigin: '*' },
+      method : 'GET',
+    })
+  
+    if(!response.ok) throw new Error(response.status);
+  
+    //Parsing
+    const resText = await response.text();
+    const resJson = await JSON.parse(resText.substring(47,resText.length-2));
+  
+    return resJson;
 
-  const path = `${PROXY}${GETGOOGLESHEETURL}${SHEET_ID}/gviz/tq`
-  //const path = `/spreadsheets/d/${SHEET_ID}/gviz/tq`
-  const queryStr = qs.stringify(queryObject);
-  const fullpath =  path + "?" + queryStr
-
-  console.log("getQueryData 요청 쿼리스트링 :");
-  console.log(queryObject);
-  console.log(fullpath);
-
-  //Get Request
-  const resData = await fetch(fullpath, {
-    headers: { Authorization: tokeType + " " + token, AccessControlAllowOrigin: '*' },
-    method : 'GET',
-  })
-
-  //Parsing
-  const resText = await resData.text();
-  const resJson = await JSON.parse(resText.substring(47,resText.length-2));
-  console.log("getQueryData 리스폰 :");
-  console.log(resJson);
-
-  return resJson;
+  }catch(err){
+    removeUserInfo();
+    console.log(err);
+  }
 }
 
 async function setData(id,newData) {
-  const token = localStorage.getItem('ACCESS_TOKEN');
-  const tokeType = localStorage.getItem('TOKEN_TYPE');
+  try{
+    const token = getToken();
+    const tokeType = "Bearer";
 
-  const queryObject = { valueInputOption: "USER_ENTERED"}
+    const queryObject = { valueInputOption: "USER_ENTERED"}
 
-  const path  =`${testapi}${SHEET_ID}/values/${SHEETNAME}!${getRange(id)}`
-  const queryStr = qs.stringify(queryObject);
-  const fullpath =  path + "?" + queryStr
+    const path  =`${testapi}${SHEET_ID}/values/${SHEETNAME}!${getRange(id)}`
+    const queryStr = qs.stringify(queryObject);
+    const fullpath =  path + "?" + queryStr
 
-  newData.id = "=ROW()-1";
-  const dataArray = createData(newData);
+    newData.id = "=ROW()-1";
+    const dataArray = createData(newData);
 
-  const data = { 
-    range: `${SHEETNAME}!${getRange(id)}`,
-    majorDimension: "ROWS",
-    values: [dataArray]
+    const data = { 
+      range: `${SHEETNAME}!${getRange(id)}`,
+      majorDimension: "ROWS",
+      values: [dataArray]
+    }
+
+    //Get Request
+    const response = await fetch(fullpath, {
+      headers: { Authorization: tokeType + " " + token},
+      method : 'PUT',
+      body: JSON.stringify(data)
+    })
+
+    if(!response.ok) throw new Error(response.status);
+
+    //Parsing
+    const resJson = await response.json();
+
+    return resJson;
+  } catch(err){
+    removeUserInfo();
+    console.log(err);
   }
-
-  console.log("setData 변경 데이터 :");
-  console.log(data);
-
-  //Get Request
-  const resData = await fetch(fullpath, {
-    headers: { Authorization: tokeType + " " + token},
-    method : 'PUT',
-    body: JSON.stringify(data)
-  })
-
-  //Parsing
-  const resJson = await resData.json();
-
-  console.log("setData 리스폰 :");
-  console.log(resJson);
-
-  return resJson;
 }
 
 async function addData(newData) {
-  const token = localStorage.getItem('ACCESS_TOKEN');
-  const tokeType = localStorage.getItem('TOKEN_TYPE');
+  try{
+    const token = getToken();
+    const tokeType = "Bearer";
 
-  const queryObject = { valueInputOption: "USER_ENTERED"}
+    const queryObject = { valueInputOption: "USER_ENTERED"}
 
-  const path  =`${testapi}${SHEET_ID}/values/${SHEETNAME}!${getRange(0)}:append`
-  const queryStr = qs.stringify(queryObject);
-  const fullpath =  path + "?" + queryStr
+    const path  =`${testapi}${SHEET_ID}/values/${SHEETNAME}!${getRange(0)}:append`
+    const queryStr = qs.stringify(queryObject);
+    const fullpath =  path + "?" + queryStr
 
-  newData.id = "=ROW()-1";
-  const dataArray = createData(newData);
+    newData.id = "=ROW()-1";
+    const dataArray = createData(newData);
 
-  const data = { 
-    range: `${SHEETNAME}!${getRange(0)}`,
-    majorDimension: "ROWS",
-    values: [dataArray]
+    const data = { 
+      range: `${SHEETNAME}!${getRange(0)}`,
+      majorDimension: "ROWS",
+      values: [dataArray]
+    }
+
+    //Get Request
+    const response = await fetch(fullpath, {
+      headers: { Authorization: tokeType + " " + token},
+      method : 'POST',
+      body: JSON.stringify(data)
+    })
+
+    if(!response.ok) throw new Error(response.status);
+
+    //Parsing
+    const resJson = await response.json();
+
+    return resJson;
+  } catch(err){
+    removeUserInfo();
+    console.log(err);
   }
-
-  console.log("addData 변경 데이터 :");
-  console.log(data);
-
-  //Get Request
-  const resData = await fetch(fullpath, {
-    headers: { Authorization: tokeType + " " + token},
-    method : 'POST',
-    body: JSON.stringify(data)
-  })
-
-  //Parsing
-  const resJson = await resData.json();
-
-  console.log("addData 리스폰 :");
-  console.log(resJson);
-
-  return resJson;
 }
 
 
 async function deleteData(idx) {
-  const token = localStorage.getItem('ACCESS_TOKEN');
-  const tokeType = localStorage.getItem('TOKEN_TYPE');
+  try{
+    const token = getToken();
+    const tokeType = "Bearer";
 
-  const path  =`${testapi}${SHEET_ID}:batchUpdate`
-  const fullpath =  path;
+    const path  =`${testapi}${SHEET_ID}:batchUpdate`
+    const fullpath =  path;
 
-  const data = { 
-    requests: [{deleteDimension: {
-          range: {
-            dimension: "ROWS",
-            sheetId: 0,
-            startIndex: idx,
-            endIndex: idx+1
-          }
-    }}]
+    const data = { 
+      requests: [{deleteDimension: {
+            range: {
+              dimension: "ROWS",
+              sheetId: 0,
+              startIndex: idx,
+              endIndex: idx+1
+            }
+      }}]
+    }
+
+    //Get Request
+    const response = await fetch(fullpath, {
+      headers: { Authorization: tokeType + " " + token},
+      method : 'POST',
+      body: JSON.stringify(data)
+    })
+
+    if(!response.ok) throw new Error(response.status);
+
+    //Parsing
+    const resJson = await response.json();
+
+    return resJson;
+  } catch(err){
+    removeUserInfo();
+    console.log(err);
   }
-
-  console.log("삭제 데이터 :");
-  console.log(data);
-
-  //Get Request
-  const resData = await fetch(fullpath, {
-    headers: { Authorization: tokeType + " " + token},
-    method : 'POST',
-    body: JSON.stringify(data)
-  })
-
-  //Parsing
-  const resJson = await resData.json();
-
-  console.log("deleteData 리스폰 :");
-  console.log(resJson);
-
-  return resJson;
 }
 
 

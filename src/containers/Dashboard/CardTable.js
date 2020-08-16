@@ -28,6 +28,7 @@ export default function CardTable(props) {
 
     //Request Data
   const getTableData = useCallback(async() =>{
+    try{
     setLoading(true);
 
     const queryObject = { tq: `select * where (A is not null) order by A desc limit 5`, sheet: `Item_Tables`}
@@ -40,6 +41,9 @@ export default function CardTable(props) {
     
     setTableData(itemArray);
     setLoading(false);
+    }catch(err){
+      console.log(err);
+    }
   }, [])
 
   useEffect(() =>{

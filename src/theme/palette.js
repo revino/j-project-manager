@@ -12,12 +12,7 @@ export default {
     main: colors.indigo[500],
     light: colors.indigo[100]
   },
-  secondary: {
-    contrastText: white,
-    dark: colors.blue[900],
-    main: colors.blue['A400'],
-    light: colors.blue['A400']
-  },
+
   success: {
     contrastText: white,
     dark: colors.green[900],

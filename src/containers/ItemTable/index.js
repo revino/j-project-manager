@@ -6,7 +6,7 @@ import { makeStyles } from '@material-ui/styles';
 
 //View
 import CollapsibleTable from './CollapsibleTable';
-import AddModal from '../../components/AddModal'
+import ItemAddModal from '../../components/ItemAddModal'
 
 //API
 import SheetApi from '../../api/SpreadSheetApi';
@@ -63,6 +63,7 @@ export default function ItemTable(props) {
   
   //Request Data
   const getTableData = useCallback(async(cbState) =>{
+    try{
     setLoading(true);
     const cbArray          = Object.values(cbState);//[state.cb1, state.cb2, state.cb3, state.cb4, state.cb5]
     const checkBoxConArray = fieldData.progress.filter((el,idx) => cbArray[idx] === true).map(el => `B='${el}'`);
@@ -77,10 +78,13 @@ export default function ItemTable(props) {
     
     setTableData(itemArray);
     setLoading(false);
+    }catch(err){
+      console.log(err);
+    }
   }, [fieldData.progress])
 
   const getProgressData = async() =>{
-
+    try{
     setLoading(true);
     const fieldData = {pic:[],line:[],progress:[],company:[],pl:[]}
     const conArray =  ["A is not null","B is not null","C is not null","D is not null","E is not null"]
@@ -100,26 +104,38 @@ export default function ItemTable(props) {
     }
     setFieldData(fieldData);
     setLoading(false);
+    }catch(err){
+      console.log(err);
+    }
+
   }
 
   //Update Data
   const updateData = async(newData, oldData) =>{
+    try{
     await SheetApi.setData(newData.id,newData);
     await getTableData(state);
+    }catch(err){
+      console.log(err);
+    }
   }
 
   const deleteData = async(oldData) =>{
-    console.log("삭제콜백");
+    try{
     await SheetApi.deleteData(oldData.id);
     await getTableData(state);
+    }catch(err){
+      console.log(err);
+    }
   }
   const changeContent  = async(e) =>{
+    try{
     const array = tableData;
-    console.log(e.target.value);
-    console.log(e.target.id-1);
-    console.log(array[e.target.id-1].content);
     array[e.target.id-1].content=e.target.value;
     setTableData(array);
+    }catch(err){
+      console.log(err);
+    }
   }
   useEffect(() => { 
     getProgressData(); 
@@ -134,7 +150,7 @@ export default function ItemTable(props) {
   return (
   <div className={classes.root}>
     { modalOpen &&
-    <AddModal open={modalOpen} handleClose={handleClose} fieldData={fieldData}/>
+    <ItemAddModal open={modalOpen} handleClose={handleClose} fieldData={fieldData}/>
     }
     <Grid container spacing={2}>
       <Grid item lg={1} md={2} sm={2} xl={1} xs={3} container justify="center" >
@@ -164,7 +180,7 @@ export default function ItemTable(props) {
           <FormGroup className={classes.formGroup}>
             {fieldData.progress.map((el,idx) => (
               <FormControlLabel
-                key={`cb${idx+1}`} control={<Checkbox checked={state[`cb${idx+1}`]} onChange={handleChange} name={`cb${idx+1}`} />} label={el}
+                key={`cb${idx+1}`} control={<Checkbox checked={state[`cb${idx+1}`]} onChange={handleChange} name={`cb${idx+1}`} color="primary"/>} label={el}
               />
             ))} 
           </FormGroup>

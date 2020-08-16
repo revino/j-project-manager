@@ -126,14 +126,14 @@ function CollapsibleTable(props) {
 
   const detailContent = (rowData) =>{
     let content;
-    const handleChange = (e) => {
-      content = e.target.value;
-    }
+
+    const handleChange = (e) => { content = e.target.value;};
 
     const handleContentUpdate = () => { 
       rowData.content = content;
       onRowUpdate(rowData)
     };
+
     return (
       <div className={classes.typo} display="block" >
         

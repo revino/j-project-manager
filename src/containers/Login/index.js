@@ -1,48 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { withRouter } from 'react-router-dom';
 
-import validate from 'validate.js';
-
 import { makeStyles } from '@material-ui/styles';
-import {
-  Grid,
-  Button,
-  IconButton,
-  Typography
-} from '@material-ui/core';
+import { Grid, Button, IconButton, Typography } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 import { Google as GoogleIcon } from '../../icons';
- 
-import qs from "qs";
 
-const CLIENT_ID = "19314272408-m9nc8iqrs88urlgr504ra6ceu649itoc.apps.googleusercontent.com";
-const AUTHORIZE_URI = "https://accounts.google.com/o/oauth2/v2/auth";
-const SCOPE_URI = "https://www.googleapis.com/auth/spreadsheets";
-
-const queryStr = qs.stringify({
-    client_id: CLIENT_ID,
-    redirect_uri: `${window.location.protocol}//${window.location.host}/login/google/`,
-    response_type: "token",
-    scope: SCOPE_URI
-  });
-  
-
-const schema = {
-  email: {
-    presence: { allowEmpty: false, message: 'is required' },
-    email: true,
-    length: {
-      maximum: 64
-    }
-  },
-  password: {
-    presence: { allowEmpty: false, message: 'is required' },
-    length: {
-      maximum: 128
-    }
-  }
-};
+//API
+import googleLogin from '../../api/GoogleLoginApi';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -143,30 +109,20 @@ function SignIn(props) {
 
   const classes = useStyles();
 
-  const [formState, setFormState] = useState({
-    isValid: false,
-    values: {},
-    touched: {},
-    errors: {}
-  });
-
-  useEffect(() => {
-    const errors = validate(formState.values, schema);
-
-    setFormState(formState => ({
-      ...formState,
-      isValid: errors ? false : true,
-      errors: errors || {}
-    }));
-  }, [formState.values]);
-
   const handleBack = () => {
     history.goBack();
   };
 
-  const handleSignIn = async(event) => {
-
-    window.location.assign(AUTHORIZE_URI + "?" + queryStr);
+  const handleSignIn = async() => { 
+    try{
+      const ret = await googleLogin.authGoogle();
+      if(!!ret.credential.accessToken) {
+        localStorage.setItem('ACCESS_TOKEN', ret.credential.accessToken);
+        history.push("/dashboard");
+      }
+    }catch(err){
+      console.log(err);
+    }
   };
 
   return (

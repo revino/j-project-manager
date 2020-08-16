@@ -12,6 +12,8 @@ import {
     Dashboard      as DashboardView,
     ItemTable      as TableView,
     Chart          as ChartView,
+    CheckList      as CheckListView,
+    Settings       as SettingsView,
     Login          as LoginView,
     OAuth2Redirect as GoogleRedirectView
 } from './containers';
@@ -32,7 +34,9 @@ export default function Routes(props) {
         <WrapRoute exact path="/dashboard"     component={DashboardView} wrap={MainLayout}/>
         <WrapRoute exact path="/chart"         component={ChartView}     wrap={MainLayout}/>
         <WrapRoute exact path="/table"         component={TableView}     wrap={MainLayout}/>
-        <Route     exact path="/login"         component={WithWrap(LoginView)}                      />
+        <WrapRoute exact path="/checklist"         component={CheckListView}     wrap={MainLayout}/>
+        <WrapRoute exact path="/settings"      component={SettingsView}     wrap={MainLayout}/>
+        <Route     exact path="/login"         component={WithWrap(LoginView)}            />
         <Route           path="/login/google/" component={GoogleRedirectView}             />
       </Switch>
     );

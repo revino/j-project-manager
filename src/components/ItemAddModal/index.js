@@ -68,7 +68,7 @@ function createData(id, progress, company, line, pl, pic, start, end, pjtno, pjt
     return {id, progress, company, line, pl, pic, start, end, pjtno, pjtname,content};
   }
 
-export default function AddModal(props) {
+export default function ItemAddModal(props) {
   const {fieldData} = props;
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
@@ -89,6 +89,7 @@ export default function AddModal(props) {
   
 
   const handleSubmit= async(event) => {
+    try{
     const start = moment(selectedStartDate).format("YYYY-MM-DD");
     const end = moment(selectedEndDate).format("YYYY-MM-DD");
     
@@ -98,6 +99,9 @@ export default function AddModal(props) {
     
     props.handleClose();
     event.preventDefault();
+    }catch(err){
+      console.log(err);
+    }
   }
 
   const SelectForm = (field,label,data,onChange)=>{

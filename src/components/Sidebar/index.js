@@ -3,13 +3,13 @@ import clsx from 'clsx';
 
 import { makeStyles } from '@material-ui/styles';
 import { Divider, Drawer } from '@material-ui/core';
-import DashboardIcon from '@material-ui/icons/Dashboard';
-import InsertChartIcon from '@material-ui/icons/InsertChart';
-import TableChartIcon from '@material-ui/icons/TableChart';
+
+import {Dashboard, SpeakerNotes, InsertChart, TableChart, SettingsApplications } from '@material-ui/icons';
 
 import Profile     from './Profile';
 import SidebarNav  from './SidebarNav';
 import UpgradePlan from './UpgradePlan';
+
 
 const useStyles = makeStyles(theme => ({
   drawer: {
@@ -39,22 +39,31 @@ export default function Sidebar(props) {
   const { open, variant, onClose, className, ...rest } = props;
 
   const classes = useStyles();
-
   const pages = [
     {
       title: '대시보드',
       href: '/dashboard',
-      icon: <DashboardIcon />
+      icon: <Dashboard />
     },
     {
       title: '그래프',
       href: '/chart',
-      icon: <InsertChartIcon />
+      icon: <InsertChart />
     },
     {
       title: '테이블',
       href: '/table',
-      icon: <TableChartIcon />
+      icon: <TableChart />
+    },
+    {
+      title: '메모',
+      href: '/checklist',
+      icon: <SpeakerNotes />
+    },
+    {
+      title: '설정',
+      href: '/settings',
+      icon: <SettingsApplications />
     }
   ];
 
@@ -70,7 +79,7 @@ export default function Sidebar(props) {
         {...rest}
         className={clsx(classes.root, className)}
       >
-        <Profile />
+        <Profile/>
         <Divider className={classes.divider} />
         <SidebarNav
           className={classes.nav}
