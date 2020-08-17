@@ -33,7 +33,7 @@ export const signInWithGoogle = () => {
 
   provider.addScope(SCOPE);
   provider.addScope("https://www.googleapis.com/auth/drive")
-  providee.addScope("https://www.googleapis.com/auth/drive.file")
+  provider.addScope("https://www.googleapis.com/auth/drive.file")
   return auth.signInWithPopup(provider)
 }
 
