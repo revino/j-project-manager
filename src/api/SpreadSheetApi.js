@@ -42,7 +42,6 @@ async function getQueryData(queryObject) {
     return resJson;
 
   }catch(err){
-    removeUserInfo();
     console.log(err);
   }
 }
@@ -81,7 +80,6 @@ async function setData(id,newData) {
 
     return resJson;
   } catch(err){
-    removeUserInfo();
     console.log(err);
   }
 }
@@ -120,7 +118,6 @@ async function addData(newData) {
 
     return resJson;
   } catch(err){
-    removeUserInfo();
     console.log(err);
   }
 }
@@ -159,7 +156,6 @@ async function deleteData(idx) {
 
     return resJson;
   } catch(err){
-    removeUserInfo();
     console.log(err);
   }
 }
