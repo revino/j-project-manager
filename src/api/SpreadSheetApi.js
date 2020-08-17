@@ -4,8 +4,8 @@ import {getToken} from '../auth';
 
 
 //const PROXY = "https://cors-anywhere.herokuapp.com/"
-//const PROXY = "https://revino.herokuapp.com/"
-//const GETGOOGLESHEETURL= "https://docs.google.com/spreadsheets/d/"
+const PROXY = "https://revino.herokuapp.com/"
+const GETGOOGLESHEETURL= "https://docs.google.com/spreadsheets/d/"
 const SHEET_ID = "1Eb2Bwx7aRWc2vwVyqw8rK4vKeM9U99bDPRNnJWIcC_s"
 const testapi = "https://sheets.googleapis.com/v4/spreadsheets/"
 const SHEETNAME = "Item_Tables"
@@ -23,8 +23,8 @@ async function getQueryData(queryObject) {
     const token = getToken();
     const tokeType = "Bearer";
   
-    //const path = `${PROXY}${GETGOOGLESHEETURL}${SHEET_ID}/gviz/tq`
-    const path = `/spreadsheets/d/${SHEET_ID}/gviz/tq`
+    const path = `${PROXY}${GETGOOGLESHEETURL}${SHEET_ID}/gviz/tq`
+    //const path = `/spreadsheets/d/${SHEET_ID}/gviz/tq`
     const queryStr = qs.stringify(queryObject);
     const fullpath =  path + "?" + queryStr
   
