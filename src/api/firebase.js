@@ -22,12 +22,10 @@ firebase.initializeApp(firebaseConfig);
 export const auth = firebase.auth();
 export const db = firebase.firestore();
 
-
-
 auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
 
 export const signInWithGoogle = () => {
-  //auth.signInWithPopup(provider);
+
   let provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({prompt: 'select_account'});
 

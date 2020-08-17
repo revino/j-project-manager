@@ -1,8 +1,12 @@
 import React, {useState, useEffect, useCallback} from 'react';
+import browserHistory from '../../history'
 
 //Material
 import { Grid,FormLabel,FormControl,FormGroup,Checkbox,Button,FormControlLabel, CircularProgress} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+
+//UI
+import { useSnackbar } from 'notistack';
 
 //View
 import CollapsibleTable from './CollapsibleTable';
@@ -40,6 +44,7 @@ function createData(id, progress, company, line, pl, pic, start, end, pjtno, pjt
 
 export default function ItemTable(props) {
   const classes = useStyles();
+  const {enqueueSnackbar} = useSnackbar();
   
   //State
   const [tableData,setTableData] = useState([]);
@@ -64,67 +69,96 @@ export default function ItemTable(props) {
   //Request Data
   const getTableData = useCallback(async(cbState) =>{
     try{
-    setLoading(true);
-    const cbArray          = Object.values(cbState);//[state.cb1, state.cb2, state.cb3, state.cb4, state.cb5]
-    const checkBoxConArray = fieldData.progress.filter((el,idx) => cbArray[idx] === true).map(el => `B='${el}'`);
-    const checkBoxConStr   = checkBoxConArray.join(" or ");
-    const queryObject      = { tq: `select * where  (A is not null) and (${checkBoxConStr}) order by C`, sheet: `Item_Tables`}
-    
-    //API REQUEST
-    const resJson          = await SheetApi.getQueryData(queryObject);
-    
-    //make Array
-    const itemArray = resJson.table.rows.map(el => new createData( el.c[0].v,el.c[1].v,el.c[2].v,el.c[3].v,el.c[4].v,el.c[5].v,el.c[6].f,el.c[7].f,el.c[8].v,el.c[9].v,el.c[10].v))
-    
-    setTableData(itemArray);
-    setLoading(false);
+      setLoading(true);
+      const cbArray          = Object.values(cbState);//[state.cb1, state.cb2, state.cb3, state.cb4, state.cb5]
+      const checkBoxConArray = fieldData.progress.filter((el,idx) => cbArray[idx] === true).map(el => `B='${el}'`);
+      const checkBoxConStr   = checkBoxConArray.join(" or ");
+      const queryObject      = { tq: `select * where  (A is not null) and (${checkBoxConStr}) order by C`, sheet: `Item_Tables`}
+      
+      //API REQUEST
+      const response          = await SheetApi.getQueryData(queryObject);
+
+      if(response === "403") {
+        browserHistory.push("/settings");
+        enqueueSnackbar('권한이 없습니다.', { variant: 'error' } );
+        throw new Error(response)
+      }
+      else if(response === "401") {
+        browserHistory.push("/login");
+        enqueueSnackbar('인증이 실패하였습니다.', { variant: 'error' } );
+        throw new Error(response)
+      }
+      
+      //make Array
+      const itemArray = response.table.rows.map(el => new createData( el.c[0].v,el.c[1].v,el.c[2].v,el.c[3].v,el.c[4].v,el.c[5].v,el.c[6].f,el.c[7].f,el.c[8].v,el.c[9].v,el.c[10].v))
+      
+      setTableData(itemArray);
+      setLoading(false);
     }catch(err){
+      enqueueSnackbar('데이터 로드 실패', { variant: 'error' } );
       console.log(err);
     }
-  }, [fieldData.progress])
+  }, [fieldData.progress,enqueueSnackbar])
 
-  const getProgressData = async() =>{
+  const getProgressData = useCallback(async() =>{
     try{
-    setLoading(true);
-    const fieldData = {pic:[],line:[],progress:[],company:[],pl:[]}
-    const conArray =  ["A is not null","B is not null","C is not null","D is not null","E is not null"]
-    const ConStr   = conArray.join(" or ");
-    const queryObject   = { tq: `select A,B,C,D,E where (${ConStr}) offset 1`, sheet: `Prop_Types`};
+      setLoading(true);
+      const fieldData = {pic:[],line:[],progress:[],company:[],pl:[]}
+      const conArray =  ["A is not null","B is not null","C is not null","D is not null","E is not null"]
+      const ConStr   = conArray.join(" or ");
+      const queryObject   = { tq: `select A,B,C,D,E where (${ConStr}) offset 1`, sheet: `Prop_Types`};
 
-    //API REQUEST
-    const resJson       = await SheetApi.getQueryData(queryObject);
+      //API REQUEST
+      const response       = await SheetApi.getQueryData(queryObject);
 
-    //make Array
-    for (let el of resJson.table.rows) {
-      if(el.c[0] !== null && el.c[0].v !== null) fieldData['pic'].push(el.c[0].v);
-      if(el.c[1] !== null && el.c[1].v !== null)  fieldData['line'].push(el.c[1].v);
-      if(el.c[2] !== null && el.c[2].v !== null) fieldData['progress'].push(el.c[2].v);
-      if(el.c[3] !== null && el.c[3].v !== null) fieldData['company'].push(el.c[3].v);
-      if(el.c[4] !== null && el.c[4].v !== null) fieldData['pl'].push(el.c[4].v);
-    }
-    setFieldData(fieldData);
-    setLoading(false);
+      if(response === "403") {
+        browserHistory.push("/settings");
+        enqueueSnackbar('권한이 없습니다.', { variant: 'error' } );
+        throw new Error(response)
+      }
+      else if(response === "401") {
+        browserHistory.push("/login");
+        enqueueSnackbar('인증이 실패하였습니다.', { variant: 'error' } );
+        throw new Error(response)
+      }
+
+      //make Array
+      for (let el of response.table.rows) {
+        if(el.c[0] !== null && el.c[0].v !== null) fieldData['pic'].push(el.c[0].v);
+        if(el.c[1] !== null && el.c[1].v !== null) fieldData['line'].push(el.c[1].v);
+        if(el.c[2] !== null && el.c[2].v !== null) fieldData['progress'].push(el.c[2].v);
+        if(el.c[3] !== null && el.c[3].v !== null) fieldData['company'].push(el.c[3].v);
+        if(el.c[4] !== null && el.c[4].v !== null) fieldData['pl'].push(el.c[4].v);
+      }
+      setFieldData(fieldData);
+      setLoading(false);
     }catch(err){
+      enqueueSnackbar('필드 로드 실패', { variant: 'error' } );
       console.log(err);
     }
-
-  }
+  }, [enqueueSnackbar])
 
   //Update Data
   const updateData = async(newData, oldData) =>{
+    
     try{
-    await SheetApi.setData(newData.id,newData);
-    await getTableData(state);
+      await SheetApi.setData(newData.id,newData);
+      await getTableData(state);
+      enqueueSnackbar('업데이트 성공', { variant: 'success' } );
+
     }catch(err){
+      enqueueSnackbar('업데이트 실패 다시 시도 해주세요', { variant: 'error' } );
       console.log(err);
     }
   }
 
   const deleteData = async(oldData) =>{
     try{
-    await SheetApi.deleteData(oldData.id);
-    await getTableData(state);
+      await SheetApi.deleteData(oldData.id);
+      await getTableData(state);
+      enqueueSnackbar('삭제 성공', { variant: 'success' } );
     }catch(err){
+      enqueueSnackbar('삭제 실패 다시 시도 해주세요', { variant: 'error' } );
       console.log(err);
     }
   }
@@ -139,7 +173,7 @@ export default function ItemTable(props) {
   }
   useEffect(() => { 
     getProgressData(); 
-  }, []);
+  }, [getProgressData]);
 
   useEffect(() =>{
     getTableData(checkBoxDefault)

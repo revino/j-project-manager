@@ -1,9 +1,13 @@
 //React
-import React, {useState, useEffect} from 'react';
-//Material UI
+import React, {useState, useEffect, useCallback} from 'react';
+import browserHistory from '../../history'
 
+//Material UI
 import {Avatar,Card,CardContent,Grid,Typography,colors,makeStyles, List, ListItem, ListItemAvatar, ListItemText} from '@material-ui/core';
 import { deepOrange, teal, indigo, brown, blueGrey } from '@material-ui/core/colors';
+
+//UI
+import { useSnackbar } from 'notistack';
 
 //API
 import SheetApi from '../../api/SpreadSheetApi';
@@ -51,53 +55,79 @@ const useStyles = makeStyles((theme) => ({
 
 
 export default function CardSummary(props) {
+  const {enqueueSnackbar} = useSnackbar();
   const classes = useStyles();
   const avatarColor =[classes.indigo,classes.orange, classes.blueGrey, classes.teal ,classes.brown];
   const [loading, setLoading] = useState(false);
   const [summaryData, setSummaryData] = useState([]);
   const {total, company} = props;
   //Request Data
-  const getTotalSummaryData = async() =>{
+  const getTotalSummaryData = useCallback(async() =>{
     try{
     setLoading(true);
     const queryObject   = { tq: `select B,count(B) where B is not null group by B order by B desc`};
 
     //API REQUEST
-    const resJson       = await SheetApi.getQueryData(queryObject);
+    const response      = await SheetApi.getQueryData(queryObject);
 
-    const itemArray = resJson.table.rows.map (el => [el.c[0].v, el.c[1].v])
+    if(response === "403") {
+      browserHistory.push("/settings");
+      enqueueSnackbar('권한이 없습니다.', { variant: 'error' } );
+      throw new Error(response)
+    }
+    else if(response === "401") {
+      enqueueSnackbar('인증이 실패하였습니다.', { variant: 'error' } );
+      browserHistory.push("/login");
+      
+      throw new Error(response)
+    }
+
+    const itemArray = response.table.rows.map (el => [el.c[0].v, el.c[1].v])
 
     setSummaryData(itemArray);
 
     setLoading(false);
     }catch(err){
+      enqueueSnackbar('데이터 로드 실패', { variant: 'error' } );
       console.log(err);
     }
-  }
+  },[enqueueSnackbar])
 
-  const getCompnaySummaryData = async() =>{
+  const getCompnaySummaryData = useCallback(async() =>{
     try{
     setLoading(true);
     const queryObject   = { tq: `select C,count(C) where C is not null and B != "완료" group by C`};
 
     //API REQUEST
-    const resJson       = await SheetApi.getQueryData(queryObject);
+    const response       = await SheetApi.getQueryData(queryObject);
 
-    const itemArray = resJson.table.rows.map (el => [el.c[0].v, el.c[1].v])
+    if(response === "403") {
+      browserHistory.push("/settings");
+      enqueueSnackbar('권한이 없습니다.', { variant: 'error' } );
+      throw new Error(response)
+    }
+    else if(response === "401") {
+      browserHistory.push("/login");
+      enqueueSnackbar('인증이 실패하였습니다.', { variant: 'error' } );
+      throw new Error(response)
+    }
+
+    const itemArray = response.table.rows.map (el => [el.c[0].v, el.c[1].v])
 
     setSummaryData(itemArray);
 
     setLoading(false);
     }catch(err){
+      enqueueSnackbar('데이터 로드 실패', { variant: 'error' } );
       console.log(err);
     }
-  }
+  },[enqueueSnackbar])
 
 
   useEffect(() =>{
          if(total  ) getTotalSummaryData();
     else if(company) getCompnaySummaryData();
-  }, [company,total]);
+  }, [company,total,getTotalSummaryData,getCompnaySummaryData]);
 
   return (
     <Card className={classes.root}>

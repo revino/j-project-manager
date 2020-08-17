@@ -10,7 +10,7 @@ export default function WrapRoute(props) {
                 if(!getUserInfo()) removeUserInfo();
 
                 return (getUserInfo())? 
-                <Wrap haistory={props.history}><Component {...matchProps} /></Wrap>
+                <Wrap><Component {...matchProps} /></Wrap>
                 :
                 <Redirect to={{ pathname: '/login', state: { from: props.location } }} />
             }}

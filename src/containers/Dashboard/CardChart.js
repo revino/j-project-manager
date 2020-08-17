@@ -1,11 +1,15 @@
 //React
 import React, {useState, useEffect, useCallback, forwardRef} from 'react';
 import { NavLink as RouterLink } from 'react-router-dom';
+import browserHistory from '../../history'
 
 //Material UI
 import {Box, CardHeader, Button, Card,CardContent,makeStyles ,Divider, CircularProgress} from '@material-ui/core';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
+
+//UI
+import { useSnackbar } from 'notistack';
 
 //Component
 import ChartView from "../Chart/ChartView"
@@ -48,6 +52,7 @@ function ChartItem(id, pic, pjtName, start, end, company, line, pjtno,progress, 
 }
 
 export default function CardChart(props) {
+  const {enqueueSnackbar} = useSnackbar();
   const classes = useStyles();
   const [ChartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -69,8 +74,22 @@ export default function CardChart(props) {
     let lastName;
     
     //API REQUEST
-    const resChartDataJson  = await SheetApi.getQueryData(queryObject);
-    const chartDataArray = resChartDataJson.table.rows.map(el => {
+    const response = await SheetApi.getQueryData(queryObject);
+
+    console.log(response);
+
+    if(response === "403") {
+      browserHistory.push("/settings");
+      enqueueSnackbar('권한이 없습니다.', { variant: 'error' } );
+      throw new Error(response)
+    }
+    else if(response === "401") {
+      browserHistory.push("/login");
+      enqueueSnackbar('인증이 실패하였습니다.', { variant: 'error' } );
+      throw new Error(response)
+    }
+
+    const chartDataArray = response.table.rows.map(el => {
       let startdate = el.c[3].f;
       let enddate = el.c[4].f;
       if(lastName !== el.c[1].v) {colorIndex+=2; colorBrighten =1; }
@@ -84,8 +103,20 @@ export default function CardChart(props) {
 
     //API REQUEST 
     if(yAxis === 1){
-      const resNameDataJson  = await SheetApi.getQueryData(queryObject2);
-      const chartDataArray = resNameDataJson.table.rows.map(el => {
+      const response  = await SheetApi.getQueryData(queryObject2);
+
+      if(response === "403") {
+        browserHistory.push("/settings");
+        enqueueSnackbar('권한이 없습니다.', { variant: 'error' } );
+        throw new Error(response)
+      }
+      else if(response === "401") {
+        browserHistory.push("/login");
+        enqueueSnackbar('인증이 실패하였습니다.', { variant: 'error' } );
+        throw new Error(response)
+      }
+
+      const chartDataArray = response.table.rows.map(el => {
         return new ChartItem(null,el.c[0].v,null,null,null,null,null,null,null,yAxis);
       });
       chartDataArray.concat(chartDataArray);
@@ -94,9 +125,10 @@ export default function CardChart(props) {
     setChartData(chartDataArray);
     setLoading(false);
     }catch(err){
+      enqueueSnackbar('차트 로드 실패', { variant: 'error' } );
       console.log(err);
     }
-  }, [])
+  }, [enqueueSnackbar])
 
   useEffect(() =>{
     getChartData(defaultYAxis,moment(),moment().add(defaultEndTime, 'days'),defaultSort);

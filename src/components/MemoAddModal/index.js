@@ -1,10 +1,14 @@
 import React, {useState, useCallback, useEffect} from 'react';
+import browserHistory from '../../history'
 
 //Material UI
 import 'date-fns';
 import {Grid, FormControl, InputLabel, MenuItem, Select, TextareaAutosize, 
 Modal, Divider, TextField, Button, makeStyles, FormControlLabel, Checkbox, CircularProgress, FormHelperText  } from '@material-ui/core';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+
+//UI
+import { useSnackbar } from 'notistack';
 
 //API
 import SheetApi from '../../api/SpreadSheetApi';
@@ -72,6 +76,8 @@ function createMemo(uid, owner, updateDate, createdDate, title, content, linkId)
 
 export default function MemoAddModal(props) {
 
+  const {enqueueSnackbar} = useSnackbar();
+
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
 
@@ -95,10 +101,21 @@ export default function MemoAddModal(props) {
       const queryObject = { tq: `select A, J, B, F where  (A is not null) and (${ConStr})`, sheet: `Item_Tables`}
       
       //API REQUEST
-      const resJson     = await SheetApi.getQueryData(queryObject);
-      
+      const response     = await SheetApi.getQueryData(queryObject);
+
+      if(response === "403") {
+        browserHistory.push("/settings");
+        enqueueSnackbar('권한이 없습니다.', { variant: 'error' } );
+        throw new Error(response);
+      }
+      else if(response === "401") {
+        enqueueSnackbar('인증이 실패하였습니다.', { variant: 'error' } );
+        browserHistory.push("/login");
+        throw new Error(response)
+      }
+
       //make Array
-      const itemArray = resJson.table.rows.map(el => new createData( el.c[0].v,el.c[1].v))
+      const itemArray = response.table.rows.map(el => new createData( el.c[0].v,el.c[1].v))
 
       setItemList(itemArray);
       setItem(itemArray[0].id);
@@ -106,21 +123,23 @@ export default function MemoAddModal(props) {
     }catch(err){
       console.log(err);
     }
-  }, [])
+  }, [enqueueSnackbar])
 
   const addMemo = async() =>{
     try{
       const memoData = await createMemo(getUid(), getUserName(), moment().format(), moment().format(), title, content, isLinkItme?item:null);
       await db.collection(`users`).doc(getUid()).collection(`memos`).add(memoData);
       onUpdate();
+      enqueueSnackbar('추가 성공', { variant: 'success' } );
     }catch(err){
+      enqueueSnackbar('추가 실패 다시 시도 해주세요', { variant: 'error' } );
       console.log(err);
     }
   }
 
   const handleSubmit = async(event) => {
-    await addMemo();
-    props.handleClose();
+      await addMemo();
+      props.handleClose();
   }
 
   const handleLinkChecked = (e) => { setLinkItem(e.target.checked);};

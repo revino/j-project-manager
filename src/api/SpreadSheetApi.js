@@ -2,9 +2,10 @@ import qs from "qs";
 
 import {getToken} from '../auth';
 
+
 //const PROXY = "https://cors-anywhere.herokuapp.com/"
-const PROXY = "https://revino.herokuapp.com/"
-const GETGOOGLESHEETURL= "https://docs.google.com/spreadsheets/d/"
+//const PROXY = "https://revino.herokuapp.com/"
+//const GETGOOGLESHEETURL= "https://docs.google.com/spreadsheets/d/"
 const SHEET_ID = "1Eb2Bwx7aRWc2vwVyqw8rK4vKeM9U99bDPRNnJWIcC_s"
 const testapi = "https://sheets.googleapis.com/v4/spreadsheets/"
 const SHEETNAME = "Item_Tables"
@@ -22,14 +23,14 @@ async function getQueryData(queryObject) {
     const token = getToken();
     const tokeType = "Bearer";
   
-    const path = `${PROXY}${GETGOOGLESHEETURL}${SHEET_ID}/gviz/tq`
-    //const path = `/spreadsheets/d/${SHEET_ID}/gviz/tq`
+    //const path = `${PROXY}${GETGOOGLESHEETURL}${SHEET_ID}/gviz/tq`
+    const path = `/spreadsheets/d/${SHEET_ID}/gviz/tq`
     const queryStr = qs.stringify(queryObject);
     const fullpath =  path + "?" + queryStr
   
     //Get Request
     const response = await fetch(fullpath, {
-      headers: { Authorization: tokeType + " " + token, AccessControlAllowOrigin: '*' },
+      headers: { Authorization: tokeType + " " + token , AccessControlAllowOrigin: '*' },
       method : 'GET',
     })
   
@@ -43,6 +44,7 @@ async function getQueryData(queryObject) {
 
   }catch(err){
     console.log(err);
+    return err.message;
   }
 }
 
@@ -81,6 +83,7 @@ async function setData(id,newData) {
     return resJson;
   } catch(err){
     console.log(err);
+    return err.message;
   }
 }
 
@@ -119,6 +122,7 @@ async function addData(newData) {
     return resJson;
   } catch(err){
     console.log(err);
+    return err.message;
   }
 }
 
@@ -157,6 +161,7 @@ async function deleteData(idx) {
     return resJson;
   } catch(err){
     console.log(err);
+    return err.message;
   }
 }
 

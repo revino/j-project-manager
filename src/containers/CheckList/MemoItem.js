@@ -1,4 +1,5 @@
 import React,{useState} from 'react';
+import browserHistory from '../../history'
 
 //Material Icons
 import {ExpandMore} from '@material-ui/icons';
@@ -11,6 +12,9 @@ import { Edit, Delete, Save, Link, Cancel} from '@material-ui/icons';
 //Material
 import {makeStyles, Button, Typography, Divider , Accordion, AccordionDetails, 
 AccordionSummary, AccordionActions, TextareaAutosize, FormControl, Input,CircularProgress, Popover} from '@material-ui/core';
+
+//UI
+import { useSnackbar } from 'notistack';
 
 //API
 import SheetApi from '../../api/SpreadSheetApi';
@@ -116,6 +120,7 @@ function createMemo(title, content, updateDate, linkId) {
 
 
 export default function MemoItem(props) {
+  const {enqueueSnackbar} = useSnackbar();
   let {item, onUpdate} = props;
   const classes = useStyles();
 
@@ -138,10 +143,21 @@ export default function MemoItem(props) {
     const queryObject = { tq: `select A, J, K where A = ${id}`, sheet: `Item_Tables`}
     
     //API REQUEST
-    const resJson = await SheetApi.getQueryData(queryObject);
+    const response = await SheetApi.getQueryData(queryObject);
 
-    setLinkTitle(resJson.table.rows[0].c[1].v);
-    setLinkContent(resJson.table.rows[0].c[2].v);
+    if(response === "403") {
+      browserHistory.push("/settings");
+      enqueueSnackbar('권한이 없습니다.', { variant: 'error' } );
+      throw new Error(response)
+    }
+    else if(response === "401") {
+      browserHistory.push("/login");
+      enqueueSnackbar('인증이 실패하였습니다.', { variant: 'error' } );
+      throw new Error(response)
+    }
+
+    setLinkTitle(response.table.rows[0].c[1].v);
+    setLinkContent(response.table.rows[0].c[2].v);
 
     setLoading(false);
     }catch(err){
@@ -170,8 +186,9 @@ export default function MemoItem(props) {
       item.title= memoTitle;
       item.content=memoContent;
       handleEditChange();
-      
+      enqueueSnackbar('업데이트 성공', { variant: 'success' } );
     }catch(err){
+      enqueueSnackbar('업데이트 실패 다시 시도 해주세요', { variant: 'error' } );
       console.log(err);
     }
   };
@@ -181,7 +198,9 @@ export default function MemoItem(props) {
       const memosRef = db.collection(`users`).doc(getUid()).collection(`memos`).doc(item.docId);
       await memosRef.delete();
       onUpdate();
+      enqueueSnackbar('삭제 성공', { variant: 'success' } );
     }catch(err){
+      enqueueSnackbar('삭제 실패 다시 시도 해주세요', { variant: 'error' } );
       console.log(err);
     }
   };

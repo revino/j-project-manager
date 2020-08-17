@@ -22,7 +22,7 @@ export default function Minimal(props) {
   return (
     <div className={classes.root}>
       <Topbar minimal/>
-      <main className={classes.content}>{children}</main>
+        <main className={classes.content}>{children}</main>
     </div>
   );
 };

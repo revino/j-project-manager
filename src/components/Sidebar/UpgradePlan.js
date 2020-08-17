@@ -33,7 +33,7 @@ export default function UpgradePlan(props) {
           align="center"
           gutterBottom
           variant="h5"
-        >테스트 중~
+        >테스트 중~ <br/>안뜨면 새로고침
         </Typography>
 
       </div>

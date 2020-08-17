@@ -1,5 +1,6 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
+import browserHistory from '../../history';
 
 import { makeStyles } from '@material-ui/styles';
 import { Grid, Button, IconButton, Typography } from '@material-ui/core';
@@ -105,12 +106,11 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function SignIn(props) {
-  const { history } = props;
 
   const classes = useStyles();
 
   const handleBack = () => {
-    history.goBack();
+    browserHistory.goBack();
   };
 
   const handleSignIn = async() => { 
@@ -118,7 +118,7 @@ function SignIn(props) {
       const ret = await googleLogin.authGoogle();
       if(!!ret.credential.accessToken) {
         localStorage.setItem('ACCESS_TOKEN', ret.credential.accessToken);
-        history.push("/dashboard");
+        browserHistory.push("/dashboard");
       }
     }catch(err){
       console.log(err);

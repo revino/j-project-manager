@@ -41,70 +41,8 @@ export default function ChartView(props) {
   const chart = useRef(null);
   const classes = useStyles();
   
-  useLayoutEffect((props) => {
-
-    let x = am4core.create("chartdiv", am4charts.XYChart);
-
-    //설정
-    x.hiddenState.properties.opacity = 0;
-    x.dateFormatter.inputDateFormat = "yyyy-MM-dd HH:mm";
-    x.dateFormatter.dateFormat = "MM월 dd일";
-    x.dateFormatter.inputDateFormat = "yyyy-MM-dd";
-
-    
-    //축 생성
-    let categoryAxis = x.yAxes.push(new am4charts.CategoryAxis());
-    categoryAxis.dataFields.category = "category";
-    categoryAxis.renderer.grid.template.location = 0;
-    categoryAxis.renderer.minGridDistance = 10;
-    categoryAxis.renderer.inversed = true;
-
-    let dateAxis = x.xAxes.push(new am4charts.DateAxis());
-    dateAxis.renderer.minGridDistance = 40;
-    dateAxis.baseInterval = { count: 1, timeUnit: "day" };
-    dateAxis.dateFormats.setKey("day", "MM/dd");
-    dateAxis.renderer.tooltipLocation = 0;
-
-    let series1 = x.series.push(new am4charts.ColumnSeries());
-    series1.columns.template.height = am4core.percent(60);
-    series1.columns.template.tooltipText = tooltip;
-
-    series1.dataFields.openDateX = "start";
-    series1.dataFields.dateX = "end";
-    series1.dataFields.categoryY = "category";
-
-    series1.columns.template.propertyFields.fill = "color";
-    series1.columns.template.propertyFields.stroke = "color";
-    series1.columns.template.strokeOpacity = 1;
-
-
-    // Sell Auto Adjust
-    let cellSize = 50;
-    x.events.on("datavalidated", function(ev) {
-
-      // Get objects
-      let chart = ev.target;
-      let categoryAxis = chart.yAxes.getIndex(0);
-      const itemArray = chart.data.map(el => el.category);
-      const CategoryArray = Array.from(new Set(itemArray));
-
-      // Calculate how we need to adjust chart height
-      let adjustHeight = CategoryArray.length * cellSize - categoryAxis.pixelHeight;
-      let targetHeight = chart.pixelHeight + adjustHeight;
-    
-      // Set it on chart's container
-      chart.svgContainer.htmlElement.style.height = targetHeight + "px";
-    });
-    
-    x.scrollbarX = new am4core.Scrollbar();
-    chart.current = x;
-
-    return () => {
-      x.dispose();
-    };
-  }, []);
-
   useLayoutEffect(() => {
+
     let x = am4core.create("chartdiv", am4charts.XYChart);
 
     //설정
@@ -160,6 +98,9 @@ export default function ChartView(props) {
     
     x.scrollbarX = new am4core.Scrollbar();
     chart.current = x;
+    return () => {
+      x.dispose();
+    };
   }, [props.data]);
 
   return (

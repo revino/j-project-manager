@@ -7,6 +7,8 @@ import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/picker
 import DateFnsUtils from '@date-io/date-fns';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 
+//UI
+import { useSnackbar } from 'notistack';
 
 //API
 import SheetApi from '../../api/SpreadSheetApi'
@@ -69,6 +71,7 @@ function createData(id, progress, company, line, pl, pic, start, end, pjtno, pjt
   }
 
 export default function ItemAddModal(props) {
+  const {enqueueSnackbar} = useSnackbar();
   const {fieldData} = props;
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
@@ -90,16 +93,17 @@ export default function ItemAddModal(props) {
 
   const handleSubmit= async(event) => {
     try{
-    const start = moment(selectedStartDate).format("YYYY-MM-DD");
-    const end = moment(selectedEndDate).format("YYYY-MM-DD");
-    
-    const data = createData(1,fieldData.progress[progress],fieldData.company[company],fieldData.line[line],fieldData.pl[pl],fieldData.pic[pic],start,end,pjtno,pjtname,content);
-    
-    await SheetApi.addData(data);
-    
-    props.handleClose();
-    event.preventDefault();
+      const start = moment(selectedStartDate).format("YYYY-MM-DD");
+      const end = moment(selectedEndDate).format("YYYY-MM-DD");
+      
+      const data = createData(1,fieldData.progress[progress],fieldData.company[company],fieldData.line[line],fieldData.pl[pl],fieldData.pic[pic],start,end,pjtno,pjtname,content);
+      
+      await SheetApi.addData(data);
+      enqueueSnackbar('추가 성공', { variant: 'success' } );
+      props.handleClose();
+      event.preventDefault();
     }catch(err){
+      enqueueSnackbar('추가 실패 다시 시도 해주세요', { variant: 'error' } );
       console.log(err);
     }
   }

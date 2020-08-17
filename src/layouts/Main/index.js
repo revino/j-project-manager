@@ -26,7 +26,7 @@ const useStyles = makeStyles(theme => ({
 
 
 export default function Main(props){
-    const { children, history } = props;
+    const { children } = props;
 
     const classes = useStyles();
     const theme = useTheme();
@@ -46,13 +46,14 @@ export default function Main(props){
     const shouldOpenSidebar = isDesktop ? true : openSidebar;
 
     return (
+      
         <div
           className={clsx({
             [classes.root]: true,
             [classes.shiftContent]: isDesktop
           })}
         >
-          <Topbar history={history} onSidebarOpen={handleSidebarOpen} />
+          <Topbar onSidebarOpen={handleSidebarOpen} />
           <Sidebar
             onClose={handleSidebarClose}
             open={shouldOpenSidebar}
