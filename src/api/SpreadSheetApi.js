@@ -1,6 +1,6 @@
 import qs from "qs";
 
-import {getToken, removeUserInfo} from '../auth';
+import {getToken} from '../auth';
 
 //const PROXY = "https://cors-anywhere.herokuapp.com/"
 const PROXY = "https://revino.herokuapp.com/"
