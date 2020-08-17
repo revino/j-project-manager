@@ -22,15 +22,18 @@ firebase.initializeApp(firebaseConfig);
 export const auth = firebase.auth();
 export const db = firebase.firestore();
 
-const provider = new firebase.auth.GoogleAuthProvider();
 
-provider.setCustomParameters({prompt: 'select_account'});
 
 auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
 
 export const signInWithGoogle = () => {
   //auth.signInWithPopup(provider);
+  let provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({prompt: 'select_account'});
+
   provider.addScope(SCOPE);
+  provider.addScope("https://www.googleapis.com/auth/drive")
+  providee.addScope("https://www.googleapis.com/auth/drive.file")
   return auth.signInWithPopup(provider)
 }
 
