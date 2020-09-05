@@ -63,7 +63,13 @@ function* loginRequestSaga() {
 const initialState = {
   fetchingUpdate: false,
   isLoggedIn: false,
-  user: null
+  user: {
+    id: "",
+    name: "",
+    accessToken:"",
+    photo:"",
+    expire:"",
+  }
 
 };
 

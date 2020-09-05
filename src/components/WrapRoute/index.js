@@ -12,7 +12,8 @@ function WrapRoute(props) {
                 
                 if(!getUserInfo()) removeUserInfo();
                 //return (user.accessToken || allow===true)? 
-                return (localStorage.getItem('ACCESS_TOKEN') || allow===true)? 
+
+                return ((localStorage.getItem('ACCESS_TOKEN') && !!user.accessToken) || allow===true)? 
                 <Wrap><SnackbarProvider maxSnack={5}><Component {...matchProps} /></SnackbarProvider></Wrap>
                 :
                 <Redirect to={{ pathname: '/login', state: { from: props.location } }} />
