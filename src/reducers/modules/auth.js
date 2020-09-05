@@ -50,19 +50,20 @@ function* loginRequestSaga() {
     yield put(successFailure(err));
   }
 }
-
-
-// Initial State
-const initialState = {
-  fetchingUpdate: false,
-  isLoggedIn: false,
-  user: {
+/*
+{
     id: "o1gLuUabqWNloOxiha0g4u3JEbB2",
     name: "김지웅",
     accessToken:"",
     photo:"https://lh3.googleusercontent.com/a-/AOh14GjBKAHbl_gX-jRsAm4dJ91bm1zlHpZnR9f8cFDO",
     expire:"Sat, 05 Sep 2020 13:24:21 GMT",
   }
+*/
+// Initial State
+const initialState = {
+  fetchingUpdate: false,
+  isLoggedIn: false,
+  user: null
 
 };
 

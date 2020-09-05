@@ -22,13 +22,12 @@ const updateSheetInfo  = createAction(SHEET_INFO_UPDATE);
 const successSheetInfo = createAction(SHEET_INFO_SUCCESS);
 const failureSheetInfo = createAction(SHEET_INFO_FAILURE);
 const successUpdateSheetInfo = createAction(SHEET_INFO_UPDATE_SUCCESS);
-
+/*
 const defaultProgressData = ["접수(작지X)","진행중","접수 완료(작지O)","완료","모니터링中","보고서상신","보류"];
 const defaultPicData= ["유영준","유현준","김지웅"];
 const defaultLineData= ["이천TDBI","이천MVP","청주TDBI","청주MVP","하이텍","충칭","윈팩","하이셈"];
 const defaultComapanyData= ["HYNIX","하이텍","윈팩","하이셈"];
 const defaultPlData= ["유영준","유현준"];
-const defaultFieldData = {pic: defaultPicData,line: defaultLineData,progress: defaultProgressData,company: defaultComapanyData,pl: defaultPlData };
 const defaultSheetList= [
   {label:'test2',link:'16qTlqWa0f7V8bIIVDwDmZr2knmQNvKcMOPfqMMzR8eQ'},
   {label:'하이닉스',link:'1Eb2Bwx7aRWc2vwVyqw8rK4vKeM9U99bDPRNnJWIcC_s'},
@@ -37,10 +36,14 @@ const defaultSheetList= [
   {label:'bb',link:'bb'}
 
 ]
+*/
+const defaultFieldData = {pic: [],line: [],progress: [],company: [],pl: [] };
+
+
 
 // Initial State
 const initialState = {
-  sheetList: defaultSheetList,
+  sheetList: [],
   selectSheetId: "16qTlqWa0f7V8bIIVDwDmZr2knmQNvKcMOPfqMMzR8eQ",
   fetching: false,
   isList: false,
