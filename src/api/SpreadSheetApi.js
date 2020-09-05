@@ -6,7 +6,7 @@ import {getToken} from '../auth';
 //const PROXY = "https://cors-anywhere.herokuapp.com/"
 const PROXY = "https://revino.herokuapp.com/"
 const GETGOOGLESHEETURL= "https://docs.google.com/spreadsheets/d/"
-const SHEET_ID = "1Eb2Bwx7aRWc2vwVyqw8rK4vKeM9U99bDPRNnJWIcC_s"
+
 const testapi = "https://sheets.googleapis.com/v4/spreadsheets/"
 const SHEETNAME = "Item_Tables"
 
@@ -18,29 +18,24 @@ function createData({id, progress, company, line, pl, pic, start, end, pjtno, pj
   return [id, progress, company, line, pl, pic, start, end, pjtno, pjtname, content];
   }
 
-async function getQueryData(queryObject) {
+export async function getQueryData({tq, sheet, selectSheetId}) {
   try{
     const token = getToken();
     const tokeType = "Bearer";
-  
-    const path = `${PROXY}${GETGOOGLESHEETURL}${SHEET_ID}/gviz/tq`
+    const qString = {tq, sheet};
+    const path = `${PROXY}${GETGOOGLESHEETURL}${selectSheetId}/gviz/tq`
     //const path = `/spreadsheets/d/${SHEET_ID}/gviz/tq`
-    const queryStr = qs.stringify(queryObject);
+    const queryStr = qs.stringify(qString);
     const fullpath =  path + "?" + queryStr
   
     //Get Request
     const response = await fetch(fullpath, {
-      headers: { Authorization: tokeType + " " + token , AccessControlAllowOrigin: '*' },
+      headers: { Authorization: tokeType + " " + token, AccessControlAllowOrigin: '*' },
       method : 'GET',
     })
+    
   
-    if(!response.ok) throw new Error(response.status);
-  
-    //Parsing
-    const resText = await response.text();
-    const resJson = await JSON.parse(resText.substring(47,resText.length-2));
-  
-    return resJson;
+    return response;
 
   }catch(err){
     console.log(err);
@@ -48,22 +43,23 @@ async function getQueryData(queryObject) {
   }
 }
 
-async function setData(id,newData) {
+export async function setData({newData, selectSheetId}) {
   try{
     const token = getToken();
     const tokeType = "Bearer";
 
+
     const queryObject = { valueInputOption: "USER_ENTERED"}
 
-    const path  =`${testapi}${SHEET_ID}/values/${SHEETNAME}!${getRange(id)}`
+    const path  =`${testapi}${selectSheetId}/values/${SHEETNAME}!${getRange(newData.id)}`
     const queryStr = qs.stringify(queryObject);
     const fullpath =  path + "?" + queryStr
 
-    newData.id = "=ROW()-1";
-    const dataArray = createData(newData);
+
+    const dataArray = createData({...newData,id:"=ROW()-1"});
 
     const data = { 
-      range: `${SHEETNAME}!${getRange(id)}`,
+      range: `${SHEETNAME}!${getRange(newData.id)}`,
       majorDimension: "ROWS",
       values: [dataArray]
     }
@@ -75,31 +71,26 @@ async function setData(id,newData) {
       body: JSON.stringify(data)
     })
 
-    if(!response.ok) throw new Error(response.status);
+    return response;
 
-    //Parsing
-    const resJson = await response.json();
-
-    return resJson;
   } catch(err){
     console.log(err);
     return err.message;
   }
 }
 
-async function addData(newData) {
+export async function addData({newData, selectSheetId}) {
   try{
     const token = getToken();
     const tokeType = "Bearer";
 
     const queryObject = { valueInputOption: "USER_ENTERED"}
 
-    const path  =`${testapi}${SHEET_ID}/values/${SHEETNAME}!${getRange(0)}:append`
+    const path  =`${testapi}${selectSheetId}/values/${SHEETNAME}!${getRange(0)}:append`
     const queryStr = qs.stringify(queryObject);
     const fullpath =  path + "?" + queryStr
 
-    newData.id = "=ROW()-1";
-    const dataArray = createData(newData);
+    const dataArray = createData({...newData,id:"=ROW()-1"});
 
     const data = { 
       range: `${SHEETNAME}!${getRange(0)}`,
@@ -114,12 +105,7 @@ async function addData(newData) {
       body: JSON.stringify(data)
     })
 
-    if(!response.ok) throw new Error(response.status);
-
-    //Parsing
-    const resJson = await response.json();
-
-    return resJson;
+    return response;
   } catch(err){
     console.log(err);
     return err.message;
@@ -127,12 +113,12 @@ async function addData(newData) {
 }
 
 
-async function deleteData(idx) {
+export async function deleteData({id, selectSheetId}) {
   try{
     const token = getToken();
     const tokeType = "Bearer";
 
-    const path  =`${testapi}${SHEET_ID}:batchUpdate`
+    const path  =`${testapi}${selectSheetId}:batchUpdate`
     const fullpath =  path;
 
     const data = { 
@@ -140,8 +126,8 @@ async function deleteData(idx) {
             range: {
               dimension: "ROWS",
               sheetId: 0,
-              startIndex: idx,
-              endIndex: idx+1
+              startIndex: id,
+              endIndex: id+1
             }
       }}]
     }
@@ -153,22 +139,11 @@ async function deleteData(idx) {
       body: JSON.stringify(data)
     })
 
-    if(!response.ok) throw new Error(response.status);
+    return response;
 
-    //Parsing
-    const resJson = await response.json();
-
-    return resJson;
   } catch(err){
     console.log(err);
     return err.message;
   }
 }
 
-
-export default {
-  getQueryData,
-  setData,
-  addData,
-  deleteData
-};

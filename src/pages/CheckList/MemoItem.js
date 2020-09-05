@@ -1,5 +1,5 @@
-import React,{useState} from 'react';
-import browserHistory from '../../history'
+import React,{useState,useCallback} from 'react';
+import { connect } from 'react-redux';
 
 //Material Icons
 import {ExpandMore} from '@material-ui/icons';
@@ -11,15 +11,15 @@ import { Edit, Delete, Save, Link, Cancel} from '@material-ui/icons';
 
 //Material
 import {makeStyles, Button, Typography, Divider , Accordion, AccordionDetails, 
-AccordionSummary, AccordionActions, TextareaAutosize, FormControl, Input,CircularProgress, Popover} from '@material-ui/core';
+AccordionSummary, AccordionActions, TextareaAutosize, FormControl, Input, Popover} from '@material-ui/core';
 
 //UI
 import { useSnackbar } from 'notistack';
 
 //API
-import SheetApi from '../../api/SpreadSheetApi';
 import {db} from '../../api/firebase'
 import {getUid} from '../../auth'
+import useAsyncSheetData from '../../hooks/useAsyncSheetData'
 
 //Time
 import moment from 'moment'
@@ -118,52 +118,33 @@ function createMemo(title, content, updateDate, linkId) {
   else         return {title, content, updateDate};
 }
 
+const parseTable = (data) =>{
+  return {id : data.table.rows[0].c[0].v, pjtname : data.table.rows[0].c[1].v, content : data.table.rows[0].c[2].v}
+};
 
-export default function MemoItem(props) {
+function MemoItem(props) {
   const {enqueueSnackbar} = useSnackbar();
-  let {item, onUpdate} = props;
+  let {item, onUpdate, selectSheetId} = props;
   const classes = useStyles();
 
   const [editable,setEditable] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [memoTitle, setMemoTitle] = useState("");
   const [memoContent, setMemoContent] = useState("");
-  const [linkTitle, setLinkTitle] = useState("");
-  const [linkContent, setLinkContent] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const {sheetData, loadSheetData} = useAsyncSheetData({
+    initialData:{pjtname:"", content:""},
+    selectSheetId, 
+    parserFn:parseTable
+  });
+
+  const getTableData = useCallback((id) =>{
+    const queryObject = {tq: `select A, J, K where A = ${id}`, sheet: `Item_Tables`};
+    loadSheetData({...queryObject});
+  },[loadSheetData]);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
-
-  //Request Data
-  const getTableData = async(id) =>{
-    try{
-    setLoading(true);
-
-    const queryObject = { tq: `select A, J, K where A = ${id}`, sheet: `Item_Tables`}
-    
-    //API REQUEST
-    const response = await SheetApi.getQueryData(queryObject);
-
-    if(response === "403") {
-      browserHistory.push("/settings");
-      enqueueSnackbar('권한이 없습니다.', { variant: 'error' } );
-      throw new Error(response)
-    }
-    else if(response === "401") {
-      browserHistory.push("/login");
-      enqueueSnackbar('인증이 실패하였습니다.', { variant: 'error' } );
-      throw new Error(response)
-    }
-
-    setLinkTitle(response.table.rows[0].c[1].v);
-    setLinkContent(response.table.rows[0].c[2].v);
-
-    setLoading(false);
-    }catch(err){
-      console.log(err);
-    }
-  }
 
   const handleEditChange    = (e) => { 
     if(!editable) {
@@ -172,6 +153,7 @@ export default function MemoItem(props) {
     }
     setEditable(!editable)
   };
+
   const handleTitleChange   = (e) => { setMemoTitle(e.target.value)};
   const handleContentChange = (e) => { setMemoContent(e.target.value)};
   const handleLinkClick     = (e) => { setAnchorEl(e.currentTarget);};
@@ -228,7 +210,7 @@ export default function MemoItem(props) {
       </AccordionSummary>
       
       <AccordionDetails className={classes.details}>
-      {loading? <CircularProgress />:
+
         <React.Fragment>
         <div className={classes.detailsTitle}>
           { editable? 
@@ -245,7 +227,7 @@ export default function MemoItem(props) {
         { !!item.linkId &&
         <div className={classes.detailsLink}>
             <React.Fragment>
-              <Link color="primary"/><Typography color="primary" onClick={handleLinkClick}> {linkTitle}</Typography>
+              <Link color="primary"/><Typography color="primary" onClick={handleLinkClick}> {sheetData.pjtname}</Typography>
               <Popover
                 id={id}
                 open={open}
@@ -261,11 +243,13 @@ export default function MemoItem(props) {
                 }}
               >
                 <div className={classes.popover}>
-                  <Typography className={classes.typography}>
-                    {linkContent.split('\n').map( (line,idx) => {
+  
+                    {!!sheetData.content &&
+                      <div className={classes.typography} dangerouslySetInnerHTML={ {__html: sheetData.content.replace(/(\n|\r\n)/g, '<br>')} }></div>}
+                    {/*sheetData.content.split('\n').map( (line,idx) => {
                         return (<span key={idx}>{line}<br/></span>)
-                    })}
-                  </Typography>
+                    })*/}
+    \
                 </div>
               </Popover>
             </React.Fragment>
@@ -283,15 +267,13 @@ export default function MemoItem(props) {
               { editable? 
                 <TextareaAutosize className={classes.textarea} aria-label="minimum height" rowsMin={5} placeholder="내용 입력" defaultValue={item.content} onChange={handleContentChange}/>:
                 <Typography variant="caption">
-                  { item.content.split('\n').map( (line,idx) => {
-                      return (<span key={idx}>{line}<br/></span>)
-                  })}
+                  {!!item.content &&
+                  <div dangerouslySetInnerHTML={ {__html: item.content.replace(/(\n|\r\n)/g, '<br>')} }></div>}
                 </Typography>
               }
             </div>
         </div>
         </React.Fragment>
-      }
       </AccordionDetails>
       
       <Divider />
@@ -311,3 +293,11 @@ export default function MemoItem(props) {
     
   )
 }
+const mapStateToProps = state => ({
+  selectSheetId: state.sheetInfo.selectSheetId
+})
+
+const mapDispatchToProps = dispatch => ({
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(MemoItem)

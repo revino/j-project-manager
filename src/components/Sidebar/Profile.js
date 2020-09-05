@@ -5,9 +5,7 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
 import { Avatar, Typography } from '@material-ui/core';
 
-import {getUserPicture, getUserName} from '../../auth'
-
-
+import { connect } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -25,16 +23,11 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Profile(props) {
+function Profile(props) {
 
   const { className,user , ...rest } = props;
 
   const classes = useStyles();
-  /*
-    const user = {
-      avatar: process.env.PUBLIC_URL + '/favicon.ico',
-    };
-  */
 
   return (
     <div
@@ -45,7 +38,7 @@ export default function Profile(props) {
         alt="Person"
         className={classes.avatar}
         component={RouterLink}
-        src={getUserPicture()}
+        src={user.photo}
         to="/settings"
       />}
       
@@ -53,8 +46,16 @@ export default function Profile(props) {
         className={classes.name}
         variant="h4"
       >
-        {getUserName()}
+        {user.name}
       </Typography>
     </div>
   );
 };
+
+const mapStateToProps = state => ({
+  user: state.auth.user
+})
+
+const mapDispatchToProps = dispatch => ({})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Profile)

@@ -1,27 +1,12 @@
-import React, {forwardRef, useEffect, useState} from 'react';
+
+import React, {forwardRef} from 'react';
 
 //Material Icons
 import {
   ArrowDownward, Check, AddBox, ChevronLeft, ChevronRight, Clear, DeleteOutline, Edit, FilterList, FirstPage,
   LastPage, Remove, SaveAlt, Search, ViewColumn} from '@material-ui/icons';
 
-//Material
-import MaterialTable from 'material-table'
-import {makeStyles, TextareaAutosize, Button, Typography} from '@material-ui/core';
-import withWidth, {isWidthDown } from '@material-ui/core/withWidth';
-
-
-//Style
-const useStyles = makeStyles(theme => ({
-  typo: {
-    padding: theme.spacing(2),
-  },
-  textarea: {
-    width: "98%"
-  }
-}));
-
-const tableIcons = {
+export const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
   Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
   Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
@@ -41,7 +26,7 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
 
-const pcColumns = [
+export const pcColumns = [
   { title: 'ID'      ,field: 'id'       , editable: 'never', width: '50'},
   
   { title: '상태'    , field: 'progress', editable: 'onUpdate',
@@ -73,7 +58,7 @@ const pcColumns = [
     headerStyle: {minWidth: '300px'}}
 ]
 
-const mobileColumns = [
+export const mobileColumns = [
   { title: '상태'    , field: 'progress', editable: 'onUpdate',
     cellStyle: {minWidth: '160px'},
     headerStyle: {minWidth: '100px'}},
@@ -100,95 +85,15 @@ const mobileColumns = [
   headerStyle: {minWidth: '300px'}}
 ]
 
-function CollapsibleTable(props) {
-  const {onRowUpdate, onRowDelete, data, fieldData, summary} = props;
-  const [columns, setColumns] = useState([]);
-  const classes = useStyles();
-  const isMobile = isWidthDown('sm', props.width);
-  
-  useEffect(() =>{
-
-    const getHeader = (column) => (
-      column.map(el =>{
-        let item = el;
-        for(var fieldKey in fieldData){
-          if(el.field === fieldKey) {
-            let lookup = {};
-            for(var v of fieldData[fieldKey]){ lookup[v] = v;}
-            item.lookup = lookup;
-            }
-        }
-        return item
-    }));
-  
-    setColumns(getHeader((isMobile && !summary)? mobileColumns:pcColumns));
-  }, [fieldData,isMobile, summary]);
-
-  const detailContent = (rowData) =>{
-    let content;
-
-    const handleChange = (e) => { content = e.target.value;};
-
-    const handleContentUpdate = () => { 
-      rowData.content = content;
-      onRowUpdate(rowData)
-    };
-
-    return (
-      <div className={classes.typo} display="block" >
-        
-        { //HTML 출력 기능
-        /*rowData.content &&
-          <div dangerouslySetInnerHTML={ {__html: rowData.content.replace(/(\n|\r\n)/g, '<br>')} }></div>
-        */}
-        <Typography variant="h5" component="div">내용</Typography>
-        <TextareaAutosize id={rowData.id} className={classes.textarea} aria-label="minimum height" rowsMin={5} rowsMax={16} placeholder="내용 입력" onChange={handleChange}>
-          {rowData.content}
-        </TextareaAutosize>
-        { !summary &&
-        <Button
-          variant="outlined"
-          color="primary"
-          size="large"
-          className={classes.button}
-          startIcon={<Edit/>}
-          onClick={handleContentUpdate}
-        > 수정
-        </Button>
-        }
-        
-      </div>
-    )
-  }
-
-  return (
-      <MaterialTable
-        icons={tableIcons}
-        columns={columns}
-        data={data}
-        title="전체 아이템"
-        detailPanel={detailContent}
-        editable={{onRowUpdate: onRowUpdate, onRowDelete: isMobile?null:onRowDelete}}
-        options={{
-          draggable: isMobile?false:true,
-          sorting: isMobile?false:true, 
-          pageSize:isMobile?5:10, 
-          showTitle:(isMobile||summary)?false:true,
-          search: summary?false:true,
-          exportAllData: summary? false:true,
-          exportButton: summary? false:true,
-          paging: summary?false:true,
-          toolbar: summary?false:true,
-        }}
-        localization={{
-          body:{
-            editRow:{
-              deleteText: "삭제할까요?"
-            }
-          }
-        }}
-      />
-  );
-}
-
-export default withWidth()(CollapsibleTable);
+export const getOptions = (isMobile,isSummary) =>({
+  draggable: isMobile?false:true,
+  sorting: isMobile?false:true, 
+  pageSize:isMobile?5:10, 
+  showTitle:(isMobile||isSummary)?false:true,
+  search: isSummary?false:true,
+  exportAllData: isSummary? false:true,
+  exportButton: isSummary? false:true,
+  paging: isSummary?false:true,
+  toolbar: isSummary?false:true,
+  paginationType: "stepped"
+});

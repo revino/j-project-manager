@@ -1,5 +1,5 @@
 //React
-import React, {useLayoutEffect, useRef} from 'react';
+import React, {useLayoutEffect, useEffect,useRef, useCallback} from 'react';
 
 //Material UI
 import { makeStyles } from '@material-ui/styles';
@@ -9,6 +9,7 @@ import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_material from "@amcharts/amcharts4/themes/material";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
+
 
 //Style
 const useStyles = makeStyles(theme => ({
@@ -29,20 +30,33 @@ const useStyles = makeStyles(theme => ({
   }));
 
 
-const colorSet = new am4core.ColorSet();
-const tooltip = "[bold]기간: [/]{openDateX} ~ [/]{dateX}\n[bold]상태: [/]{progress}\n[bold]사이트: [/]{company} {line}\n[bold]이름: [/]{pjtName}\n[bold]No: [/]{pjtno}\n[bold]담당자: [/]{pic}";
+const tooltip = "[bold]기간: [/]{tipStart} ~ [/]{tipEnd}\n[bold]상태: [/]{progress}\n[bold]사이트: [/]{company} {line}\n[bold]이름: [/]{pjtName}\n[bold]No: [/]{pjtno}\n[bold]담당자: [/]{pic}";
 
-colorSet.saturation = 0.4;
 am4core.useTheme(am4themes_material);
 am4core.useTheme(am4themes_animated);
 
-export default function ChartView(props) {
+const addChartColor = (data) =>{
+  let colorSet = new am4core.ColorSet();
+  colorSet.saturation = 0.5;
+  let colorIndex = -1, colorBrighten = 1;
+  let lastName;
+  const colorChartData = data.map(el => {
+    if(lastName !== el.pic) {colorBrighten  =1; colorIndex+=1; }
+    else                    {colorBrighten -=0.2;              }
+    lastName = el.pic;
+    return {...el,color:colorSet.getIndex(colorIndex).brighten(colorBrighten)}
+  });
+  return colorChartData;
+}
+
+function GanttChart(props) {
 
   const chart = useRef(null);
   const classes = useStyles();
-  
-  useLayoutEffect(() => {
+  const {data} = props;
 
+
+  const makeChart = useCallback(() => {
     let x = am4core.create("chartdiv", am4charts.XYChart);
 
     //설정
@@ -50,8 +64,6 @@ export default function ChartView(props) {
     x.dateFormatter.inputDateFormat = "yyyy-MM-dd HH:mm";
     x.dateFormatter.dateFormat = "MM월 dd일";
     x.dateFormatter.inputDateFormat = "yyyy-MM-dd";
-
-    x.data = props.data;
     
     //축 생성
     let categoryAxis = x.yAxes.push(new am4charts.CategoryAxis());
@@ -81,7 +93,6 @@ export default function ChartView(props) {
     // Sell Auto Adjust
     let cellSize = 50;
     x.events.on("datavalidated", function(ev) {
-
       // Get objects
       let chart = ev.target;
       let categoryAxis = chart.yAxes.getIndex(0);
@@ -95,16 +106,33 @@ export default function ChartView(props) {
       // Set it on chart's container
       chart.svgContainer.htmlElement.style.height = targetHeight + "px";
     });
-    
     x.scrollbarX = new am4core.Scrollbar();
-    chart.current = x;
+    return x;
+
+  },[])
+  
+  useLayoutEffect(()=>{
+    chart.current = makeChart();
+
     return () => {
-      x.dispose();
+      chart.current.dispose()
+      
     };
-  }, [props.data]);
+  }, [makeChart]);
+  
+
+  useEffect(()=>{
+    if(!!data && data.length> 0) {
+      chart.current.data= addChartColor(data);
+    }
+  }, [data]);
+  
 
   return (
       <div className={classes.root} id="chartdiv"></div>
   );
 
 }
+
+
+export default React.memo(GanttChart)

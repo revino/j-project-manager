@@ -1,15 +1,17 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
-import browserHistory from '../../history';
+import { connect } from 'react-redux';
+
+import { useHistory } from "react-router-dom";
 
 import { makeStyles } from '@material-ui/styles';
 import { Grid, Button, IconButton, Typography } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
-import { Google as GoogleIcon } from '../../icons';
+import { Google as GoogleIcon } from '../../components/Icon';
 
-//API
-import googleLogin from '../../api/GoogleLoginApi';
+//Action
+import { requestLogin } from '../../reducers/modules/auth'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -108,22 +110,11 @@ const useStyles = makeStyles(theme => ({
 function SignIn(props) {
 
   const classes = useStyles();
+  const history = useHistory();
+  const {requestLogin} = props;
 
-  const handleBack = () => {
-    browserHistory.goBack();
-  };
-
-  const handleSignIn = async() => { 
-    try{
-      const ret = await googleLogin.authGoogle();
-      if(!!ret.credential.accessToken) {
-        localStorage.setItem('ACCESS_TOKEN', ret.credential.accessToken);
-        browserHistory.push("/dashboard");
-      }
-    }catch(err){
-      console.log(err);
-    }
-  };
+  const handleBack   = () => {history.goBack();};
+  const handleSignIn = async() => { requestLogin();};
 
   return (
     <div className={classes.root}>
@@ -169,4 +160,12 @@ function SignIn(props) {
   );
 };
 
-export default withRouter(SignIn);
+const mapStateToProps = state => ({})
+
+const mapDispatchToProps = dispatch => ({
+  requestLogin: () => dispatch(requestLogin())
+})
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(SignIn))
+

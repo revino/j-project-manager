@@ -30,7 +30,6 @@ export default function CheckList() {
   const getMemoList = async() =>{
     try{
       setLoading(true);
-      console.log("리스트요청");
 
       const memosRef    = db.collection(`users`).doc(getUid()).collection(`memos`);
       const memosOrder  = memosRef.orderBy("updateDate", "desc");

@@ -4,9 +4,14 @@ import {Route, Switch, Redirect} from "react-router-dom";
 import WrapRoute from './components/WrapRoute'
 
 import { 
-    Main as MainLayout, 
+    Main as MainLayout
+} from './layouts';
+/*
+import { 
+    Main as MainLayout,
     Minimal as MinimalLayout 
 } from './layouts';
+*/
 
 import {
     Dashboard      as DashboardView,
@@ -16,15 +21,7 @@ import {
     Settings       as SettingsView,
     Login          as LoginView,
     OAuth2Redirect as GoogleRedirectView
-} from './containers';
-
-const WithWrap = (WrappedComponent) => {
-  return (props) => {
-    return (
-        <MinimalLayout><WrappedComponent {...props}/></MinimalLayout >
-    );
-  };
-}
+} from './pages';
 
 export default function Routes(props) {
 
@@ -36,7 +33,7 @@ export default function Routes(props) {
         <WrapRoute exact path="/table"         component={TableView}     wrap={MainLayout}/>
         <WrapRoute exact path="/checklist"     component={CheckListView} wrap={MainLayout}/>
         <WrapRoute exact path="/settings"      component={SettingsView}  wrap={MainLayout}/>
-        <Route     exact path="/login"         component={WithWrap(LoginView)}            />
+        <WrapRoute exact path="/login"         component={LoginView}     wrap={MainLayout} allow={true}/>
         <Route           path="/login/google/" component={GoogleRedirectView}             />
       </Switch>
     );
