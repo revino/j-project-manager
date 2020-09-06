@@ -12,6 +12,8 @@ import { Edit, Delete, Save, Link, Cancel} from '@material-ui/icons';
 //Material
 import {makeStyles, Button, Typography, Divider , Accordion, AccordionDetails, 
 AccordionSummary, AccordionActions, TextareaAutosize, FormControl, Input, Popover} from '@material-ui/core';
+import Skeleton from '@material-ui/lab/Skeleton';
+
 
 //UI
 import { useSnackbar } from 'notistack';
@@ -124,7 +126,7 @@ const parseTable = (data) =>{
 
 function MemoItem(props) {
   const {enqueueSnackbar} = useSnackbar();
-  let {item, onUpdate, selectSheetId} = props;
+  let {item, onUpdate, selectSheetId, skeleton} = props;
   const classes = useStyles();
 
   const [editable,setEditable] = useState(false);
@@ -194,8 +196,17 @@ function MemoItem(props) {
     }
   }
 
-  return (
-    
+  if(skeleton) {
+    console.log(skeleton);
+    return(
+      <div className={classes.root}>
+     <Accordion >
+        <AccordionSummary expandIcon={<Skeleton variant="circle" width={20} height={20} />} aria-controls="panel1c-content" id="panel1c-header">
+          <div className={classes.summaryColumn}><Skeleton animation="wave" height={50} width={200} /></div>
+          <div className={classes.summaryColumn}><Skeleton animation="wave" height={50} width={120} /></div>
+        </AccordionSummary>
+      </Accordion></div>)}
+  else return (
     <div className={classes.root}>
     {item &&
     <Accordion  onChange={handleExpendCahnge}>
@@ -249,7 +260,7 @@ function MemoItem(props) {
                     {/*sheetData.content.split('\n').map( (line,idx) => {
                         return (<span key={idx}>{line}<br/></span>)
                     })*/}
-    \
+    
                 </div>
               </Popover>
             </React.Fragment>

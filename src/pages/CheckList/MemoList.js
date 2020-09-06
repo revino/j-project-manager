@@ -3,9 +3,8 @@ import React from 'react';
 //Material Icons
 
 //Material
-import {makeStyles} from '@material-ui/core';
+import {makeStyles, LinearProgress} from '@material-ui/core';
 import withWidth from '@material-ui/core/withWidth';
-
 
 //View
 import MemoItem from './MemoItem'
@@ -14,6 +13,7 @@ import MemoItem from './MemoItem'
 //Style
 const useStyles = makeStyles((theme) => ({
   root: {
+    margin: theme.spacing(0.5, 0),
     width: '100%',
   }
 }));
@@ -22,12 +22,17 @@ const useStyles = makeStyles((theme) => ({
 function MemoList(props) {
  const {data} = props;
  const classes = useStyles();
-  
   return (
     <div className={classes.root}>
-      {data.map( (el,idx) => <MemoItem item={el} idx={idx} key={idx} onUpdate={props.onUpdate}/>)}
+      { !data && <LinearProgress />}
+      { !!data && data.length>0 ? data.map( (el,idx) => <MemoItem item={el} idx={idx} key={idx} onUpdate={props.onUpdate}/>):
+        [<MemoItem skeleton={true}/>,<MemoItem skeleton={true}/>]
+      }
     </div>
   )
 }
 
+/*
+
+*/
 export default withWidth()(MemoList);

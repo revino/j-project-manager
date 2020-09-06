@@ -27,9 +27,10 @@ export default function DashBoard(props) {
       <Grid container spacing={4}>
         <Grid item lg={6}  sm={6}  xl={6}  xs={12}> <CardStatus/> </Grid>
         <Grid item lg={6}  sm={6}  xl={6}  xs={12}> <CardCompany/> </Grid>
-        <Grid item lg={12} sm={12} xl={12} xs={12}> <CardTable/> </Grid>
         <Grid item lg={12} sm={12} xl={12} xs={12}> <CardChart endTime={defaultEndTime} yAxis={defaultYAxis} sort={defaultSort}/> </Grid>
+
       </Grid>
       </div>
     );
 }
+//<Grid item lg={12} sm={12} xl={12} xs={12}> <CardTable/> </Grid>

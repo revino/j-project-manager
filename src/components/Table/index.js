@@ -11,6 +11,9 @@ import withWidth, {isWidthDown } from '@material-ui/core/withWidth';
 //default data
 import {mobileColumns, pcColumns, tableIcons} from './defaultData'
 
+//component
+import LineImageList from '../LineImageList'
+
 //Style
 const useStyles = makeStyles(theme => ({
   typo: {
@@ -18,6 +21,9 @@ const useStyles = makeStyles(theme => ({
   },
   textarea: {
     width: "98%"
+  },
+  button:{
+    margin: theme.spacing(0.5, 0), 
   }
 }));
 
@@ -68,6 +74,7 @@ function Table(props) {
       <div className={classes.typo} display="block" >
         <Typography variant="h5" component="div">내용</Typography>
         <TextareaAutosize id={rowData.id} className={classes.textarea} aria-label="minimum height" rowsMin={5} rowsMax={16} defaultValue={rowData.content} placeholder="내용 입력" onChange={handleChange}/>
+        { !isSummary && rowData.image.length>0 && <LineImageList tileData={rowData.image}/> }
         { !isSummary &&
         <Button
           variant="outlined"

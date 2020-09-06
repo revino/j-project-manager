@@ -30,7 +30,7 @@ function CardTable(props) {
 
 
   useLayoutEffect(() =>{
-     getSummaryTableData({ tq: `select * where (A is not null and B != "완료") order by A desc limit 5`, sheet: `Item_Tables`, selectSheetId});
+     getSummaryTableData({ tq: `select A,B,C,D,E,F,G,H,I,J,K where (A is not null and B != "완료") order by A desc limit 5`, sheet: `Item_Tables`, selectSheetId});
   
   }, [getSummaryTableData,selectSheetId]);
 

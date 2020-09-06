@@ -1,8 +1,8 @@
-import React,{useState, useEffect} from 'react';
+import React,{useState, useEffect, useCallback} from 'react';
 
 //Maerial
 import { makeStyles } from '@material-ui/styles';
-import { Button, CircularProgress} from '@material-ui/core';
+import { Button} from '@material-ui/core';
 
 //View
 import MemoList from './MemoList'
@@ -27,7 +27,7 @@ export default function CheckList() {
   const [loading, setLoading] = useState(false);
 
   //Request Data
-  const getMemoList = async() =>{
+  const getMemoList = useCallback(async() =>{
     try{
       setLoading(true);
 
@@ -47,7 +47,7 @@ export default function CheckList() {
     }catch(err){
       console.log(err);
     }
-  }
+  },[])
 
   const handleOpen  = () => { setModalOpen(true); }
   const handleClose = () => { setModalOpen(false); }
@@ -58,20 +58,18 @@ export default function CheckList() {
 
   return (
     <div className={classes.root}>
-      { loading && <CircularProgress />}
+
       { modalOpen &&
         <MemoAddModal open={modalOpen} handleClose={handleClose} onUpdate={getMemoList}/>
       }
             
-      { !loading &&
-        <Button className={classes.refreshButton}
-          color = "primary"
-          variant="outlined"
-          onClick={handleOpen}
-        > 추가
-        </Button>
-      }
-      { !loading && !!memoList && <MemoList data={memoList} onUpdate={getMemoList}/>}
+      <Button className={classes.refreshButton}
+        color = "primary"
+        variant="outlined"
+        onClick={handleOpen}
+      > 추가
+      </Button>
+      <MemoList data={memoList} onUpdate={getMemoList}/>
     </div>
   );
 }

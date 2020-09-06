@@ -34,7 +34,13 @@ const checkBoxDefault = { cb1: true, cb2: true, cb3: true, cb4: false, cb5: true
 
 const parseTable = (data) =>{
   const result  = data.table.rows.map(el => {
-      return {id : el.c[0].v, progress : el.c[1].v, company : el.c[2].v,line : el.c[3].v,pl : el.c[4].v,pic : el.c[5].v,start : el.c[6].f,end : el.c[7].f,pjtno : el.c[8].v,pjtname : el.c[9].v,content : el.c[10].v}
+    
+    const imagesString = el.c[11].v;
+    const imageSplit = !!imagesString? imagesString.split(',') : []; 
+    const images = imageSplit.map((el,idx) => ({img:el, title:idx}));
+    console.log(images);
+    
+    return {id : el.c[0].v, progress : el.c[1].v, company : el.c[2].v,line : el.c[3].v,pl : el.c[4].v,pic : el.c[5].v,start : el.c[6].f,end : el.c[7].f,pjtno : el.c[8].v,pjtname : el.c[9].v,content : el.c[10].v,image: images}
   });
   return result;
 };

@@ -3,6 +3,7 @@ import React, {useEffect} from 'react';
 
 //Material UI
 import {Avatar,Card,CardContent,Grid,Typography,colors,makeStyles, List, ListItem, ListItemAvatar, ListItemText} from '@material-ui/core';
+import Skeleton from '@material-ui/lab/Skeleton';
 import { deepOrange, teal, indigo, brown, blueGrey } from '@material-ui/core/colors';
 
 import useApiErrorSnackbar from '../../hooks/useApiErrorSnackbar'
@@ -46,7 +47,24 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: blueGrey[500],
     },
   }));
-
+const layout = (idx)=>{
+  return (
+  <ListItem key={idx}>
+    <ListItemAvatar>
+      <Skeleton animation="wave" variant="circle" width={40} height={40} />
+    </ListItemAvatar>
+    <ListItemText primary={<Skeleton animation="wave" height={10} width={150} />}/>
+      
+  </ListItem> )
+}
+const Skeloton = ()=>{
+  console.log("skeleton");
+  const skeletonArray = [];
+  for (var i = 0; i < 5; i++) {
+    skeletonArray.push(layout(i));
+  }
+  return skeletonArray;
+}
 
 
 function CardSummary(props) {
@@ -56,7 +74,6 @@ function CardSummary(props) {
   const avatarColor =[classes.indigo,classes.orange, classes.blueGrey, classes.teal ,classes.brown];
   
   const {data, title, error} = props;
-
   
   //Error
   useEffect(() =>{ handelSnackbar(error);}, [handelSnackbar, error]);
@@ -74,7 +91,7 @@ function CardSummary(props) {
               {title}
             </Typography>
             <List dense={true}>
-              {(!!data) && data.map( (el,idx) => 
+            {(data.length > 0) ? data.map( (el,idx) => 
                 <ListItem key={idx}>
                   <ListItemAvatar>
                     <Avatar className={avatarColor[idx]}>
@@ -83,7 +100,7 @@ function CardSummary(props) {
                   </ListItemAvatar>
                   <ListItemText primary={`${el.name}`}/>
                 </ListItem>   
-              )}
+              ): Skeloton()}
             </List>
           </Grid>
         </Grid>
@@ -92,5 +109,9 @@ function CardSummary(props) {
   );
 
 }
+
+/*
+              
+*/
 
 export default CardSummary;
