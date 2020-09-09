@@ -197,7 +197,6 @@ function MemoItem(props) {
   }
 
   if(skeleton) {
-    console.log(skeleton);
     return(
       <div className={classes.root}>
      <Accordion >

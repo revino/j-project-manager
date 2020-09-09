@@ -24,13 +24,9 @@ export default function CheckList() {
   const [modalOpen, setModalOpen] = useState(false);
   const [memoList, setMemoList] = useState(null);
 
-  const [loading, setLoading] = useState(false);
-
   //Request Data
   const getMemoList = useCallback(async() =>{
     try{
-      setLoading(true);
-
       const memosRef    = db.collection(`users`).doc(getUid()).collection(`memos`);
       const memosOrder  = memosRef.orderBy("updateDate", "desc");
       
@@ -43,7 +39,6 @@ export default function CheckList() {
       });
       
       setMemoList(data);
-      setLoading(false);
     }catch(err){
       console.log(err);
     }
@@ -54,7 +49,7 @@ export default function CheckList() {
 
   useEffect(() =>{
     getMemoList()
-  }, [])
+  }, [getMemoList])
 
   return (
     <div className={classes.root}>
@@ -62,7 +57,7 @@ export default function CheckList() {
       { modalOpen &&
         <MemoAddModal open={modalOpen} handleClose={handleClose} onUpdate={getMemoList}/>
       }
-            
+
       <Button className={classes.refreshButton}
         color = "primary"
         variant="outlined"

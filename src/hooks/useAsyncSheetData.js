@@ -39,6 +39,7 @@ const useAsyncSheetData = ({selectSheetId, parserFn, initialData}) => {
       const resText   = await response.text();
       const resData   = JSON.parse(resText.substring(47,resText.length-2));
       const resparse  = parserFn(resData);
+      console.log(resData);
       setSheetData(resparse);
       setIsLoading(false);
     } catch (err) {
