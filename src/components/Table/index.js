@@ -1,18 +1,15 @@
 import React, {useState, useEffect} from 'react';
 
-//Material Icons
-import {Edit} from '@material-ui/icons';
-
 //Material
 import MaterialTable from 'material-table'
-import {makeStyles, TextareaAutosize, Button, Typography} from '@material-ui/core';
+import {makeStyles} from '@material-ui/core';
 import withWidth, {isWidthDown } from '@material-ui/core/withWidth';
 
 //default data
 import {mobileColumns, pcColumns, tableIcons} from './defaultData'
 
 //component
-import LineImageList from '../LineImageList'
+import DetailContent from './DetailContent'
 
 //Style
 const useStyles = makeStyles(theme => ({
@@ -29,6 +26,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(0.5, 0), 
   }
 }));
+
 
 const getHeader = (column,fieldData) => (
   column.map(el => {
@@ -53,6 +51,7 @@ const getColumns = (isMobile,isSummary,fieldData) =>{
 
 function Table(props) {
   const {onRowUpdate, onRowDelete, data, fieldData, isSummary, width} = props;
+  const classes = useStyles();
   const isMobile = isWidthDown('sm', width);
   
   const [tableConfig,setTableConfig] = useState({
@@ -66,40 +65,13 @@ function Table(props) {
     );
   },[fieldData,isMobile,isSummary,setTableConfig])
 
-  const classes = useStyles();
-  
-  const detailContent = (rowData) =>{
-    let content;
-    const handleChange = (e) => { content = e.target.value;};
-    const handleContentUpdate = () => { rowData.content = content; onRowUpdate(rowData)};
-
-    return (
-      <div className={classes.typo} display="block" >
-        <Typography variant="h5" component="div">내용</Typography>
-        <TextareaAutosize id={rowData.id} className={classes.textarea} aria-label="minimum height" rowsMin={5} rowsMax={16} defaultValue={rowData.content} placeholder="내용 입력" onChange={handleChange}/>
-        { !isSummary && rowData.image.length>0 && <LineImageList tileData={rowData.image} className={classes.list}/> }
-        { !isSummary &&
-        <Button
-          variant="outlined"
-          color="primary"
-          size="large"
-          className={classes.button}
-          startIcon={<Edit/>}
-          onClick={handleContentUpdate}
-        > 수정
-        </Button>
-        }
-      </div>
-    )
-  }
-  
   return (
     <MaterialTable
       icons={tableIcons}
       columns={tableConfig.columns}
       data={ !!data? data: []}
       title="전체 아이템"
-      detailPanel={detailContent}
+      detailPanel={DetailContent.bind(this,onRowUpdate,isSummary,classes)}
       editable={{onRowUpdate: onRowUpdate, onRowDelete: isMobile?null:onRowDelete}}
       options={{
         draggable: false,

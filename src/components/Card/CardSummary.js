@@ -58,7 +58,6 @@ const layout = (idx)=>{
   </ListItem> )
 }
 const Skeloton = ()=>{
-  console.log("skeleton");
   const skeletonArray = [];
   for (var i = 0; i < 5; i++) {
     skeletonArray.push(layout(i));

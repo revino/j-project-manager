@@ -1,5 +1,5 @@
 //React
-import React,{useCallback} from 'react';
+import React,{useCallback, useState} from 'react';
 import {useDropzone} from 'react-dropzone'
 
 //Material UI
@@ -38,11 +38,12 @@ const useStyles = makeStyles((theme) => ({
       
     },
     title: {
-      color: theme.palette.primary.light,
+      color: theme.palette.getContrastText(indigo[900]),
     },
     titleBar: {
-      background:
-        'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+      background: `linear-gradient(to top, ${indigo[900]} 0%, rgba(255,255,255,0) 100%)`,
+      opacity: 0.7
+
     },
     indigo: {
       color: theme.palette.getContrastText(indigo[500]),
@@ -54,19 +55,22 @@ function LineImageList(props) {
 
   const classes = useStyles();
   const {onClickIcon, tileData} = props;
+  const [uploadFileList, setUploadFileList] = useState([]);
 
   const onDrop = useCallback((acceptedFiles) => {
-    console.log(acceptedFiles)
-
-    
-  }, [])
+    console.log("업로드",uploadFileList)
+    console.log(uploadFileList.concat(acceptedFiles))
+    setUploadFileList(uploadFileList.concat(acceptedFiles));
+   
+  }, [uploadFileList])
 
   const {getRootProps, getInputProps, isDragActive,isDragAccept , acceptedFiles} = useDropzone({
     onDrop, noKeyboard: true, accept: 'image/jpeg, image/png'})
 
   const onClickMain = (e)=>{
-    console.log("image click");
+    window.open(e.target.src,'_blank','height=1200,width=1200');
   }
+
   return (
     <div className={classes.root}>
       <GridList className={classes.gridList} cols={12} cellHeight={100}>
@@ -78,29 +82,37 @@ function LineImageList(props) {
               (isDragAccept?
               <React.Fragment><CircularProgress className={classes.addtileicon} /><p>Drop Here</p></React.Fragment>:
               <p>이미지가 아니야</p>
-              ):(
-              !!acceptedFiles && acceptedFiles.length>0? 
-              <img src={ URL.createObjectURL(acceptedFiles[0])} alt={"addimage"} onClick={onClickMain}/>:
-              <React.Fragment><AddAPhoto className={classes.addtileicon}  fontSize='large'/><p>Drag & Click</p></React.Fragment>)
+              ):
+              <React.Fragment><AddAPhoto className={classes.addtileicon}  fontSize='large'/><p>Drag & Click</p></React.Fragment>
           }
         </GridListTile>
         {tileData.map((tile) => (
-        <GridListTile key={tile.title}>
+        <GridListTile key={tile.id}>
           <img src={tile.img} alt={tile.title} onClick={onClickMain}/>
           <GridListTileBar
-            title={tile.title}
-            classes={{
-              root: classes.titleBar,
-              title: classes.title,
-            }}
+            title={tile.title+1}
+            classes={{root: classes.titleBar,title: classes.title}}
             actionIcon={
-              <IconButton aria-label={`star ${tile.title}`} onClick={onClickIcon}>
-                <DeleteOutline className={classes.title} />
+              <IconButton className={classes.title} aria-label={`star ${tile.title}`} onClick={onClickIcon.bind(this,tile.id)}>
+                <DeleteOutline/>
               </IconButton>
             }
           />
         </GridListTile>
         ))}
+        { !!uploadFileList && uploadFileList.length>0 && uploadFileList.map((file,idx) => (
+        <GridListTile >
+          <img src={URL.createObjectURL(file)} alt={`Add ${idx}`} onClick={onClickMain}/>
+          <GridListTileBar
+            title={`Add ${idx}`}
+            classes={{root: classes.titleBar,title: classes.title}}
+          />
+        </GridListTile>
+        ))
+
+        }
+        {/*  {tileData.map((tile) => (<ImageTile key={tile.title} onClickImage={onClickMain} onClickIcon={onClickIcon} title={tile.title} img={tile.img}/>))}
+      */}
       </GridList>
     </div>
   );
