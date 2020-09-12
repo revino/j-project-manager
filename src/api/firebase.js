@@ -3,6 +3,7 @@ import firebase from 'firebase/app';
  
 // These imports load individual services into the firebase namespace.
 import 'firebase/firestore';
+import '@firebase/storage';
 import 'firebase/auth';
 
 var firebaseConfig = {
@@ -19,8 +20,9 @@ const SCOPE = "https://www.googleapis.com/auth/spreadsheets";
 
 firebase.initializeApp(firebaseConfig);
 
-export const auth = firebase.auth();
-export const db = firebase.firestore();
+export const auth    = firebase.auth();
+export const db      = firebase.firestore();
+export const storage = firebase.storage();
 
 auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
 

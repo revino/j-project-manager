@@ -1,5 +1,5 @@
 //React
-import React,{useCallback, useState} from 'react';
+import React,{useCallback} from 'react';
 import {useDropzone} from 'react-dropzone'
 
 //Material UI
@@ -54,17 +54,13 @@ const useStyles = makeStyles((theme) => ({
 function LineImageList(props) {
 
   const classes = useStyles();
-  const {onClickIcon, tileData} = props;
-  const [uploadFileList, setUploadFileList] = useState([]);
+  const {onClickIcon, tileData, addUploadFile} = props;
 
   const onDrop = useCallback((acceptedFiles) => {
-    console.log("업로드",uploadFileList)
-    console.log(uploadFileList.concat(acceptedFiles))
-    setUploadFileList(uploadFileList.concat(acceptedFiles));
-   
-  }, [uploadFileList])
+    addUploadFile(acceptedFiles);
+  }, [addUploadFile])
 
-  const {getRootProps, getInputProps, isDragActive,isDragAccept , acceptedFiles} = useDropzone({
+  const {getRootProps, getInputProps, isDragActive,isDragAccept} = useDropzone({
     onDrop, noKeyboard: true, accept: 'image/jpeg, image/png'})
 
   const onClickMain = (e)=>{
@@ -100,19 +96,7 @@ function LineImageList(props) {
           />
         </GridListTile>
         ))}
-        { !!uploadFileList && uploadFileList.length>0 && uploadFileList.map((file,idx) => (
-        <GridListTile >
-          <img src={URL.createObjectURL(file)} alt={`Add ${idx}`} onClick={onClickMain}/>
-          <GridListTileBar
-            title={`Add ${idx}`}
-            classes={{root: classes.titleBar,title: classes.title}}
-          />
-        </GridListTile>
-        ))
 
-        }
-        {/*  {tileData.map((tile) => (<ImageTile key={tile.title} onClickImage={onClickMain} onClickIcon={onClickIcon} title={tile.title} img={tile.img}/>))}
-      */}
       </GridList>
     </div>
   );

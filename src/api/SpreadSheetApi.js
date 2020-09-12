@@ -11,11 +11,12 @@ const testapi = "https://sheets.googleapis.com/v4/spreadsheets/"
 const SHEETNAME = "Item_Tables"
 
 function getRange(id){
-  return `A${id+1}:K${id+1}`;
+  return `A${id+1}:L${id+1}`;
 }
 
-function createData({id, progress, company, line, pl, pic, start, end, pjtno, pjtname,content} ) {
-  return [id, progress, company, line, pl, pic, start, end, pjtno, pjtname, content];
+function createData({id, progress, company, line, pl, pic, start, end, pjtno, pjtname,content,images} ) {
+  const imageArray = images.map(el=> el.img);
+  return [id, progress, company, line, pl, pic, start, end, pjtno, pjtname, content, imageArray.join(',')];
   }
 
 export async function getQueryData({tq, sheet, selectSheetId}) {

@@ -11,6 +11,7 @@ import Table from '../../components/Table'
 
 //API
 import useAsyncSheetData from '../../hooks/useAsyncSheetData'
+import {storage} from '../../api/firebase'
 
 //Style
 const useStyles = makeStyles(theme => ({
@@ -38,12 +39,12 @@ const parseTable = (data) =>{
     const imagesString = el.c[11].v;
     const imageSplit = !!imagesString? imagesString.split(',') : []; 
     const images = imageSplit.map((el,idx) => ({id:idx, img:el, title:idx}));
-    console.log(imagesString);
-    
+
     return {id : el.c[0].v, progress : el.c[1].v, company : el.c[2].v,line : el.c[3].v,pl : el.c[4].v,pic : el.c[5].v,start : el.c[6].f,end : el.c[7].f,pjtno : el.c[8].v,pjtname : el.c[9].v,content : el.c[10].v,images: images}
   });
   return result;
 };
+
 
 function ItemTable(props) {
   const classes = useStyles();
@@ -67,8 +68,34 @@ function ItemTable(props) {
   },[fieldData,loadSheetData]);
 
   const updateTableData = useCallback(async(newData, oldData) =>{
+    console.log("oldData",oldData)
+    console.log("newData",newData)
+    
     updateSheetData(newData, oldData);
   },[updateSheetData]);
+
+  const uploadImage = useCallback( async({path,files}) =>{
+
+    const storageRef = storage.ref();
+    const mountainsRef = storageRef.child(path);
+    const response = await mountainsRef.put(files);
+    console.log("업로드 결과",response);
+    return true;
+
+  },[])
+
+  const deleteImage = useCallback( async({path}) =>{
+    console.log(path);
+    const storageRef = storage.refFromURL(path);
+    const response = await storageRef.delete();
+    console.log("삭제 결과",response);
+    return true;
+  },[])
+  
+  const getImgUrl = useCallback(async(imageObj) => {
+    const imgUrl = await storage.refFromURL(imageObj.img).getDownloadURL()
+    return {...imageObj, img:imgUrl};
+  },[]);
 
   const deleteTableData = useCallback(async(oldData) =>{
     deleteSheetData(oldData);
@@ -82,6 +109,7 @@ function ItemTable(props) {
 
   useEffect(()=>{
     getTableData(checkBoxDefault);
+    
   },[getTableData])
 
   return (
@@ -124,7 +152,7 @@ function ItemTable(props) {
   
       <Grid item lg={12} sm={12} xl={12} xs={12}>
         {isLoading && <LinearProgress />}
-        <Table data={sheetData} onRowUpdate={updateTableData} onRowDelete={deleteTableData} fieldData={fieldData}/>
+        <Table data={sheetData} onRowUpdate={updateTableData} onRowDelete={deleteTableData} deleteImage={deleteImage} getImgUrl={getImgUrl} fieldData={fieldData} uploadImage={uploadImage}/>
       </Grid>
     </Grid>
   </div>

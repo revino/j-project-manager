@@ -2,7 +2,6 @@ import React, {useState, useEffect} from 'react';
 
 //Material
 import MaterialTable from 'material-table'
-import {makeStyles} from '@material-ui/core';
 import withWidth, {isWidthDown } from '@material-ui/core/withWidth';
 
 //default data
@@ -10,23 +9,6 @@ import {mobileColumns, pcColumns, tableIcons} from './defaultData'
 
 //component
 import DetailContent from './DetailContent'
-
-//Style
-const useStyles = makeStyles(theme => ({
-  typo: {
-    padding: theme.spacing(2),
-  },
-  textarea: {
-    width: "98%"
-  },
-  list:{
-    margin: theme.spacing(0.5, 0), 
-  },
-  button:{
-    margin: theme.spacing(0.5, 0), 
-  }
-}));
-
 
 const getHeader = (column,fieldData) => (
   column.map(el => {
@@ -50,8 +32,8 @@ const getColumns = (isMobile,isSummary,fieldData) =>{
 }
 
 function Table(props) {
-  const {onRowUpdate, onRowDelete, data, fieldData, isSummary, width} = props;
-  const classes = useStyles();
+  const {onRowUpdate, onRowDelete, deleteImage, uploadImage, getImgUrl, data, fieldData, isSummary, width} = props;
+
   const isMobile = isWidthDown('sm', width);
   
   const [tableConfig,setTableConfig] = useState({
@@ -65,13 +47,17 @@ function Table(props) {
     );
   },[fieldData,isMobile,isSummary,setTableConfig])
 
+  const detailContent = (rowData) =>{
+    return (<DetailContent onRowUpdate={onRowUpdate} getImgUrl={getImgUrl} deleteImage={deleteImage} uploadImage={uploadImage} isSummary={isSummary} rowData={rowData}/>)
+  }
+
   return (
     <MaterialTable
       icons={tableIcons}
       columns={tableConfig.columns}
       data={ !!data? data: []}
       title="전체 아이템"
-      detailPanel={DetailContent.bind(this,onRowUpdate,isSummary,classes)}
+      detailPanel={detailContent}
       editable={{onRowUpdate: onRowUpdate, onRowDelete: isMobile?null:onRowDelete}}
       options={{
         draggable: false,
