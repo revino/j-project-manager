@@ -95,16 +95,18 @@ function ItemTable(props) {
     const storageRef = storage.ref();
     const mountainsRef = storageRef.child(path);
     const response = await mountainsRef.put(files);
-    console.log("업로드 결과",response);
-    return true;
+    let result = false;
+    if(response.state === 'success') result = true
+    return result;
 
   },[])
 
   const deleteImage = useCallback( async({path}) =>{
     const storageRef = storage.refFromURL(path);
     const response = await storageRef.delete();
-    console.log("삭제 결과",response);
-    return true;
+    let result = false;
+    if(response.state === 'success') result = true
+    return result;
   },[])
   
   const getImgUrl = useCallback(async(imageObj) => {

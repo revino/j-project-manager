@@ -41,7 +41,6 @@ export default function DetailContent (props) {
   };
 
   const addUploadFile = useCallback(async(newFile) => {
-
     const currentTime = moment().format("YYMMDDhhmmss");
     const fileName = currentTime + '_' + newFile[0].name
     const uploadResponse = await uploadImage({path:`WorkManager/${fileName}`, files:newFile[0]});
@@ -66,11 +65,6 @@ export default function DetailContent (props) {
         onRowUpdate(newData,rowData)
       }
     }
-    
-
-    //setImages(newImages)
-    //onRowUpdate(newData,rowData)
-
   },[onRowUpdate,deleteImage,rowData]);
       
   useLayoutEffect(()=>{

@@ -1,12 +1,11 @@
 import React from 'react';
-import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { withRouter, useHistory } from 'react-router-dom';
 
-import { useHistory } from "react-router-dom";
 
 import { makeStyles } from '@material-ui/styles';
-import { Grid, Button, IconButton, Typography } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import { Grid, Button, IconButton, Typography, Backdrop, CircularProgress } from '@material-ui/core';
 
 import { Google as GoogleIcon } from '../../components/Icon';
 
@@ -14,9 +13,14 @@ import { Google as GoogleIcon } from '../../components/Icon';
 import { requestLogin } from '../../reducers/modules/auth'
 
 const useStyles = makeStyles(theme => ({
+  
   root: {
     backgroundColor: theme.palette.background.default,
     height: '100%'
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
   },
   grid: {
     height: '100%'
@@ -111,13 +115,18 @@ function SignIn(props) {
 
   const classes = useStyles();
   const history = useHistory();
-  const {requestLogin} = props;
+  const {requestLogin, isLoading} = props;
 
   const handleBack   = () => {history.goBack();};
-  const handleSignIn = async() => { requestLogin();};
+  const handleSignIn = async() => { 
+    requestLogin();
+  };
 
   return (
     <div className={classes.root}>
+          <Backdrop className={classes.backdrop} open={isLoading}>
+            <CircularProgress color="inherit" />
+          </Backdrop>
           <div className={classes.content}>
             <div className={classes.contentHeader}>
               <IconButton onClick={handleBack}>
@@ -160,7 +169,9 @@ function SignIn(props) {
   );
 };
 
-const mapStateToProps = state => ({})
+const mapStateToProps = state => ({
+  isLoading: state.auth.fetchingUpdate,
+})
 
 const mapDispatchToProps = dispatch => ({
   requestLogin: () => dispatch(requestLogin())
