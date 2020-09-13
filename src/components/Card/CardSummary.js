@@ -90,7 +90,7 @@ function CardSummary(props) {
               {title}
             </Typography>
             <List dense={true}>
-            {(data.length > 0) ? data.map( (el,idx) => 
+            {( !!data && data.length > 0) ? data.map( (el,idx) => 
                 <ListItem key={idx}>
                   <ListItemAvatar>
                     <Avatar className={avatarColor[idx]}>

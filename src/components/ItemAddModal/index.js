@@ -123,13 +123,13 @@ function ItemAddModal(props) {
     return selectError;
   }
 
-  const handleSubmit= (event) => {
+  const handleSubmit= async (event) => {
     if(checkForm()) return;
     const dropboxValue= {id:"new", progress:fieldData.progress[progress],company:fieldData.company[company],line:fieldData.line[line],pl:fieldData.pl[pl],pic:fieldData.pic[pic]};
     const start = moment(startDate).format("YYYY-MM-DD");
     const end = moment(endDate).format("YYYY-MM-DD");
 
-    createSheetData({...dropboxValue, start, end, pjtno, pjtname, content});
+    await createSheetData({...dropboxValue, start, end, pjtno, pjtname, content});
     props.handleClose();
     event.preventDefault();
   }

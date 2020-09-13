@@ -15,7 +15,7 @@ function getRange(id){
 }
 
 function createData({id, progress, company, line, pl, pic, start, end, pjtno, pjtname,content,images} ) {
-  const imageArray = images.map(el=> el.img);
+  const imageArray = (!!images && images.length>0)? images.map(el=> el.img): [];
   return [id, progress, company, line, pl, pic, start, end, pjtno, pjtname, content, imageArray.join(',')];
   }
 

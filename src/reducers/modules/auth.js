@@ -50,28 +50,18 @@ function* loginRequestSaga() {
     yield put(successFailure(err));
   }
 }
-/*
 
-  {
+// Initial State
+const initialState = {
+  fetchingUpdate: false,
+  isLoggedIn: true,
+  user:   {
     id: "",
     name: "",
     accessToken:"",
     photo:"",
     expire:"",
   }
-*/
-// Initial State
-const initialState = {
-  fetchingUpdate: false,
-  isLoggedIn: true,
-  user: {
-    id: "o1gLuUabqWNloOxiha0g4u3JEbB2",
-    name: "김지웅",
-    accessToken:"aa",
-    photo:"https://lh3.googleusercontent.com/a-/AOh14GjBKAHbl_gX-jRsAm4dJ91bm1zlHpZnR9f8cFDO",
-    expire:"Sat, 10 Sep 2020 13:24:21 GMT",
-  }
-
 };
 
 export function* authSaga() {

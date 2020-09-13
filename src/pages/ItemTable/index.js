@@ -38,9 +38,28 @@ const parseTable = (data) =>{
     
     const imagesString = el.c[11].v;
     const imageSplit = !!imagesString? imagesString.split(',') : []; 
-    const images = imageSplit.map((el,idx) => ({id:idx, img:el, title:idx}));
+    const images = imageSplit.length> 0? imageSplit.map((el,idx) => ({id:idx, img:el, title:idx})) : [];
+    const checkString = (string,type) => {
+      return !!string? string[type]: '';
+    }
+    const checkData = (el) => {
+      const data={};
+      data.id       = checkString(el.c[0],'v');
+      data.progress = checkString(el.c[1],'v');
+      data.company  = checkString(el.c[2],'v');
+      data.line     = checkString(el.c[3],'v');
+      data.pl       = checkString(el.c[4],'v');
+      data.pic      = checkString(el.c[5],'v');
+      data.start    = checkString(el.c[6],'f');
+      data.end      = checkString(el.c[7],'f');
+      data.pjtno    = checkString(el.c[8],'v');
+      data.pjtname  = checkString(el.c[9],'v');
+      data.content  = checkString(el.c[10],'v');
+      return data; 
+    }
+    const retData = checkData(el);
 
-    return {id : el.c[0].v, progress : el.c[1].v, company : el.c[2].v,line : el.c[3].v,pl : el.c[4].v,pic : el.c[5].v,start : el.c[6].f,end : el.c[7].f,pjtno : el.c[8].v,pjtname : el.c[9].v,content : el.c[10].v,images: images}
+    return {...retData,images: images}
   });
   return result;
 };
@@ -68,9 +87,6 @@ function ItemTable(props) {
   },[fieldData,loadSheetData]);
 
   const updateTableData = useCallback(async(newData, oldData) =>{
-    console.log("oldData",oldData)
-    console.log("newData",newData)
-    
     updateSheetData(newData, oldData);
   },[updateSheetData]);
 
@@ -85,7 +101,6 @@ function ItemTable(props) {
   },[])
 
   const deleteImage = useCallback( async({path}) =>{
-    console.log(path);
     const storageRef = storage.refFromURL(path);
     const response = await storageRef.delete();
     console.log("삭제 결과",response);

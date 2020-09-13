@@ -56,7 +56,6 @@ export default function DetailContent (props) {
   },[onRowUpdate,rowData,uploadImage]);
   
   const handleDeleteImage = useCallback(async(id,e) => {
-    console.log(id,rowData.images);
     const image = rowData.images.filter((el) => { return el.id === id; })
     if(image.length>0){
       const deleteResponse = await deleteImage({path:image[0].img})
