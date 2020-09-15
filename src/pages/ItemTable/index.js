@@ -103,9 +103,9 @@ function ItemTable(props) {
 
   const deleteImage = useCallback( async({path}) =>{
     const storageRef = storage.refFromURL(path);
-    const response = await storageRef.delete();
+    await storageRef.delete();
     let result = false;
-    if(response.state === 'success') result = true
+    result = true
     return result;
   },[])
   
