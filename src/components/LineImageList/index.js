@@ -82,14 +82,14 @@ function LineImageList(props) {
               <React.Fragment><AddAPhoto className={classes.addtileicon}  fontSize='large'/><p>Drag & Click</p></React.Fragment>
           }
         </GridListTile>
-        {tileData.map((tile) => (
-        <GridListTile key={tile.id}>
-          <img src={tile.img} alt={tile.title} onClick={onClickMain}/>
+        {tileData.map((tile, idx) => (
+        <GridListTile key={idx}>
+          <img src={tile.src} alt={tile.title} onClick={onClickMain}/>
           <GridListTileBar
             title={tile.title+1}
             classes={{root: classes.titleBar,title: classes.title}}
             actionIcon={
-              <IconButton className={classes.title} aria-label={`star ${tile.title}`} onClick={onClickIcon.bind(this,tile.id)}>
+              <IconButton className={classes.title} aria-label={`star ${tile.title}`} onClick={onClickIcon.bind(this,idx)}>
                 <DeleteOutline/>
               </IconButton>
             }

@@ -8,10 +8,15 @@ import { makeStyles } from '@material-ui/styles';
 //View
 import ItemAddModal from '../../components/ItemAddModal'
 import Table from '../../components/Table'
+import DetailContent from './DetailContent'
+
+//
+import moment from 'moment';
 
 //API
-import useAsyncSheetData from '../../hooks/useAsyncSheetData'
-import {storage} from '../../api/firebase'
+import {storage, db} from '../../firebase'
+import useFirebaseOnceCollection from '../../hooks/useFirebaseOnceCollection';
+import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
 
 //Style
 const useStyles = makeStyles(theme => ({
@@ -31,119 +36,107 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const checkBoxDefault = { cb1: true, cb2: true, cb3: true, cb4: false, cb5: true, cb6: true, cb7: false};
+//data parsing
 
-const parseTable = (data) =>{
-  const result  = data.table.rows.map(el => {
-    
-    const imagesString = el.c[11].v;
-    const imageSplit = !!imagesString? imagesString.split(',') : []; 
-    const images = imageSplit.length> 0? imageSplit.map((el,idx) => ({id:idx, img:el, title:idx})) : [];
-    const checkString = (string,type) => {
-      return !!string? string[type]: '';
-    }
-    const checkData = (el) => {
-      const data={};
-      data.id       = checkString(el.c[0],'v');
-      data.progress = checkString(el.c[1],'v');
-      data.company  = checkString(el.c[2],'v');
-      data.line     = checkString(el.c[3],'v');
-      data.pl       = checkString(el.c[4],'v');
-      data.pic      = checkString(el.c[5],'v');
-      data.start    = checkString(el.c[6],'f');
-      data.end      = checkString(el.c[7],'f');
-      data.pjtno    = checkString(el.c[8],'v');
-      data.pjtname  = checkString(el.c[9],'v');
-      data.content  = checkString(el.c[10],'v');
-      return data; 
-    }
-    const retData = checkData(el);
-
-    return {...retData,images: images}
-  });
+const headParsing = (headData) =>{
+  let result = {};
+  if(!!headData){
+    headData.docs.forEach( doc=>{
+      const data = doc.data();
+      result[doc.id]=data.list;
+    })
+  }
+  else result = null;
   return result;
-};
+}
 
+const tableParsing = (tableData) =>{
+  const result = !!tableData? tableData.docs.map((doc,idx)=>{
+    const docData = doc.data();
+    const startdate = moment.utc(docData.start_date.seconds * 1000).format("YYYY-MM-DD")
+    const enddate  = moment.utc(docData.end_date.seconds* 1000).format("YYYY-MM-DD")
+    return {...docData,start_date: startdate, end_date:enddate, id:doc.id}
+  }) : [];
+  return result;
+}
+
+const headQuery       = db.collection(`tables`).doc('HYNIX').collection(`props`);
+const tableQuery      = db.collection(`tables`).doc('HYNIX').collection(`Items`);
+const checkBoxDefault = { cb1: true, cb2: true, cb3: true, cb4: true, cb5: true, cb6: true, cb7: true};
 
 function ItemTable(props) {
   const classes = useStyles();
-  const {selectSheetId, fieldData} = props;
-  
+
   //State
-  const [cbState, setCbState] = useState(checkBoxDefault);
-  const [modalOpen, setModalOpen] = useState(false);
-  const {sheetData,loadSheetData, isLoading, updateSheetData, deleteSheetData} = useAsyncSheetData({selectSheetId, parserFn:parseTable});
+  const [fieldData,setFieldData]   = useState(null);
+  const [sheetData,setSheetData]   = useState([]);
+  const [cbState, setCbState]      = useState(checkBoxDefault);
+  const [modalOpen, setModalOpen]  = useState(false);
 
-  //error con
+  const {data:headData}            = useFirebaseOnceCollection(headQuery);
+  const {data:tableData, setRef}   = useFirebaseListenCollection(tableQuery);
+
   const checkBoxerror = Object.values(cbState).filter((v) => v).length < 1;
-  const ModalError    = Object.keys(fieldData).filter(v => v == null || v === []).length > 0;
+  const ModalError    = !fieldData;//? Object.keys(fieldData).filter(v => v == null || v === []).length > 0: false;
 
-  const getTableData = useCallback((cbState) =>{
-    const cbArray          = Object.values(cbState);
-    const checkBoxConArray = fieldData.progress.filter((el,idx) => cbArray[idx] === true).map(el => `B='${el}'`);
-    const checkBoxConStr   = checkBoxConArray.join(" or ");
-    const queryObject      = {tq:`select * where  (A is not null) and (${checkBoxConStr}) order by C`, sheet: `Item_Tables`};
-    loadSheetData({...queryObject});
-  },[fieldData,loadSheetData]);
+  useEffect(()=>{
+    const result = headParsing(headData)
+    if(!!result) setFieldData(result);
+  },[headData])
 
-  const updateTableData = useCallback(async(newData, oldData) =>{
-    updateSheetData(newData, oldData);
-  },[updateSheetData]);
+  useEffect(()=>{
+    const result = tableParsing(tableData);
+    if(!!result ) setSheetData(result);
+  },[tableData])
 
-  const uploadImage = useCallback( async({path,files}) =>{
-
-    const storageRef = storage.ref();
-    const mountainsRef = storageRef.child(path);
-    const response = await mountainsRef.put(files);
-    let result = false;
-    if(response.state === 'success') result = true
-    return result;
-
-  },[])
-
-  const deleteImage = useCallback( async({path}) =>{
-    const storageRef = storage.refFromURL(path);
-    await storageRef.delete();
-    let result = false;
-    result = true
-    return result;
-  },[])
-  
-  const getImgUrl = useCallback(async(imageObj) => {
-    const imgUrl = await storage.refFromURL(imageObj.img).getDownloadURL()
-    return {...imageObj, img:imgUrl};
+  //table data handle
+  const updateTableData = useCallback(async(newData, oldData) =>{   
+    const memosRef = tableQuery.doc(newData.id)
+    await memosRef.update(newData);
   },[]);
 
   const deleteTableData = useCallback(async(oldData) =>{
-    deleteSheetData(oldData);
-  },[deleteSheetData]);
+    const memosRef = tableQuery.doc(oldData.id)
+    await memosRef.delete();
+  },[]);
+
+  //image data handle
+  const uploadImage = useCallback( async({path,files}) =>{
+    const response = await storage.ref().child(path).put(files);
+    if(response.state === 'success') return true;
+    else                             return false;
+  },[])
+
+  const deleteImage = useCallback( async({path}) =>{
+    await storage.refFromURL(path).delete();
+    return true;
+  },[])
+  
+  const getImgUrl = useCallback(async(imageObj) => {
+    const imgUrl = await storage.refFromURL(imageObj.src).getDownloadURL()
+    return {...imageObj, src:imgUrl};
+  },[]);
 
   //handle
-  const handleCheckBoxChange = (event) => { setCbState({ ...cbState, [event.target.name]: event.target.checked }); }
+  const handleCheckBoxChange = (e) => { 
+    const checkbox = { ...cbState, [e.target.name]: e.target.checked }
+    const checkBoxConArray = !!fieldData ? fieldData.progress.filter((el,idx) => Object.values(checkbox)[idx] === true):[''];
+    const Query = tableQuery.where('progress','in',checkBoxConArray);
+    setCbState(checkbox); 
+    setRef(Query);
+  }
   const handleAddModal       = ()      => { setModalOpen(true); }
   const handleClose          = ()      => { setModalOpen(false); }
-  const handleRefreshClick   = ()      => { getTableData(cbState)}
 
-  useEffect(()=>{
-    getTableData(checkBoxDefault);
-    
-  },[getTableData])
+  const detailContent = (rowData) =>{
+    return (<DetailContent onRowUpdate={updateTableData} getImgUrl={getImgUrl} deleteImage={deleteImage} uploadImage={uploadImage} rowData={rowData}/>)
+  }
 
   return (
   <div className={classes.root}>
     { modalOpen && <ItemAddModal open={modalOpen} handleClose={handleClose} fieldData={fieldData}/>}
 
     <Grid container spacing={2}>
-      <Grid item lg={1} md={2} sm={2} xl={1} xs={3} container justify="center" >
-        <Button className={classes.refreshButton}
-            color = "primary"
-            variant="outlined"
-            onClick={handleRefreshClick}
-            disabled={checkBoxerror}
-          > 갱신
-        </Button>
-      </Grid>
-      
       <Grid item lg={1} md={2} sm={2} xl={1} xs={3} container justify="center">
         <Button className={classes.refreshButton}
           color = "inherit"
@@ -158,7 +151,7 @@ function ItemTable(props) {
         <FormControl required error={checkBoxerror} component="fieldset" className={classes.formControl}>
           <FormLabel component="legend">1개 이상 선택</FormLabel>
           <FormGroup className={classes.formGroup}>
-            {fieldData.progress.map((el,idx) => (
+            {!!fieldData && fieldData.progress.map((el,idx) => (
               <FormControlLabel
                 key={`cb${idx+1}`} control={<Checkbox checked={cbState[`cb${idx+1}`]} onChange={handleCheckBoxChange} name={`cb${idx+1}`} color="primary"/>} label={el}
               />
@@ -168,8 +161,12 @@ function ItemTable(props) {
       </Grid>
   
       <Grid item lg={12} sm={12} xl={12} xs={12}>
-        {isLoading && <LinearProgress />}
-        <Table data={sheetData} onRowUpdate={updateTableData} onRowDelete={deleteTableData} deleteImage={deleteImage} getImgUrl={getImgUrl} fieldData={fieldData} uploadImage={uploadImage}/>
+        {!tableData && <LinearProgress />}
+        {
+        <Table 
+          data={sheetData} fieldData={fieldData} detailContent={detailContent}
+          onRowUpdate={updateTableData} onRowDelete={deleteTableData}/>
+        }
       </Grid>
     </Grid>
   </div>
@@ -180,7 +177,6 @@ function ItemTable(props) {
 
 const mapStateToProps = state => ({
   selectSheetId: state.sheetInfo.selectSheetId,
-  fieldData:state.sheetInfo.fieldData
 })
 
 const mapDispatchToProps = dispatch => ({

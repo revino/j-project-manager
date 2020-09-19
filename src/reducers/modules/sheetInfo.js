@@ -3,8 +3,8 @@ import { createAction, handleActions  } from 'redux-actions';
 import { put, call, takeLatest } from 'redux-saga/effects';
 
 //API
-import {getSetting, updateSetting} from '../../api/firestore/setting';
-import {getQueryData} from '../../api/SpreadSheetApi';
+import {getSetting, updateSetting} from '../../firebase/firestore/setting';
+
 
 //types
 const  SHEET_INFO_REQUEST = "reducer/requestSheetInfo";
@@ -23,8 +23,24 @@ const successSheetInfo = createAction(SHEET_INFO_SUCCESS);
 const failureSheetInfo = createAction(SHEET_INFO_FAILURE);
 const successUpdateSheetInfo = createAction(SHEET_INFO_UPDATE_SUCCESS);
 
-const defaultFieldData = {pic: [],line: [],progress: [],company: [],pl: [] };
+const defaultSheetList= [
+  {label:'test2',link:'16qTlqWa0f7V8bIIVDwDmZr2knmQNvKcMOPfqMMzR8eQ'},
+  {label:'하이닉스',link:'1Eb2Bwx7aRWc2vwVyqw8rK4vKeM9U99bDPRNnJWIcC_s'},
+  {label:'test3',link:'1T3VPAPTVJoECISHMbjtTQzBbo2Y4XW0BQoC0_MbAMIc'},
+  {link:'aa',label:'aa'},
+  {label:'bb',link:'bb'}
 
+]
+
+// Initial State
+const initialState = {
+  sheetList: defaultSheetList,
+  selectSheetId: "16qTlqWa0f7V8bIIVDwDmZr2knmQNvKcMOPfqMMzR8eQ",
+  fetching: false,
+  isList: false,
+  isUpdate: false,
+};
+/*
 // Initial State
 const initialState = {
   sheetList: [],
@@ -34,40 +50,13 @@ const initialState = {
   isUpdate: false,
   fieldData: defaultFieldData
 };
-
-const parserProp = async(data) =>{
-  const fieldData   = {pic:[],line:[],progress:[],company:[],pl:[]}
-
-  const resText   = await data.text();
-  const resData   = JSON.parse(resText.substring(47,resText.length-2));;
-
-  //make Array
-  for (let el of resData.table.rows) {
-    if(el.c[0] !== null && el.c[0].v !== null) fieldData['pic'].push(el.c[0].v);
-    if(el.c[1] !== null && el.c[1].v !== null) fieldData['line'].push(el.c[1].v);
-    if(el.c[2] !== null && el.c[2].v !== null) fieldData['progress'].push(el.c[2].v);
-    if(el.c[3] !== null && el.c[3].v !== null) fieldData['company'].push(el.c[3].v);
-    if(el.c[4] !== null && el.c[4].v !== null) fieldData['pl'].push(el.c[4].v);
-  }
-  return fieldData;
-}
+*/
 
 //saga
 function* sheetInfoRequestSaga() {
   try {
-
-    const conArray    =  ["A is not null","B is not null","C is not null","D is not null","E is not null"]
-    const ConStr      = conArray.join(" or ");
-    const queryObject =  { tq: `select A,B,C,D,E where (${ConStr}) offset 1`, sheet: `Prop_Types`};
-
     const resSetting   = yield getSetting();
-
-    const resSheetProp = yield getQueryData({...queryObject, selectSheetId:resSetting.selectSheetId});
-    if(!resSheetProp.ok) throw new Error(resSheetProp);
-    const fieldData    = yield parserProp(resSheetProp);
-
-    const response = {...resSetting, fieldData}
-
+    const response = {...resSetting}
     yield put(successSheetInfo(response));
     
   } catch (err) {
@@ -109,7 +98,7 @@ export default handleActions({
   },
 
   [SHEET_INFO_SUCCESS]: (state, action) => {
-    return { ...state, fetching:false, isList:true, sheetList:action.payload.sheetList, selectSheetId:action.payload.selectSheetId, fieldData:action.payload.fieldData};
+    return { ...state, fetching:false, isList:true, sheetList:action.payload.sheetList, selectSheetId:action.payload.selectSheetId};
   },
 
   [SHEET_INFO_UPDATE_SUCCESS]: (state, action) => {

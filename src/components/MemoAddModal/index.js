@@ -12,7 +12,7 @@ import { useSnackbar } from 'notistack';
 
 //API
 import useAsyncSheetData from '../../hooks/useAsyncSheetData'
-import {db} from '../../api/firebase'
+import {db} from '../../firebase'
 import {getUid} from '../../auth'
 
 import DropBox from '../DropBox'

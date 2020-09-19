@@ -19,7 +19,7 @@ import Skeleton from '@material-ui/lab/Skeleton';
 import { useSnackbar } from 'notistack';
 
 //API
-import {db} from '../../api/firebase'
+import {db} from '../../firebase'
 import {getUid} from '../../auth'
 import useAsyncSheetData from '../../hooks/useAsyncSheetData'
 
@@ -126,7 +126,7 @@ const parseTable = (data) =>{
 
 function MemoItem(props) {
   const {enqueueSnackbar} = useSnackbar();
-  let {item, onUpdate, selectSheetId, skeleton} = props;
+  let {item, selectSheetId, skeleton} = props;
   const classes = useStyles();
 
   const [editable,setEditable] = useState(false);
@@ -159,8 +159,7 @@ function MemoItem(props) {
   const handleTitleChange   = (e) => { setMemoTitle(e.target.value)};
   const handleContentChange = (e) => { setMemoContent(e.target.value)};
   const handleLinkClick     = (e) => { setAnchorEl(e.currentTarget);};
-  const handleClose         = ()  => { setAnchorEl(null);
-  };
+  const handleClose         = ()  => { setAnchorEl(null);};
 
   const handleEditSave = async(e) => {
     try{
@@ -181,7 +180,6 @@ function MemoItem(props) {
     try{
       const memosRef = db.collection(`users`).doc(getUid()).collection(`memos`).doc(item.docId);
       await memosRef.delete();
-      onUpdate();
       enqueueSnackbar('삭제 성공', { variant: 'success' } );
     }catch(err){
       enqueueSnackbar('삭제 실패 다시 시도 해주세요', { variant: 'error' } );

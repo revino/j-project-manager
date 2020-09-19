@@ -27,12 +27,10 @@ export const tableIcons = {
 };
 
 export const pcColumns = [
-  { title: 'ID'      ,field: 'id'       , editable: 'never', width: '50'},
-  
   { title: '상태'    , field: 'progress', editable: 'onUpdate',
     cellStyle: {minWidth: '160px'},
     headerStyle: {minWidth: '100px'}},
-  { title: 'PJT 이름', field: 'pjtname' , editable: 'onUpdate',
+  { title: 'PJT 이름', field: 'project_name' , editable: 'onUpdate',
     cellStyle: {minWidth: '450px'},
     headerStyle: {minWidth: '450px'}},
   { title: '사이트'  , field: 'company' , editable: 'onUpdate',
@@ -47,13 +45,13 @@ export const pcColumns = [
   { title: 'PL'      , field: 'pl'     , editable: 'onUpdate',
     cellStyle: {minWidth: '90px'},
     headerStyle: {minWidth: '90px'}},
-  { title: '시작일'  , field: 'start'   , editable: 'onUpdate',
+  { title: '시작일'  , field: 'start_date'   , editable: 'onUpdate',
     cellStyle: {minWidth: '120px'},
     headerStyle: {minWidth: '120px'}},
-  { title: '종료일'  , field: 'end'     , editable: 'onUpdate',
+  { title: '종료일'  , field: 'end_date'     , editable: 'onUpdate',
     cellStyle: {minWidth: '120px'},
     headerStyle: {minWidth: '120px'}},
-  { title: '번호'    , field: 'pjtno'   , editable: 'onUpdate',
+  { title: '번호'    , field: 'project_no'   , editable: 'onUpdate',
     cellStyle: {minWidth: '300px'},
     headerStyle: {minWidth: '300px'}}
 ]
@@ -68,19 +66,19 @@ export const mobileColumns = [
   { title: '라인'    , field: 'line'    , editable: 'onUpdate',
     cellStyle: {minWidth: '140px'},
     headerStyle: {minWidth: '140px'}},
-  { title: 'PJT 이름', field: 'pjtname' , editable: 'onUpdate',
+  { title: 'PJT 이름', field: 'project_name' , editable: 'onUpdate',
     cellStyle: {minWidth: '450px'},
     headerStyle: {minWidth: '450px'}},
   { title: '담당자'  , field: 'pic'     , editable: 'onUpdate',
   cellStyle: {minWidth: '120px'},
   headerStyle: {minWidth: '120px'}},
-  { title: '시작일'  , field: 'start'   , editable: 'onUpdate',
+  { title: '시작일'  , field: 'start_date'   , editable: 'onUpdate',
   cellStyle: {minWidth: '120px'},
   headerStyle: {minWidth: '120px'}},
-  { title: '종료일'  , field: 'end'     , editable: 'onUpdate',
+  { title: '종료일'  , field: 'end_date'     , editable: 'onUpdate',
   cellStyle: {minWidth: '120px'},
   headerStyle: {minWidth: '120px'}},
-  { title: '번호'    , field: 'pjtno'   , editable: 'onUpdate',
+  { title: '번호'    , field: 'project_no'   , editable: 'onUpdate',
   cellStyle: {minWidth: '300px'},
   headerStyle: {minWidth: '300px'}}
 ]

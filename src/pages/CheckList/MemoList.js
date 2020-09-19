@@ -25,7 +25,7 @@ function MemoList(props) {
   return (
     <div className={classes.root}>
       { !data && <LinearProgress />}
-      { !!data && data.length>0 ? data.map( (el,idx) => <MemoItem item={el} idx={idx} key={idx} onUpdate={props.onUpdate}/>):
+      { !!data && data.length>0 ? data.map( (el,idx) => <MemoItem item={el} idx={idx} key={idx}/>):
         [<MemoItem key='date' skeleton={true}/>,<MemoItem key='Head' skeleton={true}/>]
       }
     </div>

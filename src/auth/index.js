@@ -1,4 +1,4 @@
-import {auth} from '../api/firebase'
+import {auth} from '../firebase'
 
 export const getUserInfo = () => {
   const ret = window.sessionStorage.getItem("firebase:authUser:AIzaSyCwNU0s6FikXidM6GFbLAUIqURYJ_jTMx4:[DEFAULT]");

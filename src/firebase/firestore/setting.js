@@ -1,5 +1,5 @@
 //Api
-import {db} from '../../api/firebase'
+import {db} from '../../firebase'
 import {getUid} from '../../auth'
 
 async function getSetting() {

@@ -6,7 +6,7 @@ import {Edit} from '@material-ui/icons';
 import {TextareaAutosize, Button, Typography} from '@material-ui/core';
 import {makeStyles} from '@material-ui/core';
 
-import LineImageList from '../LineImageList'
+import LineImageList from '../../components/LineImageList'
 
 import moment from 'moment'
 
@@ -28,7 +28,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function DetailContent (props) {
   const classes = useStyles();
-  const {onRowUpdate, deleteImage, uploadImage, getImgUrl, isSummary,rowData} = props;
+  const {onRowUpdate, deleteImage, uploadImage, getImgUrl,rowData} = props;
   const [content, setContent] = useState(rowData.content);
   const [images, setImages] = useState([]);
 
@@ -37,6 +37,7 @@ export default function DetailContent (props) {
   const handleContentUpdate = () => {
     const newData = {...rowData} 
     newData.content = content; 
+    delete newData.tableData;
     onRowUpdate(newData,rowData)
   };
 
@@ -47,24 +48,22 @@ export default function DetailContent (props) {
 
     if(!!uploadResponse){
       const newData = {...rowData};
-      const lastImageId = newData.images.length>0? newData.images[newData.images.length-1].id+1 : 0; 
-      const newImages = {id:lastImageId, title:lastImageId, img: `gs://j-project-manager.appspot.com/WorkManager/${fileName}`}
+      const newImages = {title:fileName, src: `gs://j-project-manager.appspot.com/WorkManager/${fileName}`}
       newData.images  = newData.images.concat(newImages);
+      delete newData.tableData;
       onRowUpdate(newData,rowData)
     }
   },[onRowUpdate,rowData,uploadImage]);
   
   const handleDeleteImage = useCallback(async(id,e) => {
-    const image = rowData.images.filter((el) => { return el.id === id; })
-    if(image.length>0){
-      const deleteResponse = await deleteImage({path:image[0].img})
-      if(!!deleteResponse){
-        const newData = {...rowData} 
-        const newImages = newData.images.filter(image => image.id !== id)
-        newData.images  = newImages;
-        onRowUpdate(newData,rowData)
-      }
+    const deleteResponse = await deleteImage({path:rowData.images[id].src})
+    if(!!deleteResponse){
+      const newData = {...rowData};
+      newData.images.splice(id, 1);
+      delete newData.tableData;
+      onRowUpdate(newData,rowData)
     }
+  
   },[onRowUpdate,deleteImage,rowData]);
       
   useLayoutEffect(()=>{
@@ -72,15 +71,17 @@ export default function DetailContent (props) {
       const imagesUrl = await Promise.all(images.map(image => (getImgUrl(image))))
       setImages(imagesUrl);
     }
-    getUrl(rowData.images);
+    if(rowData.images.length>0){
+      getUrl(rowData.images);
+    }
+
   },[getImgUrl,rowData.images])
 
   return (
     <div className={classes.typo} display="block" >
       <Typography variant="h5" component="div">내용</Typography>
       <TextareaAutosize id={rowData.id} className={classes.textarea} aria-label="minimum height" rowsMin={5} rowsMax={16} defaultValue={content} placeholder="내용 입력" onChange={handleChange}/>
-      { !isSummary && <LineImageList tileData={images} className={classes.list} addUploadFile={addUploadFile} onClickIcon={handleDeleteImage}/> }
-      { !isSummary &&
+      <LineImageList tileData={images} className={classes.list} addUploadFile={addUploadFile} onClickIcon={handleDeleteImage}/> 
       <Button
         variant="outlined"
         color="primary"
@@ -90,7 +91,7 @@ export default function DetailContent (props) {
         onClick={handleContentUpdate}
       > 적용
       </Button>
-      }
+    
     </div>
   )
 }

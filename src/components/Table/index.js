@@ -7,9 +7,6 @@ import withWidth, {isWidthDown } from '@material-ui/core/withWidth';
 //default data
 import {mobileColumns, pcColumns, tableIcons} from './defaultData'
 
-//component
-import DetailContent from './DetailContent'
-
 const getHeader = (column,fieldData) => (
   column.map(el => {
     const lookupData = fieldData[el.field]
@@ -32,7 +29,7 @@ const getColumns = (isMobile,isSummary,fieldData) =>{
 }
 
 function Table(props) {
-  const {onRowUpdate, onRowDelete, deleteImage, uploadImage, getImgUrl, data, fieldData, isSummary, width} = props;
+  const {onRowUpdate, onRowDelete, deleteImage, uploadImage, getImgUrl, data, fieldData, detailContent, isSummary, width} = props;
 
   const isMobile = isWidthDown('sm', width);
   
@@ -47,9 +44,7 @@ function Table(props) {
     );
   },[fieldData,isMobile,isSummary,setTableConfig])
 
-  const detailContent = (rowData) =>{
-    return (<DetailContent onRowUpdate={onRowUpdate} getImgUrl={getImgUrl} deleteImage={deleteImage} uploadImage={uploadImage} isSummary={isSummary} rowData={rowData}/>)
-  }
+
 
   return (
     <MaterialTable

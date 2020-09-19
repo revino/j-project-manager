@@ -3,7 +3,7 @@ import { Route, Redirect } from 'react-router-dom';
 import {getUserInfo, removeUserInfo} from '../../auth';
 import { SnackbarProvider } from 'notistack';
 import { connect } from 'react-redux';
-import moment from 'moment';
+//import moment from 'moment';
 
 function WrapRoute(props) {
     const { wrap: Wrap, component: Component,login,allow,user,...el} = props;
@@ -11,10 +11,11 @@ function WrapRoute(props) {
         <Route
             render={matchProps => {
                 
-                if(!getUserInfo()) removeUserInfo();
+                //if(!getUserInfo()) removeUserInfo();
                 
-                const RouteCon = allow || (localStorage.getItem('ACCESS_TOKEN') && !!user.accessToken && moment() < moment(user.expire));
+                //const RouteCon = allow || (localStorage.getItem('ACCESS_TOKEN') && !!user.accessToken && moment() < moment(user.expire));
 
+                const RouteCon = allow || (localStorage.getItem('ACCESS_TOKEN') );
                 return (RouteCon)? 
                 <Wrap><SnackbarProvider maxSnack={5}><Component {...matchProps} /></SnackbarProvider></Wrap>
                 :

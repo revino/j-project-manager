@@ -52,9 +52,10 @@ function* loginRequestSaga() {
 }
 
 // Initial State
+/*
 const initialState = {
   fetchingUpdate: false,
-  isLoggedIn: true,
+  isLoggedIn: false,
   user:   {
     id: "",
     name: "",
@@ -63,7 +64,18 @@ const initialState = {
     expire:"",
   }
 };
-
+*/
+const initialState = {
+  fetchingUpdate: false,
+  isLoggedIn: true,
+  user:   {
+    id: "o1gLuUabqWNloOxiha0g4u3JEbB2",
+    name: "김지웅",
+    accessToken:"ya29.a0AfH6SMDteNHSsn5YnWx8doqTMRcI4pgdyMaM-iIOVdA-Onue_-Pz2AdGvYkvjm6mMLMwyIZIezrllo0i0g6SisP8e6qEk3Fo28ZGWtlstpjfenf_9qPkpmV5-mTsVTLxWGcZGUR5Jf8LNBeBZxMb3NczbFekZGVhu16Y0A",
+    photo:"https://lh3.googleusercontent.com/a-/AOh14GjBKAHbl_gX-jRsAm4dJ91bm1zlHpZnR9f8cFDO",
+    expire:"",
+  }
+};
 export function* authSaga() {
   yield takeLatest(LOGIN_REQUEST, loginRequestSaga); 
 }

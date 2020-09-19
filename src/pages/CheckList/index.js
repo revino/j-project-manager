@@ -1,4 +1,4 @@
-import React,{useState, useEffect, useCallback} from 'react';
+import React,{useState, useEffect} from 'react';
 
 //Maerial
 import { makeStyles } from '@material-ui/styles';
@@ -9,8 +9,11 @@ import MemoList from './MemoList'
 import MemoAddModal from '../../components/MemoAddModal'
 
 //Api
-import {db} from '../../api/firebase'
+import {db} from '../../firebase'
 import {getUid} from '../../auth'
+
+//hooks
+import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -24,38 +27,27 @@ export default function CheckList() {
   const [modalOpen, setModalOpen] = useState(false);
   const [memoList, setMemoList] = useState(null);
 
-  //Request Data
-  const getMemoList = useCallback(async() =>{
-    try{
-      const memosRef    = db.collection(`users`).doc(getUid()).collection(`memos`);
-      const memosOrder  = memosRef.orderBy("updateDate", "desc");
-      
-      const response = await memosOrder.get();
-
-      const data = response.docs.map((doc) => {
-        let d = doc.data();
-        d.docId= doc.id;
-        return d;
-      });
-      
-      setMemoList(data);
-    }catch(err){
-      console.log(err);
-    }
-  },[])
+  const {data} = useFirebaseListenCollection(db.collection(`users`).doc(getUid()).collection(`memos`).orderBy("updateDate", "desc"));
 
   const handleOpen  = () => { setModalOpen(true); }
   const handleClose = () => { setModalOpen(false); }
 
-  useEffect(() =>{
-    getMemoList()
-  }, [getMemoList])
+  useEffect(()=>{
+    if(!!data){
+      const result = data.docs.map((doc) => {
+        let d = doc.data();
+        d.docId= doc.id;
+        return d;
+      });
+      setMemoList(result);
+    }
+
+  },[data]);
 
   return (
     <div className={classes.root}>
-
       { modalOpen &&
-        <MemoAddModal open={modalOpen} handleClose={handleClose} onUpdate={getMemoList}/>
+        <MemoAddModal open={modalOpen} handleClose={handleClose}/>
       }
 
       <Button className={classes.refreshButton}
@@ -64,7 +56,8 @@ export default function CheckList() {
         onClick={handleOpen}
       > 추가
       </Button>
-      <MemoList data={memoList} onUpdate={getMemoList}/>
+
+      <MemoList data={memoList}/>
     </div>
   );
 }
