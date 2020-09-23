@@ -65,8 +65,7 @@ export default function Topbar(props) {
         <RouterLink className={classes.title} to="/">
           <Typography
             variant="h4"
-          >
-            작업 관리
+          >작업 관리
           </Typography>
         </RouterLink>
         {   !minimal &&

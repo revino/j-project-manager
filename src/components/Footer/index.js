@@ -24,10 +24,9 @@ const Footer = props => {
         &copy;{' '}
         <Link
           component="a"
-          href="https://docs.google.com/spreadsheets/d/1Eb2Bwx7aRWc2vwVyqw8rK4vKeM9U99bDPRNnJWIcC_s"
           target="_blank"
         >
-          구글 시트
+          DB
         </Link>
         . 2020
       </Typography>
