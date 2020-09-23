@@ -23,34 +23,14 @@ const successSheetInfo = createAction(SHEET_INFO_SUCCESS);
 const failureSheetInfo = createAction(SHEET_INFO_FAILURE);
 const successUpdateSheetInfo = createAction(SHEET_INFO_UPDATE_SUCCESS);
 
-const defaultSheetList= [
-  {label:'test2',link:'16qTlqWa0f7V8bIIVDwDmZr2knmQNvKcMOPfqMMzR8eQ'},
-  {label:'하이닉스',link:'1Eb2Bwx7aRWc2vwVyqw8rK4vKeM9U99bDPRNnJWIcC_s'},
-  {label:'test3',link:'1T3VPAPTVJoECISHMbjtTQzBbo2Y4XW0BQoC0_MbAMIc'},
-  {link:'aa',label:'aa'},
-  {label:'bb',link:'bb'}
-
-]
-
-// Initial State
-const initialState = {
-  sheetList: defaultSheetList,
-  selectSheetId: "16qTlqWa0f7V8bIIVDwDmZr2knmQNvKcMOPfqMMzR8eQ",
-  fetching: false,
-  isList: false,
-  isUpdate: false,
-};
-/*
 // Initial State
 const initialState = {
   sheetList: [],
   selectSheetId: '',
   fetching: false,
   isList: false,
-  isUpdate: false,
-  fieldData: defaultFieldData
+  isUpdate: false
 };
-*/
 
 //saga
 function* sheetInfoRequestSaga() {

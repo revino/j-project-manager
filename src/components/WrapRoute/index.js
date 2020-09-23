@@ -1,21 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import {getUserInfo, removeUserInfo} from '../../auth';
+import {auth} from '../../firebase/index'
 import { SnackbarProvider } from 'notistack';
 import { connect } from 'react-redux';
-//import moment from 'moment';
+import { successLogin} from '../../reducers/modules/auth'
+
 
 function WrapRoute(props) {
-    const { wrap: Wrap, component: Component,login,allow,user,...el} = props;
+    const { wrap: Wrap, component: Component,allow,isLoggedIn, setLoginData, ...el} = props;
+
+    const [user, setUser]  = useState(null);
+    //const [error, setError]  = useState(null);
+    const [loading,setLoading] = useState(true);
+
+    useEffect(()=>{
+        const unsubscribe = auth.onAuthStateChanged((u)=>{
+            setUser(u); 
+            setLoading(false)
+        }, (e)=>{
+            console.log(e);
+        });
+        return () => {
+            unsubscribe();
+        };
+    },[]);
+
+    useEffect(()=>{
+        if(!!user && !loading){
+            const userInfo = {user:{
+                id: user.uid,
+                name: user.displayName,
+                accessToken:localStorage.getItem('ACCESS_TOKEN'),
+                photo:user.photoURL,
+                expire:localStorage.getItem('EXPIRE_TOKEN'),
+              }}
+            setLoginData(userInfo);
+        }
+    },[loading,setLoginData,user])
+
     return (
         <Route
             render={matchProps => {
-                
-                //if(!getUserInfo()) removeUserInfo();
-                
-                //const RouteCon = allow || (localStorage.getItem('ACCESS_TOKEN') && !!user.accessToken && moment() < moment(user.expire));
+                const RouteCon = allow || (isLoggedIn);
 
-                const RouteCon = allow || (localStorage.getItem('ACCESS_TOKEN') );
+                if(!!loading || (!loading && !!user && !isLoggedIn)) return(
+                    <Wrap><SnackbarProvider maxSnack={5}>로딩중
+                    </SnackbarProvider></Wrap>
+                    ) 
+                
                 return (RouteCon)? 
                 <Wrap><SnackbarProvider maxSnack={5}><Component {...matchProps} /></SnackbarProvider></Wrap>
                 :
@@ -28,10 +60,12 @@ function WrapRoute(props) {
 }
 
 const mapStateToProps = state => ({
-    user: state.auth.user
+    isLoggedIn: state.auth.isLoggedIn
   })
   
-const mapDispatchToProps = dispatch => ({})
+const mapDispatchToProps = dispatch => ({
+    setLoginData: (payload) => dispatch(successLogin(payload))
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(WrapRoute)
 

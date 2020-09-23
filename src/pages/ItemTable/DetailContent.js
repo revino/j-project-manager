@@ -79,7 +79,7 @@ export default function DetailContent (props) {
 
   return (
     <div className={classes.typo} display="block" >
-      <Typography variant="h5" component="div">내용</Typography>
+      <Typography variant="h5" component="div">내용 {rowData.id} </Typography>
       <TextareaAutosize id={rowData.id} className={classes.textarea} aria-label="minimum height" rowsMin={5} rowsMax={16} defaultValue={content} placeholder="내용 입력" onChange={handleChange}/>
       <LineImageList tileData={images} className={classes.list} addUploadFile={addUploadFile} onClickIcon={handleDeleteImage}/> 
       <Button

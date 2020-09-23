@@ -1,4 +1,4 @@
-import { signInWithGoogle } from '../firebase';
+import { signInWithGoogle } from '.';
 
 async function authGoogle() {
   return await signInWithGoogle();

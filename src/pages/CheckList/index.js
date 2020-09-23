@@ -1,4 +1,4 @@
-import React,{useState, useEffect} from 'react';
+import React,{useState, useEffect, useCallback} from 'react';
 
 //Maerial
 import { makeStyles } from '@material-ui/styles';
@@ -10,7 +10,7 @@ import MemoAddModal from '../../components/MemoAddModal'
 
 //Api
 import {db} from '../../firebase'
-import {getUid} from '../../auth'
+import {getUid} from '../../firebase/auth'
 
 //hooks
 import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
@@ -32,6 +32,25 @@ export default function CheckList() {
   const handleOpen  = () => { setModalOpen(true); }
   const handleClose = () => { setModalOpen(false); }
 
+  const getMemoList = useCallback(async() =>{
+    try{
+      const memosRef    = db.collection(`users`).doc(getUid()).collection(`memos`);
+      const memosOrder  = memosRef.orderBy("updateDate", "desc");
+      
+      const response = await memosOrder.get();
+
+      const data = response.docs.map((doc) => {
+        let d = doc.data();
+        d.docId= doc.id;
+        return d;
+      });
+      
+      setMemoList(data);
+    }catch(err){
+      console.log(err);
+    }
+  },[])
+
   useEffect(()=>{
     if(!!data){
       const result = data.docs.map((doc) => {
@@ -47,7 +66,7 @@ export default function CheckList() {
   return (
     <div className={classes.root}>
       { modalOpen &&
-        <MemoAddModal open={modalOpen} handleClose={handleClose}/>
+        <MemoAddModal open={modalOpen} handleClose={handleClose} onUpdate={getMemoList}/>
       }
 
       <Button className={classes.refreshButton}

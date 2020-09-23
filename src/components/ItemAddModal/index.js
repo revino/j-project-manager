@@ -1,4 +1,4 @@
-import React, {useState, useLayoutEffect} from 'react';
+import React, {useState} from 'react';
 import { connect } from 'react-redux';
 
 //Material UI
@@ -7,10 +7,6 @@ import {Grid, TextareaAutosize, Modal, Divider, TextField, Button, makeStyles, T
 
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 
-//API
-import useAsyncSheetData from '../../hooks/useAsyncSheetData'
-
-
 import useSelect from '../../hooks/useSelect'
 import useInput from '../../hooks/useInput';
 import useSelectDate from '../../hooks/useSelectDate';
@@ -18,10 +14,6 @@ import useSelectDate from '../../hooks/useSelectDate';
 import DropBox from '../DropBox'
 
 import DatePicker from '../DatePicker'
-
-
-
-
 
 //Time
 import moment from 'moment'
@@ -68,14 +60,13 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
+const changFieldData = (data) => (data.map((el,idx)=> ({value: idx, label:el})))
 
 function ItemAddModal(props) {
-  const {fieldData, selectSheetId} = props;
+  const {fieldData, insertTableData} = props;
   const classes = useStyles();
   const [modalStyle] = useState(getModalStyle);
 
-  //data
-  const [fieldList, setFieldList] = useState({progress:[],company:[],pl:[],pic:[],line:[]});
 
   //dropbox
   const [progress, onChangeProgress ] = useSelect('');
@@ -97,20 +88,6 @@ function ItemAddModal(props) {
   const [selectError,setSelectError] = useState({progress:false,company:false,pl:false,pic:false,line:false,pjtno:false,pjtname:false})
   const [formError,setformError] = useState(false)
 
-  const {createSheetData} = useAsyncSheetData({selectSheetId});
-
-  const changFieldData = (data) =>{
-    let list = {...data};
-    Object.keys(list).forEach((field)=>{
-      list[field] = list[field].map((el,idx)=> ({value: idx, label:el}))
-    })
-    return list;
-  }
-        
-  useLayoutEffect(()=>{
-    setFieldList(changFieldData(fieldData));
-  },[fieldData])
-
   const checkForm = ()=>{
     const selectState = {progress:progress === '',company: company ==='',pl: pl ==='',pic:pic ==='',line:line ==='', pjtname:pjtname ==='', pjtno:pjtno===''};
     const selectError = Object.values(selectState).some((el)=> el===true);
@@ -125,11 +102,12 @@ function ItemAddModal(props) {
 
   const handleSubmit= async (event) => {
     if(checkForm()) return;
-    const dropboxValue= {id:"new", progress:fieldData.progress[progress],company:fieldData.company[company],line:fieldData.line[line],pl:fieldData.pl[pl],pic:fieldData.pic[pic]};
-    const start = moment(startDate).format("YYYY-MM-DD");
-    const end = moment(endDate).format("YYYY-MM-DD");
 
-    await createSheetData({...dropboxValue, start, end, pjtno, pjtname, content});
+    const dropboxValue= {progress:fieldData.progress[progress],company:fieldData.company[company],line:fieldData.line[line],pl:fieldData.pl[pl],pic:fieldData.pic[pic]};
+    const inputValue = {project_name:pjtname, project_no:pjtno, content, images:[]}
+    const item = {...dropboxValue,...inputValue, end_date:endDate,start_date:startDate}
+
+    await insertTableData(item);
     props.handleClose();
     event.preventDefault();
   }
@@ -140,19 +118,19 @@ function ItemAddModal(props) {
       <h2 id="simple-modal-title">아이템 추가</h2>
         <Grid container className={classes.section1}>
           <Grid item lg={2} md={4} sm={4} xl={2} xs={12} container>
-            <DropBox error={selectError.progress} componentKey="progress" list={fieldList.progress} label="진행도" value={progress} onChange={onChangeProgress}/>
+            <DropBox error={selectError.progress} componentKey="progress" list={changFieldData(fieldData.progress)} label="진행도" value={progress} onChange={onChangeProgress}/>
           </Grid>
           <Grid item lg={2} md={4} sm={4} xl={2} xs={12} container>
-            <DropBox error={selectError.company} componentKey="company" list={fieldList.company} label="사이트" value={company} onChange={onChangeCompany}/>
+            <DropBox error={selectError.company} componentKey="company" list={changFieldData(fieldData.company)} label="사이트" value={company} onChange={onChangeCompany}/>
           </Grid>
           <Grid item lg={2} md={4} sm={4} xl={2} xs={12} container>
-            <DropBox error={selectError.pl} componentKey="pl" list={fieldList.pl} label="PL" value={pl} onChange={onChangePl}/>
+            <DropBox error={selectError.pl} componentKey="pl" list={changFieldData(fieldData.pl)} label="PL" value={pl} onChange={onChangePl}/>
           </Grid>
           <Grid item lg={2} md={4} sm={4} xl={2} xs={12} container>
-            <DropBox error={selectError.pic} componentKey="pic" list={fieldList.pic} label="담당자" value={pic} onChange={onChangePic}/>
+            <DropBox error={selectError.pic} componentKey="pic" list={changFieldData(fieldData.pic)} label="담당자" value={pic} onChange={onChangePic}/>
           </Grid>
           <Grid item lg={2} md={4} sm={4} xl={2} xs={12} container>
-            <DropBox error={selectError.line} componentKey="line" list={fieldList.line} label="라인" value={line} onChange={onChangeLine}/>
+            <DropBox error={selectError.line} componentKey="line" list={changFieldData(fieldData.line)} label="라인" value={line} onChange={onChangeLine}/>
           </Grid>
           <Grid item lg={2} md={4} sm={4} xl={2} xs={12} container>
           </Grid>

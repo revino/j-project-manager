@@ -1,4 +1,4 @@
-import {auth} from '../firebase'
+import {auth} from '../'
 
 export const getUserInfo = () => {
   const ret = window.sessionStorage.getItem("firebase:authUser:AIzaSyCwNU0s6FikXidM6GFbLAUIqURYJ_jTMx4:[DEFAULT]");
@@ -11,17 +11,8 @@ export const removeUserInfo = () => {
   localStorage.removeItem('ACCESS_TOKEN');
 }
 
-export const getToken = () => {
-  return localStorage.getItem('ACCESS_TOKEN')
-}
-
-export const getExpire = async() => {
-  const token = await auth.currentUser.getIdTokenResult()
-  return token.expirationTime;
-}
 export const getUserPicture = () => {
   return auth.currentUser.photoURL;
-    
 }
 
 export const getUserName = () => {

@@ -4,10 +4,11 @@ import { put, takeLatest, getContext, take } from 'redux-saga/effects';
 
 
 //API
-import googleLogin from '../../api/GoogleLoginApi';
+import googleLogin from '../../firebase/GoogleLoginApi';
 
 
-import {getExpire, getUid, getUserName, getUserPicture} from '../../auth';
+import {getUid, getUserName, getUserPicture} from '../../firebase/auth';
+
 
 //action
 import {requestSheetInfo, SHEET_INFO_SUCCESS} from './sheetInfo'
@@ -26,20 +27,14 @@ const successFailure = createAction(LOGIN_FAILURE);
 //saga
 function* loginRequestSaga() {
   try {
-    const response = yield googleLogin.authGoogle();
+    yield googleLogin.authGoogle();
     const history = yield getContext('history');
-    const token = yield getExpire();
     const user = {user: {
       id: getUid(),
       name: getUserName(),
-      accessToken:response.credential.accessToken,
       photo:getUserPicture(),
-      expire:token,
     }}
 
-    if(!!response.credential.accessToken) {
-      localStorage.setItem('ACCESS_TOKEN', response.credential.accessToken);
-    }
     yield put(requestSheetInfo());
     yield take(SHEET_INFO_SUCCESS);
     yield put(successLogin(user));
@@ -52,7 +47,6 @@ function* loginRequestSaga() {
 }
 
 // Initial State
-/*
 const initialState = {
   fetchingUpdate: false,
   isLoggedIn: false,
@@ -64,7 +58,8 @@ const initialState = {
     expire:"",
   }
 };
-*/
+
+/*
 const initialState = {
   fetchingUpdate: false,
   isLoggedIn: true,
@@ -76,6 +71,7 @@ const initialState = {
     expire:"",
   }
 };
+*/
 export function* authSaga() {
   yield takeLatest(LOGIN_REQUEST, loginRequestSaga); 
 }
@@ -97,6 +93,7 @@ export default handleActions({
 }, initialState);
 
 export {
-  requestLogin
+  requestLogin,
+  successLogin
 
 }

@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useHistory } from "react-router-dom";
+
+import { useSnackbar } from 'notistack';
+
 
 export default function useFirebaseListenCollection(refQuery) {
+  const {enqueueSnackbar} = useSnackbar();
+  const history = useHistory();
 
   const [data, setData] = useState(null);
   const [ref, setRef] = useState(refQuery);
@@ -14,12 +20,18 @@ export default function useFirebaseListenCollection(refQuery) {
     };
     const unsubscribe  = ref.onSnapshot((el)=>{
       setData(el);
-    },setError);
+      enqueueSnackbar("갱신 성공", { variant: 'success' } );
+    },(e)=>{
+      console.log(e);
+      setError(e);
+      enqueueSnackbar(e.code, { variant: 'error'});
+      history.push('/login');
+    });
 
     return () =>{
       unsubscribe();
     }
-  }, [ref]);
+  }, [ref,history,enqueueSnackbar]);
 
   return {data, error, setRef};
 

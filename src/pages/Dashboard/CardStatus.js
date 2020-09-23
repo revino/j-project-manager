@@ -1,41 +1,22 @@
 //React
-import React, {useLayoutEffect} from 'react';
-import { connect } from 'react-redux';
+import React from 'react';
+
+//import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
 
 import CardSummary from '../../components/Card/CardSummary';
 
-//API
-import { getSummaryStatus} from '../../reducers/modules/summary'
-
+//const tableQuery       = db.collection(`tables`).doc('HYNIX').collection(`props`).doc('progress');
 
 function CardStatus(props) {
   //props
-  const { status, getSummaryStatusData, selectSheetId} = props;
-  const title = "전체 상태";
 
-  //getData
-  useLayoutEffect(() =>{
-      getSummaryStatusData({ tq: `select B,count(B) where B is not null group by B order by B desc`, selectSheetId});
-  }, [getSummaryStatusData,selectSheetId]);
-  
+  const title = "전체 상태";
 
 
   return (
-    <CardSummary data={status.data} title={title} error={status.error}/>
+    <CardSummary title={title}/>
   );
 
 }
 
-
-const mapStateToProps = state => ({
-  status: state.summary.status,
-  selectSheetId: state.sheetInfo.selectSheetId,
-
-})
-
-const mapDispatchToProps = dispatch => ({
-  getSummaryStatusData: (payload) => dispatch(getSummaryStatus(payload)),
-})
-
-
-export default connect(mapStateToProps, mapDispatchToProps)(CardStatus)
+export default CardStatus

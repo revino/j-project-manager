@@ -16,24 +16,26 @@ var firebaseConfig = {
   appId: "1:608956176256:web:ab0e9d353a3763c35d9365"
 };
 
-const SCOPE = "https://www.googleapis.com/auth/spreadsheets";
+
 
 firebase.initializeApp(firebaseConfig);
 
 export const auth    = firebase.auth();
 export const db      = firebase.firestore();
 export const storage = firebase.storage();
+export const Timestamp = firebase.firestore.Timestamp;
 
-auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
 
-export const signInWithGoogle = () => {
+
+export const signInWithGoogle = async() => {
 
   let provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({prompt: 'select_account'});
 
-  provider.addScope(SCOPE);
+  provider.addScope("https://www.googleapis.com/auth/spreadsheets");
   provider.addScope("https://www.googleapis.com/auth/drive")
   provider.addScope("https://www.googleapis.com/auth/drive.file")
+  await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
   return auth.signInWithPopup(provider)
 }
 

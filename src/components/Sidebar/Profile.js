@@ -38,7 +38,7 @@ function Profile(props) {
         alt="Person"
         className={classes.avatar}
         component={RouterLink}
-        src={user.photo}
+        src={ !!user?user.photo:''}
         to="/settings"
       />}
       
@@ -46,7 +46,7 @@ function Profile(props) {
         className={classes.name}
         variant="h4"
       >
-        {user.name}
+        {!!user?user.name:''}
       </Typography>
     </div>
   );

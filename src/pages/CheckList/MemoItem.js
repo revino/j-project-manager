@@ -1,4 +1,4 @@
-import React,{useState,useCallback} from 'react';
+import React,{useState} from 'react';
 import { connect } from 'react-redux';
 
 //Material Icons
@@ -20,8 +20,7 @@ import { useSnackbar } from 'notistack';
 
 //API
 import {db} from '../../firebase'
-import {getUid} from '../../auth'
-import useAsyncSheetData from '../../hooks/useAsyncSheetData'
+import {getUid} from '../../firebase/auth'
 
 //Time
 import moment from 'moment'
@@ -120,30 +119,23 @@ function createMemo(title, content, updateDate, linkId) {
   else         return {title, content, updateDate};
 }
 
-const parseTable = (data) =>{
-  return {id : data.table.rows[0].c[0].v, pjtname : data.table.rows[0].c[1].v, content : data.table.rows[0].c[2].v}
+const talbeConverter = {
+  fromFirestore:(snapshot,options) => {
+    const data = snapshot.data(options);
+    return {id:snapshot.id,project_name:data.project_name,content:data.content};
+  }
 };
 
 function MemoItem(props) {
   const {enqueueSnackbar} = useSnackbar();
-  let {item, selectSheetId, skeleton} = props;
+  let {item, skeleton} = props;
   const classes = useStyles();
 
   const [editable,setEditable] = useState(false);
   const [memoTitle, setMemoTitle] = useState("");
   const [memoContent, setMemoContent] = useState("");
+  const [sheetData, setSheetData] = useState({project_name:'',content:''});
   const [anchorEl, setAnchorEl] = useState(null);
-
-  const {sheetData, loadSheetData} = useAsyncSheetData({
-    initialData:{pjtname:"", content:""},
-    selectSheetId, 
-    parserFn:parseTable
-  });
-
-  const getTableData = useCallback((id) =>{
-    const queryObject = {tq: `select A, J, K where A = ${id}`, sheet: `Item_Tables`};
-    loadSheetData({...queryObject});
-  },[loadSheetData]);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
@@ -190,7 +182,12 @@ function MemoItem(props) {
   const handleExpendCahnge = (e,expanded) => {
     if(!expanded) setEditable(false);
     else if(expanded && !!item.linkId){
-      getTableData(item.linkId);
+      db.collection(`tables`).doc('HYNIX').collection(`items`).doc(item.linkId).withConverter(talbeConverter).get().then( el => {
+        
+        setSheetData(el.data());
+      }).catch((error) => {
+        console.log("Error getting documents: ", error);
+      });
     }
   }
 
@@ -235,7 +232,7 @@ function MemoItem(props) {
         { !!item.linkId &&
         <div className={classes.detailsLink}>
             <React.Fragment>
-              <Link color="primary"/><Typography color="primary" onClick={handleLinkClick}> {sheetData.pjtname}</Typography>
+              <Link color="primary"/><Typography color="primary" onClick={handleLinkClick}> {sheetData.project_name}</Typography>
               <Popover
                 id={id}
                 open={open}

@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useIsEqualRef } from './useIsEqualRef';
 
+import { useHistory } from "react-router-dom";
+
+import { useSnackbar } from 'notistack';
+
 export default function useFirebaseOnceCollection(refQuery) {
+  const {enqueueSnackbar} = useSnackbar();
+  const history = useHistory();
+
 
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -21,12 +28,16 @@ export default function useFirebaseOnceCollection(refQuery) {
     };
     ref.current.get().then( el => {
       setData(el);
+      enqueueSnackbar("갱신 성공", { variant: 'success' } );
       setIsLoading(false);
-    }).catch((error) => {
-      setError(error);
-      console.log("Error getting documents: ", error);
-    });;
-  }, [ref]);
+    }).catch((e) => {
+      console.log(e);
+      setError(e);
+      enqueueSnackbar(e.code, { variant: 'error'});
+      history.push('/login');
+
+    });
+  }, [ref,history,enqueueSnackbar]);
 
   return {data, isLoading, error};
 

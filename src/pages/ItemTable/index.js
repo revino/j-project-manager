@@ -1,5 +1,4 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import { connect } from 'react-redux';
 
 //Material
 import { Grid,FormLabel,FormControl,FormGroup,Checkbox,Button,FormControlLabel, LinearProgress} from '@material-ui/core';
@@ -14,9 +13,12 @@ import DetailContent from './DetailContent'
 import moment from 'moment';
 
 //API
-import {storage, db} from '../../firebase'
+import {storage, db, Timestamp} from '../../firebase'
 import useFirebaseOnceCollection from '../../hooks/useFirebaseOnceCollection';
 import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
+
+import { useSnackbar } from 'notistack';
+import { useHistory } from "react-router-dom";
 
 //Style
 const useStyles = makeStyles(theme => ({
@@ -37,7 +39,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 //data parsing
-
 const headParsing = (headData) =>{
   let result = {};
   if(!!headData){
@@ -50,50 +51,74 @@ const headParsing = (headData) =>{
   return result;
 }
 
-const tableParsing = (tableData) =>{
-  const result = !!tableData? tableData.docs.map((doc,idx)=>{
-    const docData = doc.data();
-    const startdate = moment.utc(docData.start_date.seconds * 1000).format("YYYY-MM-DD")
-    const enddate  = moment.utc(docData.end_date.seconds* 1000).format("YYYY-MM-DD")
-    return {...docData,start_date: startdate, end_date:enddate, id:doc.id}
-  }) : [];
-  return result;
-}
+const talbeConverter = {
+  toFirestore:(item)=>{
+    const start = Timestamp.fromDate(moment(item.start_date).toDate());
+    const end = Timestamp.fromDate(moment(item.end_date).toDate());
+    const created = Timestamp.fromDate(moment().toDate());
+    const makeNewData = {...item,start_date:start,end_date:end,created_at:created}
+    delete makeNewData.id;
+    delete makeNewData.tableData;
+    return makeNewData;
+  },
+  fromFirestore:(snapshot,options) => {
+    
+    const data = snapshot.data(options);
+    const startdate = moment(data.start_date.toDate()).format("YYYY-MM-DD")
+    const enddate   = moment(data.end_date.toDate()).format("YYYY-MM-DD")
+;
+    return {...data,start_date: startdate, end_date:enddate, id:snapshot.id};
+  }
+};
 
-const headQuery       = db.collection(`tables`).doc('HYNIX').collection(`props`);
-const tableQuery      = db.collection(`tables`).doc('HYNIX').collection(`Items`);
-const checkBoxDefault = { cb1: true, cb2: true, cb3: true, cb4: true, cb5: true, cb6: true, cb7: true};
+const headQuery        = db.collection(`tables`).doc('HYNIX').collection(`props`);
+const tableQuery       = db.collection(`tables`).doc('HYNIX').collection(`items`).withConverter(talbeConverter);
+const checkBoxDefault  = { cb1: true, cb2: true, cb3: true, cb4: true, cb5: true, cb6: true, cb7: true};
+const checkBoxDefault2 = { cb1: false, cb2: false, cb3: false, cb4: false, cb5: false, cb6: false, cb7: false}
 
 function ItemTable(props) {
   const classes = useStyles();
-
+  const {enqueueSnackbar} = useSnackbar();
+  const history = useHistory();
   //State
   const [fieldData,setFieldData]   = useState(null);
-  const [sheetData,setSheetData]   = useState([]);
-  const [cbState, setCbState]      = useState(checkBoxDefault);
+
+  const [cbState, setCbState]      = useState(checkBoxDefault2);
   const [modalOpen, setModalOpen]  = useState(false);
 
   const {data:headData}            = useFirebaseOnceCollection(headQuery);
-  const {data:tableData, setRef}   = useFirebaseListenCollection(tableQuery);
+  const {data:tableData, setRef}   = useFirebaseListenCollection(tableQuery.orderBy("created_at", "desc"));
 
   const checkBoxerror = Object.values(cbState).filter((v) => v).length < 1;
-  const ModalError    = !fieldData;//? Object.keys(fieldData).filter(v => v == null || v === []).length > 0: false;
+  const ModalError    = !fieldData;//? Object.keys(fieldData).filter(v => v == null || v === []).length > 0: false
 
   useEffect(()=>{
     const result = headParsing(headData)
     if(!!result) setFieldData(result);
   },[headData])
 
-  useEffect(()=>{
-    const result = tableParsing(tableData);
-    if(!!result ) setSheetData(result);
-  },[tableData])
-
   //table data handle
-  const updateTableData = useCallback(async(newData, oldData) =>{   
-    const memosRef = tableQuery.doc(newData.id)
-    await memosRef.update(newData);
+  const insertTableData = useCallback(async(insertItem)=>{
+    await tableQuery.add(insertItem);
   },[]);
+
+  const updateTableData = useCallback(async(newData, oldData) =>{
+    try{
+      const memosRef = tableQuery.doc(newData.id)
+      const start = Timestamp.fromDate(moment(newData.start_date).toDate());
+      const end = Timestamp.fromDate(moment(newData.end_date).toDate());
+      const makeNewData = {...newData,start_date:start,end_date:end}
+      delete makeNewData.id;
+      delete makeNewData.tableData;
+      delete makeNewData.created_at;
+      await memosRef.update(makeNewData);
+      enqueueSnackbar('업데이트 성공', { variant: 'success' } );
+    }catch(e){
+      console.log(e);
+      enqueueSnackbar('업데이트 실패 다시 시도 해주세요', { variant: 'error' } );
+      history.push('/login');
+    }
+  },[enqueueSnackbar,history]);
 
   const deleteTableData = useCallback(async(oldData) =>{
     const memosRef = tableQuery.doc(oldData.id)
@@ -120,13 +145,22 @@ function ItemTable(props) {
   //handle
   const handleCheckBoxChange = (e) => { 
     const checkbox = { ...cbState, [e.target.name]: e.target.checked }
+    setCbState(checkbox); 
+    const valid = Object.values(checkbox).filter((v) => v).length < 1;
+    if(valid) return;
     const checkBoxConArray = !!fieldData ? fieldData.progress.filter((el,idx) => Object.values(checkbox)[idx] === true):[''];
     const Query = tableQuery.where('progress','in',checkBoxConArray);
-    setCbState(checkbox); 
+
     setRef(Query);
   }
-  const handleAddModal       = ()      => { setModalOpen(true); }
-  const handleClose          = ()      => { setModalOpen(false); }
+  const handleCheckDisabled = () => {
+    if(cbState === checkBoxDefault) setCbState(checkBoxDefault2); 
+    else setCbState(checkBoxDefault); 
+    setRef(tableQuery);
+  }
+  
+  const handleAddModal = () => { setModalOpen(true); }
+  const handleClose = () => { setModalOpen(false); }
 
   const detailContent = (rowData) =>{
     return (<DetailContent onRowUpdate={updateTableData} getImgUrl={getImgUrl} deleteImage={deleteImage} uploadImage={uploadImage} rowData={rowData}/>)
@@ -134,16 +168,25 @@ function ItemTable(props) {
 
   return (
   <div className={classes.root}>
-    { modalOpen && <ItemAddModal open={modalOpen} handleClose={handleClose} fieldData={fieldData}/>}
+    { modalOpen && <ItemAddModal open={modalOpen} handleClose={handleClose} fieldData={fieldData} insertTableData={insertTableData}/>}
 
     <Grid container spacing={2}>
       <Grid item lg={1} md={2} sm={2} xl={1} xs={3} container justify="center">
         <Button className={classes.refreshButton}
-          color = "inherit"
+          color = "primary"
           variant="outlined"
           onClick={handleAddModal}
           disabled={ModalError}
         > 추가
+        </Button>
+      </Grid>
+      <Grid item lg={1} md={2} sm={2} xl={1} xs={3} container justify="center">
+        <Button className={classes.refreshButton}
+          color = "inherit"
+          variant="outlined"
+          onClick={handleCheckDisabled}
+          disabled={ModalError}
+        > 전체선택
         </Button>
       </Grid>
 
@@ -164,23 +207,13 @@ function ItemTable(props) {
         {!tableData && <LinearProgress />}
         {
         <Table 
-          data={sheetData} fieldData={fieldData} detailContent={detailContent}
+          data={!!tableData?tableData.docs.map(doc=>doc.data()):[]} fieldData={fieldData} detailContent={detailContent}
           onRowUpdate={updateTableData} onRowDelete={deleteTableData}/>
         }
       </Grid>
     </Grid>
   </div>
   );
-
-
 }
 
-const mapStateToProps = state => ({
-  selectSheetId: state.sheetInfo.selectSheetId,
-})
-
-const mapDispatchToProps = dispatch => ({
-})
-
-
-export default connect(mapStateToProps, mapDispatchToProps)(ItemTable)
+export default ItemTable

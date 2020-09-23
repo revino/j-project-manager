@@ -8,6 +8,7 @@ import Topbar from '../../components/Topbar';
 import { makeStyles, useTheme } from '@material-ui/styles';
 import { useMediaQuery } from '@material-ui/core';
 
+
 const useStyles = makeStyles(theme => ({
     root: {
       paddingTop: 56,
@@ -26,6 +27,7 @@ const useStyles = makeStyles(theme => ({
 
 
 export default function Main(props){
+
     const { children } = props;
 
     const classes = useStyles();
@@ -36,12 +38,12 @@ export default function Main(props){
     const [openSidebar, setOpenSidebar] = useState(false);
 
     const handleSidebarOpen = () => {
-        setOpenSidebar(true);
-      };
-    
-    const handleSidebarClose = () => {
-    setOpenSidebar(false);
+      console.log('handleSidebarOpen');
+      setOpenSidebar(true);
     };
+
+    
+    const handleSidebarClose = () => {setOpenSidebar(false);};
 
     const shouldOpenSidebar = isDesktop ? true : openSidebar;
 

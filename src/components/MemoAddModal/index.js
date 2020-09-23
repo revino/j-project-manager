@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import { connect } from 'react-redux';
 
 //Material UI
@@ -11,13 +11,13 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import { useSnackbar } from 'notistack';
 
 //API
-import useAsyncSheetData from '../../hooks/useAsyncSheetData'
 import {db} from '../../firebase'
-import {getUid} from '../../auth'
+import {getUid} from '../../firebase/auth'
 
 import DropBox from '../DropBox'
 
 import useSelect from '../../hooks/useSelect'
+import useFirebaseOnceCollection from '../../hooks/useFirebaseOnceCollection';
 
 //Time
 import moment from 'moment'
@@ -73,41 +73,37 @@ function createMemo(uid, owner, updateDate, createdDate, title, content, linkId)
   else         return {uid, owner, updateDate, createdDate, title, content};
 }
 
-const parseTable = (data) =>(
-  data.table.rows.map(el => ({value : el.c[0].v, label: `${el.c[0].v} : ${el.c[1].v}`}))
-);
 
+const talbeConverter = {
+  fromFirestore:(snapshot,options) => {
+    const data = snapshot.data(options);
+    return {value:snapshot.id,label:data.project_name};
+  }
+};
 
 function MemoAddModal(props) {
-  const {selectSheetId} = props;
+  const {onUpdate, userName} = props;
 
   const {enqueueSnackbar} = useSnackbar();
 
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
 
-  const {onUpdate, userName} = props;
-
   //data
   const [content, setContent]         = useState("");
   const [title, setTitle]             = useState("");
   const [useLinkItme, setUseLinkItem] = useState(false);
 
-  const { sheetData:linkItemList, loadSheetData:loadLinkItemList, isLoading} = useAsyncSheetData({
-    initialData:[],
-    selectSheetId, 
-    parserFn:parseTable
-  });
+  const {data} = useFirebaseOnceCollection(db.collection(`tables`).doc('HYNIX').collection(`items`).where('pic','==',userName).withConverter(talbeConverter));
 
   const [linkItem, onChangelinkItem]  = useSelect('');
 
-  //Request Data
-  const getTableData = useCallback(() =>{
+  useEffect(()=>{
+    if(!!data){
+      console.log(data.docs);
+    }
 
-    const ConStr      = `(F='${userName}') and (B !='완료')`;
-    const queryObject = {tq: `select A, J, B, F where  (A is not null) and (${ConStr})`, sheet: `Item_Tables`};
-    loadLinkItemList({...queryObject});
-  },[loadLinkItemList,userName]);
+  },[data])
 
   const addMemo = async() =>{
     try{
@@ -128,10 +124,6 @@ function MemoAddModal(props) {
 
   const handleLinkChecked = (e) => { setUseLinkItem(e.target.checked);};
 
-  useEffect(() =>{
-    getTableData()
-  }, [getTableData])
-
   const body = (
     <div style={modalStyle} className={classes.paper}>
       <h2 id="simple-modal-title">메모 입력</h2>
@@ -151,12 +143,12 @@ function MemoAddModal(props) {
                 />
               }
               label="링크 사용"
-              disabled={isLoading}
+              disabled={!data}
             />
           </Grid>
 
           { useLinkItme && 
-            <DropBox componentKey="itemlist" list={linkItemList}  label={"아이템"} value={linkItem} onChange={onChangelinkItem} helperText={"담당자인 아이템이 표시됩니다."}/>
+            <DropBox componentKey="itemlist" list={!!data?data.docs.map(doc=>doc.data()):[]}  label={"아이템"} value={linkItem} onChange={onChangelinkItem} helperText={"담당자인 아이템이 표시됩니다."}/>
           }
           <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
             <TextField className={classes.textarea} id="standard-helperText" label="제목" variant="standard" value={title} onChange={({ target: { value } }) => setTitle(value)}/>
@@ -175,7 +167,7 @@ function MemoAddModal(props) {
               className={classes.button}
               startIcon={<CloudUploadIcon />}
               onClick={handleSubmit}
-              disabled={isLoading}
+              disabled={!data}
             >Upload
             </Button>
           </Grid>

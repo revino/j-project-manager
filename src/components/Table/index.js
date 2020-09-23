@@ -29,7 +29,7 @@ const getColumns = (isMobile,isSummary,fieldData) =>{
 }
 
 function Table(props) {
-  const {onRowUpdate, onRowDelete, deleteImage, uploadImage, getImgUrl, data, fieldData, detailContent, isSummary, width} = props;
+  const {onRowUpdate, onRowDelete, data, fieldData, detailContent, isSummary, width} = props;
 
   const isMobile = isWidthDown('sm', width);
   

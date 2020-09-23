@@ -1,7 +1,7 @@
 //React
-import React, {useLayoutEffect, forwardRef} from 'react';
+import React, {forwardRef} from 'react';
 import { NavLink as RouterLink } from 'react-router-dom';
-import { connect } from 'react-redux';
+
 
 //Material UI
 import {Box, CardHeader, Button, Card, Divider} from '@material-ui/core';
@@ -12,27 +12,28 @@ import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 //Component
 import Table from '../../components/Table'
 
-//hooks
-import useApiErrorSnackbar from '../../hooks/useApiErrorSnackbar'
+import {db} from '../../firebase'
+import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
+import moment from 'moment';
 
-//API
-import { getSummaryTable} from '../../reducers/modules/summary'
+const talbeConverter = {
+  fromFirestore:(snapshot,options) => {
+    const data = snapshot.data(options);
+    const startdate = moment(data.start_date.toDate()).format("YYYY-MM-DD")
+    const enddate   = moment(data.end_date.toDate()).format("YYYY-MM-DD")
+    return {...data,start_date: startdate, end_date:enddate, id:data.id};
+  }
+};
+
+const tableQuery = db.collection(`tables`).doc('HYNIX').collection(`items`).orderBy("created_at", "desc").limit(5).withConverter(talbeConverter);
+
+const CustomRouterLink = forwardRef((props, ref) => (
+  <RouterLink {...props} />
+));
 
 function CardTable(props) {
 
-  const {getSummaryTableData,selectSheetId, data, error} = props;
-  useApiErrorSnackbar(error);
-
-
-  const CustomRouterLink = forwardRef((props, ref) => (
-    <RouterLink {...props} />
-  ));
-
-
-  useLayoutEffect(() =>{
-     getSummaryTableData({ tq: `select A,B,C,D,E,F,G,H,I,J,K where (A is not null and B != "완료") order by A desc limit 5`, sheet: `Item_Tables`, selectSheetId});
-  
-  }, [getSummaryTableData,selectSheetId]);
+  const {data:tableData}   = useFirebaseListenCollection(tableQuery);
 
   return (
     <Card>
@@ -40,7 +41,7 @@ function CardTable(props) {
       <Divider />
       <PerfectScrollbar>
         <Box minWidth={800}>
-          <Table data={data} isSummary/>
+          <Table data={!!tableData?tableData.docs.map(doc=>doc.data()):[]} isSummary/>
         </Box>
       </PerfectScrollbar>
       <Box display="flex" justifyContent="flex-end" p={2}>
@@ -53,16 +54,4 @@ function CardTable(props) {
 
 }
 
-
-const mapStateToProps = state => ({
-  error: state.summary.table.error, 
-  data: state.summary.table.data, 
-  selectSheetId: state.sheetInfo.selectSheetId,
-})
-
-const mapDispatchToProps = dispatch => ({
-  getSummaryTableData: (payload) => dispatch(getSummaryTable(payload))
-})
-
-
-export default connect(mapStateToProps, mapDispatchToProps)(CardTable)
+export default CardTable;

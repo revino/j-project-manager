@@ -9,7 +9,7 @@ export const useComparatorRef = (value,isEqual,onChange) => {
   useEffect(() => {
 
     if (!isEqual(value, ref.current)) {
-      console.log("change check",value, ref.current)
+
       ref.current = value;
       if (onChange) {
         onChange();

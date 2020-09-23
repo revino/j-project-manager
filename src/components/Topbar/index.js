@@ -8,6 +8,9 @@ import MenuIcon from '@material-ui/icons/Menu';
 
 import InputIcon from '@material-ui/icons/Input';
 
+import {auth} from '../../firebase'
+import { useHistory } from "react-router-dom";
+
 const useMainStyles = makeStyles(theme => ({
   root: {
     boxShadow: 'none'
@@ -36,6 +39,7 @@ const useMinimalStyles = makeStyles(() => ({
 
 export default function Topbar(props) {
   const { className, onSidebarOpen, minimal , ...rest } = props;
+  const history = useHistory();
 
   const mainclass = useMainStyles();
   const miniclass = useMinimalStyles();
@@ -43,10 +47,11 @@ export default function Topbar(props) {
   const classes = minimal? miniclass : mainclass;
 
   const handleSignOut = event => {
-    localStorage.removeItem("ACCESS_TOKEN");
-    localStorage.removeItem("TOKEN_TYPE");
-    localStorage.removeItem("SCOPE");
-    localStorage.removeItem("EXPIRE");
+    auth.signOut().then(() =>{
+      history.push('/login');
+    }).catch((e)=>{
+      console.log(e);
+    });
   };
 
   return (
@@ -81,7 +86,7 @@ export default function Topbar(props) {
                 color="inherit"
                 onClick={onSidebarOpen}
               >
-                <MenuIcon />
+                <MenuIcon/>
               </IconButton>
             </Hidden>
             </React.Fragment>

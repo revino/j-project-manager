@@ -53,7 +53,7 @@ const layout = (idx)=>{
     <ListItemAvatar>
       <Skeleton animation="wave" variant="circle" width={40} height={40} />
     </ListItemAvatar>
-    <ListItemText primary={<Skeleton animation="wave" height={10} width={150} />}/>
+    <ListItemText primary={'공사중'/*<Skeleton animation="wave" height={10} width={150} />*/}/>
       
   </ListItem> )
 }
