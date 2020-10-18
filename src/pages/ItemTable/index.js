@@ -9,16 +9,15 @@ import ItemAddModal from '../../components/ItemAddModal'
 import Table from '../../components/Table'
 import DetailContent from './DetailContent'
 
-//
-import moment from 'moment';
-
 //API
-import {storage, db, Timestamp} from '../../firebase'
+import {storage} from '../../firebase'
+
+//hook
 import useFirebaseOnceCollection from '../../hooks/useFirebaseOnceCollection';
 import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
+import useWrapSnackBar from '../../hooks/useWrapSnackbar';
 
-import { useSnackbar } from 'notistack';
-import { useHistory } from "react-router-dom";
+import { headQuery, tableQuery, tableUpdate, tableDelete, tableAdd} from './query';
 
 //Style
 const useStyles = makeStyles(theme => ({
@@ -44,42 +43,21 @@ const headParsing = (headData) =>{
   if(!!headData){
     headData.docs.forEach( doc=>{
       const data = doc.data();
-      result[doc.id]=data.list;
+      if(doc.id === 'progress' || doc.id === 'company' ) result[doc.id]=Object.keys(data.fieldList);
+      else result[doc.id]=data.list;
     })
   }
   else result = null;
   return result;
 }
 
-const talbeConverter = {
-  toFirestore:(item)=>{
-    const start = Timestamp.fromDate(moment(item.start_date).toDate());
-    const end = Timestamp.fromDate(moment(item.end_date).toDate());
-    const created = Timestamp.fromDate(moment().toDate());
-    const makeNewData = {...item,start_date:start,end_date:end,created_at:created}
-    delete makeNewData.id;
-    delete makeNewData.tableData;
-    return makeNewData;
-  },
-  fromFirestore:(snapshot,options) => {
-    
-    const data = snapshot.data(options);
-    const startdate = moment(data.start_date.toDate()).format("YYYY-MM-DD")
-    const enddate   = moment(data.end_date.toDate()).format("YYYY-MM-DD")
-;
-    return {...data,start_date: startdate, end_date:enddate, id:snapshot.id};
-  }
-};
-
-const headQuery        = db.collection(`tables`).doc('HYNIX').collection(`props`);
-const tableQuery       = db.collection(`tables`).doc('HYNIX').collection(`items`).withConverter(talbeConverter);
 const checkBoxDefault  = { cb1: true, cb2: true, cb3: true, cb4: true, cb5: true, cb6: true, cb7: true};
 const checkBoxDefault2 = { cb1: false, cb2: false, cb3: false, cb4: false, cb5: false, cb6: false, cb7: false}
 
+
 function ItemTable(props) {
   const classes = useStyles();
-  const {enqueueSnackbar} = useSnackbar();
-  const history = useHistory();
+
   //State
   const [fieldData,setFieldData]   = useState(null);
 
@@ -88,6 +66,7 @@ function ItemTable(props) {
 
   const {data:headData}            = useFirebaseOnceCollection(headQuery);
   const {data:tableData, setRef}   = useFirebaseListenCollection(tableQuery.orderBy("created_at", "desc"));
+  const [WrapSnackBar]             = useWrapSnackBar();
 
   const checkBoxerror = Object.values(cbState).filter((v) => v).length < 1;
   const ModalError    = !fieldData;//? Object.keys(fieldData).filter(v => v == null || v === []).length > 0: false
@@ -99,31 +78,19 @@ function ItemTable(props) {
 
   //table data handle
   const insertTableData = useCallback(async(insertItem)=>{
-    await tableQuery.add(insertItem);
-  },[]);
+    const addfunc = async() => await tableAdd(tableQuery,insertItem);
+    WrapSnackBar({event:addfunc,successMessage:'추가 성공',failMessage:'추가 실패 다시 시도 해주세요',redirectUrl:'/login'})
+  },[WrapSnackBar]);
 
   const updateTableData = useCallback(async(newData, oldData) =>{
-    try{
-      const memosRef = tableQuery.doc(newData.id)
-      const start = Timestamp.fromDate(moment(newData.start_date).toDate());
-      const end = Timestamp.fromDate(moment(newData.end_date).toDate());
-      const makeNewData = {...newData,start_date:start,end_date:end}
-      delete makeNewData.id;
-      delete makeNewData.tableData;
-      delete makeNewData.created_at;
-      await memosRef.update(makeNewData);
-      enqueueSnackbar('업데이트 성공', { variant: 'success' } );
-    }catch(e){
-      console.log(e);
-      enqueueSnackbar('업데이트 실패 다시 시도 해주세요', { variant: 'error' } );
-      history.push('/login');
-    }
-  },[enqueueSnackbar,history]);
+    const updatefunc = async() => await tableUpdate(tableQuery.doc(newData.id),newData,oldData)
+    WrapSnackBar({event:updatefunc,successMessage:'업데이트 성공',failMessage:'업데이트 실패 다시 시도 해주세요',redirectUrl:'/login'})
+  },[WrapSnackBar]);
 
   const deleteTableData = useCallback(async(oldData) =>{
-    const memosRef = tableQuery.doc(oldData.id)
-    await memosRef.delete();
-  },[]);
+    const deletefunc = async() => await tableDelete(tableQuery.doc(oldData.id),oldData);
+    WrapSnackBar({event:deletefunc,successMessage:'삭제 성공',failMessage:'삭제 실패 다시 시도 해주세요',redirectUrl:'/login'})
+  },[WrapSnackBar]);
 
   //image data handle
   const uploadImage = useCallback( async({path,files}) =>{

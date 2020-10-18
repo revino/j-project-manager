@@ -51,7 +51,7 @@ export default function Sidebar(props) {
       icon: <InsertChart />
     },
     {
-      title: '테이블',
+      title: '아이템들',
       href: '/table',
       icon: <TableChart />
     },

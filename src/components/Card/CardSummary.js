@@ -53,7 +53,7 @@ const layout = (idx)=>{
     <ListItemAvatar>
       <Skeleton animation="wave" variant="circle" width={40} height={40} />
     </ListItemAvatar>
-    <ListItemText primary={'공사중'/*<Skeleton animation="wave" height={10} width={150} />*/}/>
+    <ListItemText primary={<Skeleton animation="wave" height={10} width={150} />}/>
       
   </ListItem> )
 }
@@ -70,7 +70,7 @@ function CardSummary(props) {
 
   const classes = useStyles();
   const handelSnackbar = useApiErrorSnackbar();
-  const avatarColor =[classes.indigo,classes.orange, classes.blueGrey, classes.teal ,classes.brown];
+  const avatarColor =[classes.indigo,classes.orange, classes.blueGrey, classes.teal ,classes.brown,classes.indigo,classes.orange];
   
   const {data, title, error} = props;
   

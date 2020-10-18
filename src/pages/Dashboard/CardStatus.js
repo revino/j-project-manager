@@ -1,20 +1,21 @@
 //React
 import React from 'react';
 
-//import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
-
 import CardSummary from '../../components/Card/CardSummary';
 
-//const tableQuery       = db.collection(`tables`).doc('HYNIX').collection(`props`).doc('progress');
+import useFirebaseOnceCollection from '../../hooks/useFirebaseOnceCollection';
+
+import {progressQuery} from './query';
 
 function CardStatus(props) {
   //props
 
-  const title = "전체 상태";
+  const title = "진행 상태";
 
+  const {data}= useFirebaseOnceCollection(progressQuery);
 
   return (
-    <CardSummary title={title}/>
+    <CardSummary title={title} data={!!data?data.data():null}/>
   );
 
 }
