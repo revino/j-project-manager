@@ -110,9 +110,6 @@ const useStyles = makeStyles((theme) => ({
   },
   popover:{
     overflow: "scroll",
-  },
-  AccordionActions:{
-    justifyContent:'flex-start'
   }
   
 }));
@@ -217,16 +214,7 @@ function MemoItem(props) {
         <div className={classes.summaryColumn}> <Typography className={classes.heading}>[{moment(item.updateDate).format('ll')}]</Typography></div>
         <div className={classes.summaryColumn}> <Typography className={classes.secondaryHeading}>{item.title}</Typography></div> 
       </AccordionSummary>
-      <AccordionActions className={classes.AccordionActions}>
-        { editable? 
-          <Button variant="contained" size="large" color="primary" onClick={handleEditSave}   startIcon={<Save />}>저장</Button>:
-          <Button variant="outlined" size="large" color="primary"  onClick={handleEditChange} startIcon={<Edit />}>수정</Button>
-        } 
-        { editable?  
-          <Button variant="outlined" size="large" color="secondary" onClick={handleEditChange} startIcon={<Cancel />} >취소</Button>:
-          <Button variant="outlined" size="large" color="secondary" onClick={handleMemoRemove} startIcon={<Delete />} >삭제</Button>
-        }
-      </AccordionActions>
+
       <AccordionDetails className={classes.details}>
 
         <React.Fragment>
@@ -283,7 +271,7 @@ function MemoItem(props) {
             
             <div className={clsx(classes.detailsContentColumn, classes.helper)}>
               { editable? 
-                <TextareaAutosize className={classes.textarea} aria-label="minimum height" rowsMin={5} placeholder="내용 입력" defaultValue={item.content} onChange={handleContentChange}/>:
+                <TextareaAutosize className={classes.textarea} aria-label="minimum height" rowsMax={40} rowsMin={5} placeholder="내용 입력" defaultValue={item.content} onChange={handleContentChange}/>:
                 <Typography variant="caption">
                   {!!item.content &&
                   <div dangerouslySetInnerHTML={ {__html: item.content.replace(/(\n|\r\n)/g, '<br>')} }></div>}
@@ -293,7 +281,16 @@ function MemoItem(props) {
         </div>
         </React.Fragment>
       </AccordionDetails>
-      
+      <AccordionActions className={classes.AccordionActions}>
+        { editable? 
+          <Button variant="contained" size="large" color="primary" onClick={handleEditSave}   startIcon={<Save />}>저장</Button>:
+          <Button variant="outlined" size="large" color="primary"  onClick={handleEditChange} startIcon={<Edit />}>수정</Button>
+        } 
+        { editable?  
+          <Button variant="outlined" size="large" color="secondary" onClick={handleEditChange} startIcon={<Cancel />} >취소</Button>:
+          <Button variant="outlined" size="large" color="secondary" onClick={handleMemoRemove} startIcon={<Delete />} >삭제</Button>
+        }
+      </AccordionActions>
       <Divider />
 
     </Accordion>
