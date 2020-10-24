@@ -7,16 +7,14 @@ import '@firebase/storage';
 import 'firebase/auth';
 
 var firebaseConfig = {
-  apiKey: "AIzaSyCwNU0s6FikXidM6GFbLAUIqURYJ_jTMx4",
-  authDomain: "j-project-manager.firebaseapp.com",
-  databaseURL: "https://j-project-manager.firebaseio.com",
-  projectId: "j-project-manager",
-  storageBucket: "j-project-manager.appspot.com",
-  messagingSenderId: "608956176256",
-  appId: "1:608956176256:web:ab0e9d353a3763c35d9365"
+  apiKey: process.env.REACT_APP_FIRE_BASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIRE_BASE_AUTH_DOMAIN,
+  databaseURL: process.env.REACT_APP_FIRE_BASE_DATA_BASE_URL,
+  projectId: process.env.REACT_APP_FIRE_BASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIRE_BASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIRE_BASE_MESSAGEING_SENDER_ID,
+  appId: process.env.REACT_APP_FIRE_BASE_APP_ID
 };
-
-
 
 firebase.initializeApp(firebaseConfig);
 
