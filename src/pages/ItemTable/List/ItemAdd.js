@@ -42,7 +42,6 @@ const changFieldData = (data) => (data.map((el,idx)=> ({value: idx, label:el})))
 function ItemAdd(props) {
   const {fieldData, insertTableData} = props;
   const classes = useStyles();
-console.log(props);
 
   //dropbox
   const [progress, onChangeProgress ] = useSelect('');

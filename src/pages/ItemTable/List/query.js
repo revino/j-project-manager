@@ -23,13 +23,13 @@ const talbeConverter = {
 export const headQuery   = (sheetId) => db.collection(`tables`).doc(sheetId).collection(`props`);
 export const tableQuery  = (sheetId) => db.collection(`tables`).doc(sheetId).collection(`items`).withConverter(talbeConverter);
 
-export const tableAdd = async(ref, newData)=>{
+export const tableAdd = async(ref,ref2, newData)=>{
 
   await ref.add(newData);
 
   await db.runTransaction(async (transaction)=>{
-    const progressField = await transaction.get(headQuery.doc('progress'));
-    const companyField  = await transaction.get(headQuery.doc('company'));
+    const progressField = await transaction.get(ref2.doc('progress'));
+    const companyField  = await transaction.get(ref2.doc('company'));
 
     const progressFieldList = progressField.data().fieldList;
     const companyFieldList = companyField.data().fieldList;
@@ -37,12 +37,12 @@ export const tableAdd = async(ref, newData)=>{
     ++progressFieldList[newData.progress];
     ++companyFieldList[newData.company];
 
-    transaction.update(headQuery.doc('progress'),{fieldList:progressFieldList});
-    transaction.update(headQuery.doc('company'),{fieldList:companyFieldList});
+    transaction.update(ref2.doc('progress'),{fieldList:progressFieldList});
+    transaction.update(ref2.doc('company'),{fieldList:companyFieldList});
   })
 
 }
-export const tableUpdate = async(ref, newData, oldData)=>{
+export const tableUpdate = async(ref,ref2, newData, oldData)=>{
   const start = Timestamp.fromDate(moment(newData.start_date).toDate());
   const end = Timestamp.fromDate(moment(newData.end_date).toDate());
   const makeNewData = {...newData,start_date:start,end_date:end}
@@ -51,8 +51,8 @@ export const tableUpdate = async(ref, newData, oldData)=>{
   delete makeNewData.created_at;
 
   await db.runTransaction(async (transaction)=>{
-    const progressField = await transaction.get(headQuery.doc('progress'));
-    const companyField  = await transaction.get(headQuery.doc('company'));
+    const progressField = await transaction.get(ref2.doc('progress'));
+    const companyField  = await transaction.get(ref2.doc('company'));
 
     const progressFieldList = progressField.data().fieldList;
     const companyFieldList = companyField.data().fieldList;
@@ -64,16 +64,16 @@ export const tableUpdate = async(ref, newData, oldData)=>{
     if(progressFieldList[oldData.progress]>0) --progressFieldList[oldData.progress];
 
     transaction.update(ref,makeNewData);
-    transaction.update(headQuery.doc('progress'),{fieldList:progressFieldList});
-    transaction.update(headQuery.doc('company'),{fieldList:companyFieldList});
+    transaction.update(ref2.doc('progress'),{fieldList:progressFieldList});
+    transaction.update(ref2.doc('company'),{fieldList:companyFieldList});
   })
 }
 
-export const tableDelete = async(ref,oldData)=>{
+export const tableDelete = async(ref,ref2,oldData)=>{
 
   await db.runTransaction(async (transaction)=>{
-    const progressField = await transaction.get(headQuery.doc('progress'));
-    const companyField  = await transaction.get(headQuery.doc('company'));
+    const progressField = await transaction.get(ref2.doc('progress'));
+    const companyField  = await transaction.get(ref2.doc('company'));
     
     const progressFieldList = progressField.data().fieldList;
     const companyFieldList = companyField.data().fieldList;
@@ -82,7 +82,7 @@ export const tableDelete = async(ref,oldData)=>{
     if(progressFieldList[oldData.progress]>0) --progressFieldList[oldData.progress];
 
     transaction.delete(ref);
-    transaction.update(headQuery.doc('progress'),{fieldList:progressFieldList});
-    transaction.update(headQuery.doc('company'),{fieldList:companyFieldList});
+    transaction.update(ref2.doc('progress'),{fieldList:progressFieldList});
+    transaction.update(ref2.doc('company'),{fieldList:companyFieldList});
   })
 }

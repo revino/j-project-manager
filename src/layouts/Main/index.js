@@ -38,7 +38,6 @@ export default function Main(props){
     const [openSidebar, setOpenSidebar] = useState(false);
 
     const handleSidebarOpen = () => {
-      console.log('handleSidebarOpen');
       setOpenSidebar(true);
     };
 

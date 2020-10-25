@@ -82,17 +82,17 @@ function ItemTable(props) {
 
   //table data handle
   const insertTableData = useCallback(async(insertItem)=>{
-    const addfunc = async() => await tableAdd(tableQuery(selectSheetId),insertItem);
+    const addfunc = async() => await tableAdd(tableQuery(selectSheetId),headQuery(selectSheetId),insertItem);
     WrapSnackBar({event:addfunc,successMessage:'추가 성공',failMessage:'추가 실패 다시 시도 해주세요',redirectUrl:'/login'})
   },[WrapSnackBar,selectSheetId]);
 
   const updateTableData = useCallback(async(newData, oldData) =>{
-    const updatefunc = async() => await tableUpdate(tableQuery(selectSheetId).doc(newData.id),newData,oldData)
+    const updatefunc = async() => await tableUpdate(tableQuery(selectSheetId).doc(newData.id),headQuery(selectSheetId),newData,oldData)
     WrapSnackBar({event:updatefunc,successMessage:'업데이트 성공',failMessage:'업데이트 실패 다시 시도 해주세요',redirectUrl:'/login'})
   },[WrapSnackBar,selectSheetId]);
 
   const deleteTableData = useCallback(async(oldData) =>{
-    const deletefunc = async() => await tableDelete(tableQuery(selectSheetId).doc(oldData.id),oldData);
+    const deletefunc = async() => await tableDelete(tableQuery(selectSheetId).doc(oldData.id),headQuery(selectSheetId),oldData);
     WrapSnackBar({event:deletefunc,successMessage:'삭제 성공',failMessage:'삭제 실패 다시 시도 해주세요',redirectUrl:'/login'})
   },[WrapSnackBar,selectSheetId]);
 
