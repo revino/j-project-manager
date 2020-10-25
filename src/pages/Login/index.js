@@ -2,13 +2,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { withRouter, useHistory } from 'react-router-dom';
 
-
 import { makeStyles } from '@material-ui/styles';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import { Grid, Button, IconButton, Typography, Backdrop, CircularProgress } from '@material-ui/core';
+import { Grid, Button, IconButton, Typography, Backdrop, CircularProgress, TextField, Box } from '@material-ui/core';
 
 import { Google as GoogleIcon } from '../../components/Icon';
 
+import { Formik } from "formik"
+import * as Yup from 'yup';
 //Action
 import { requestLogin } from '../../reducers/modules/auth'
 
@@ -118,8 +119,12 @@ function SignIn(props) {
   const {requestLogin, isLoading} = props;
 
   const handleBack   = () => {history.goBack();};
-  const handleSignIn = async() => { 
-    requestLogin();
+  const handleGoogleSignIn = async() => { 
+    requestLogin({isLoginType:'google'});
+  };
+  const handleSubmit = async(e) => { 
+    requestLogin({isLoginType:'email', email:e.email, password:e.password});
+
   };
 
   return (
@@ -134,35 +139,105 @@ function SignIn(props) {
               </IconButton>
             </div>
             <div className={classes.contentBody}>
-              <form
-                className={classes.form}
-                onSubmit={handleSignIn}
-              >
-                <Typography
-                  className={classes.title}
-                  variant="h2"
-                >
-                  로그인
-                </Typography>
-
                 <Grid
                   className={classes.socialButtons}
                   container
                   spacing={1}
                 >
                   <Grid item>
-                    <Button
-                      onClick={handleSignIn}
-                      size="large"
-                      variant="contained"
-                    >
-                      <GoogleIcon className={classes.socialIcon} />
-                      Login with Google
-                    </Button>
+
+                  <Formik
+                    initialValues={{
+                      email: 'test@test.com',
+                      password: '123456'
+                    }}
+                    validationSchema={Yup.object().shape({
+                      email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
+                      password: Yup.string().max(255).required('Password is required')
+                    })}
+                    onSubmit={handleSubmit}
+                  >
+                    {({
+                      errors,
+                      handleBlur,
+                      handleChange,
+                      handleSubmit,
+                      isSubmitting,
+                      touched,
+                      values
+                    }) => (
+                      <form onSubmit={handleSubmit} className={classes.form}>
+                        <Box mb={3}>
+                          <Typography
+                            color="textPrimary"
+                            variant="h2"
+                          >
+                            로그인
+                          </Typography>
+                        </Box>
+
+                        <Button
+                          onClick={handleGoogleSignIn}
+                          fullWidth
+                          size="large"
+                          variant="contained"
+                        >
+                          <GoogleIcon className={classes.socialIcon} />
+                          Login with Google
+                        </Button>
+
+                        <TextField
+                          error={Boolean(touched.email && errors.email)}
+                          fullWidth
+                          helperText={touched.email && errors.email}
+                          label="Email Address"
+                          margin="normal"
+                          name="email"
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          type="email"
+                          value={values.email}
+                          variant="outlined"
+                        />
+                        <TextField
+                          error={Boolean(touched.password && errors.password)}
+                          fullWidth
+                          helperText={touched.password && errors.password}
+                          label="Password"
+                          margin="normal"
+                          name="password"
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          type="password"
+                          value={values.password}
+                          variant="outlined"
+                        />
+                        <Box my={2}>
+                          <Button
+                            color="primary"
+                            disabled={isSubmitting}
+                            fullWidth
+                            size="large"
+                            type="submit"
+                            variant="contained"
+                          >
+                            Sign in now
+                          </Button>
+
+                        </Box>
+                        <Typography
+                          color="textSecondary"
+                          variant="body1"
+                        >
+                          Don&apos;t have an account?
+                          {' '}
+                        </Typography>
+                      </form>
+                    )}
+                  </Formik>
+
                   </Grid>
                 </Grid>
-        
-              </form>
             </div>
           </div>
     </div>
@@ -174,7 +249,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  requestLogin: () => dispatch(requestLogin())
+  requestLogin: (payload) => dispatch(requestLogin(payload))
 })
 
 

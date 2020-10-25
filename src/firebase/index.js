@@ -37,4 +37,10 @@ export const signInWithGoogle = async() => {
   return auth.signInWithPopup(provider)
 }
 
+export const signInWithEmail = async() => {
+
+  return auth.signInWithEmailAndPassword;
+}
+
+
 export default firebase;

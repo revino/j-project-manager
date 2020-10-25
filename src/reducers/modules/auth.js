@@ -4,7 +4,7 @@ import { put, takeLatest, getContext, take } from 'redux-saga/effects';
 
 
 //API
-import googleLogin from '../../firebase/GoogleLoginApi';
+import login from '../../firebase/LoginApi';
 
 
 import {getUid, getUserName, getUserPicture} from '../../firebase/auth';
@@ -12,6 +12,7 @@ import {getUid, getUserName, getUserPicture} from '../../firebase/auth';
 
 //action
 import {requestSheetInfo, SHEET_INFO_SUCCESS} from './sheetInfo'
+import { auth } from '../../firebase';
 
 //types
 export const LOGIN = 'LOGIN';
@@ -27,15 +28,25 @@ const successLogin   = createAction(LOGIN_SUCCESS);
 const successFailure = createAction(LOGIN_FAILURE);
 
 //saga
-function* loginRequestSaga() {
+function* loginRequestSaga(action) {
   try {
-    yield googleLogin.authGoogle();
+    let user = {};
+
+    if(action.payload.isLoginType === 'google') {
+      yield login.authGoogle();
+      user = {user: {
+        id: getUid(),
+        name: getUserName(),
+        photo:getUserPicture(),
+      }}
+    }
+    else {
+      console.log(action.payload)
+      const ret= yield auth.signInWithEmailAndPassword(action.payload.email, action.payload.password);  
+      console.log(ret);                               
+    }
+
     const history = yield getContext('history');
-    const user = {user: {
-      id: getUid(),
-      name: getUserName(),
-      photo:getUserPicture(),
-    }}
 
     yield put(requestSheetInfo());
     yield take(SHEET_INFO_SUCCESS);
@@ -72,6 +83,7 @@ function* loginRefreshSaga() {
 const initialState = {
   fetchingUpdate: false,
   isLoggedIn: false,
+  isLoginType: null,
   user:   {
     id: "",
     name: "",
@@ -89,7 +101,7 @@ export function* authSaga() {
 // Reducer
 export default handleActions({
   [LOGIN_REQUEST]: (state, action) => {
-    return { ...state, fetchingUpdate:true, isLoggedIn:false};
+    return { ...state, fetchingUpdate:true, isLoggedIn:false, isLoginType:action.payload};
   },
 
   [LOGIN_REFRESH]: (state, action) => {

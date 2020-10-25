@@ -83,22 +83,91 @@ export const tableAdd = async({table_name, table_id})=>{
     fieldList:{},
     name:name
   })
-  
-  await db.runTransaction(async (transaction)=>{
-    const userField = await transaction.get(db.collection(`users`).doc(getUid()));
 
-    const sheetList = userField.data().sheetList;
-    const newSheet = {label:table_name,link:table_id}
-    sheetList.push(newSheet);
-    transaction.update(db.collection(`users`).doc(getUid()),{sheetList});
-    transaction.set(tablesQuery(table_id),tableField);
-    transaction.set(PropQuery(table_id).doc('company'),propsField('company'));
-    transaction.set(PropQuery(table_id).doc('line'),propsField('line'));
-    transaction.set(PropQuery(table_id).doc('pic'),propsField('pic'));
-    transaction.set(PropQuery(table_id).doc('pl'),propsField('pl'));
-    transaction.set(PropQuery(table_id).doc('progress'),propsField('progress'));
-    transaction.set(PropQuery(table_id).doc('progress'),propsField('progress'));
-  })
-  await ItemQuery(table_id).add({content:"샘플"});
+  let userData = await db.collection(`users`).doc(getUid()).get();
+  const tableData = await tablesQuery(table_id).get();
+  let sheetList;
+
+  //리스트 설정 안되어있을 경우에 생성
+  if(!userData.data()){
+    await db.collection(`users`).doc(getUid()).set({sheetList:[],selectSheetId:''});
+  }
+
+  //다시 리스트설정 받아오기
+  userData = await db.collection(`users`).doc(getUid()).get();
+
+  //Table 없으면 신규추가
+  if(!tableData.data()){
+    await db.runTransaction(async (transaction)=>{
+        transaction.set(tablesQuery(table_id),tableField);
+        transaction.set(PropQuery(table_id).doc('company'),propsField('company'));
+        transaction.set(PropQuery(table_id).doc('line'),propsField('line'));
+        transaction.set(PropQuery(table_id).doc('pic'),propsField('pic'));
+        transaction.set(PropQuery(table_id).doc('pl'),propsField('pl'));
+        transaction.set(PropQuery(table_id).doc('progress'),propsField('progress'));
+        transaction.set(PropQuery(table_id).doc('progress'),propsField('progress'));
+    });
+    await ItemQuery(table_id).add({content:"샘플"});
+  }
+
+  //개인 리스트에 추가
+  sheetList = userData.data().sheetList;
+  const newSheet = {label:table_name,link:table_id}
+  sheetList.push(newSheet);
+  await db.collection(`users`).doc(getUid()).update({sheetList});
+    
 
 }
+
+/*
+export const tableAdd = async({table_name, table_id})=>{
+  const tableField = {
+    created_at: Timestamp.fromDate(moment().toDate()),
+    title: table_name,
+    created_by: db.collection(`users`).doc(getUid())
+  }
+  const propsField = (name) => ({
+    fieldList:{},
+    name:name
+  })
+  const userData = await db.collection(`users`).doc(getUid()).get();
+  const tableData = await tablesQuery(table_id).get();
+
+  //리스트 설정 안되어있을 경우에 생성
+  if(!userData.data()){
+    await db.collection(`users`).doc(getUid()).set({sheetList:[],selectSheetId:''});
+  }
+
+  if(!tableData.data()){
+    console.log("테이블 신규 생성")
+    await db.runTransaction(async (transaction)=>{
+      let sheetList;
+      sheetList = !userData.data()? userData.data().sheetList: [];
+      const newSheet = {label:table_name,link:table_id}
+      sheetList.push(newSheet);
+      transaction.update(db.collection(`users`).doc(getUid()),{sheetList});
+      transaction.set(tablesQuery(table_id),tableField);
+      transaction.set(PropQuery(table_id).doc('company'),propsField('company'));
+      transaction.set(PropQuery(table_id).doc('line'),propsField('line'));
+      transaction.set(PropQuery(table_id).doc('pic'),propsField('pic'));
+      transaction.set(PropQuery(table_id).doc('pl'),propsField('pl'));
+      transaction.set(PropQuery(table_id).doc('progress'),propsField('progress'));
+      transaction.set(PropQuery(table_id).doc('progress'),propsField('progress'));
+    })
+    await ItemQuery(table_id).add({content:"샘플"});
+  }
+  else{
+    await db.runTransaction(async (transaction)=>{
+      let sheetList;
+      sheetList = !userData.data()? userData.data().sheetList: [];
+      const newSheet = {label:table_name,link:table_id}
+      sheetList.push(newSheet);
+      transaction.update(db.collection(`users`).doc(getUid()),{sheetList});
+    })
+    console.log('기존 테이블 추가');
+  }
+
+
+}
+
+*/
