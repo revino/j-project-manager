@@ -16,11 +16,13 @@ import {requestSheetInfo, SHEET_INFO_SUCCESS} from './sheetInfo'
 //types
 export const LOGIN = 'LOGIN';
 export const LOGIN_REQUEST = 'reducer/loginRequest';
+export const LOGIN_REFRESH = 'reducer/loginRefresh';
 export const LOGIN_SUCCESS = 'reducer/loginSuccess';
 export const LOGIN_FAILURE = 'reducer/loginFailure';
 
 // action creators
 const requestLogin   = createAction(LOGIN_REQUEST);
+const refreshLogin   = createAction(LOGIN_REFRESH);
 const successLogin   = createAction(LOGIN_SUCCESS);
 const successFailure = createAction(LOGIN_FAILURE);
 
@@ -46,6 +48,26 @@ function* loginRequestSaga() {
   }
 }
 
+function* loginRefreshSaga() {
+  try {
+    const user = {user: {
+      id: getUid(),
+      name: getUserName(),
+      photo:getUserPicture(),
+      accessToken:localStorage.getItem('ACCESS_TOKEN'),
+      expire:localStorage.getItem('EXPIRE_TOKEN'),
+    }}
+
+    yield put(requestSheetInfo());
+    yield take(SHEET_INFO_SUCCESS);
+    yield put(successLogin(user));
+
+  } catch (err) {
+    console.log(err);
+    yield put(successFailure(err));
+  }
+}
+
 // Initial State
 const initialState = {
   fetchingUpdate: false,
@@ -59,26 +81,18 @@ const initialState = {
   }
 };
 
-/*
-const initialState = {
-  fetchingUpdate: false,
-  isLoggedIn: true,
-  user:   {
-    id: "o1gLuUabqWNloOxiha0g4u3JEbB2",
-    name: "김지웅",
-    accessToken:"ya29.a0AfH6SMDteNHSsn5YnWx8doqTMRcI4pgdyMaM-iIOVdA-Onue_-Pz2AdGvYkvjm6mMLMwyIZIezrllo0i0g6SisP8e6qEk3Fo28ZGWtlstpjfenf_9qPkpmV5-mTsVTLxWGcZGUR5Jf8LNBeBZxMb3NczbFekZGVhu16Y0A",
-    photo:"https://lh3.googleusercontent.com/a-/AOh14GjBKAHbl_gX-jRsAm4dJ91bm1zlHpZnR9f8cFDO",
-    expire:"",
-  }
-};
-*/
 export function* authSaga() {
-  yield takeLatest(LOGIN_REQUEST, loginRequestSaga); 
+  yield takeLatest(LOGIN_REQUEST, loginRequestSaga);
+  yield takeLatest(LOGIN_REFRESH, loginRefreshSaga); 
 }
 
 // Reducer
 export default handleActions({
   [LOGIN_REQUEST]: (state, action) => {
+    return { ...state, fetchingUpdate:true, isLoggedIn:false};
+  },
+
+  [LOGIN_REFRESH]: (state, action) => {
     return { ...state, fetchingUpdate:true, isLoggedIn:false};
   },
 
@@ -94,6 +108,7 @@ export default handleActions({
 
 export {
   requestLogin,
-  successLogin
+  successLogin,
+  refreshLogin
 
 }

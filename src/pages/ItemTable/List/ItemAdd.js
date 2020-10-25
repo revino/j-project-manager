@@ -3,43 +3,20 @@ import { connect } from 'react-redux';
 
 //Material UI
 import 'date-fns';
-import {Grid, TextareaAutosize, Modal, Divider, TextField, Button, makeStyles, Typography} from '@material-ui/core';
+import {Grid, TextareaAutosize, Divider, TextField, Button, makeStyles, Typography} from '@material-ui/core';
 
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 
-import useSelect from '../../hooks/useSelect'
-import useInput from '../../hooks/useInput';
-import useSelectDate from '../../hooks/useSelectDate';
-
-import DropBox from '../DropBox'
-
-import DatePicker from '../DatePicker'
+import DatePicker from '../../../components/DatePicker'
 
 //Time
 import moment from 'moment'
-
-function getModalStyle() {
-  const top = 50;
-  const left = 50;
-
-  return {
-    top: `${top}%`,
-    left: `${left}%`,
-    transform: `translate(-${top}%, -${left}%)`,
-  };
-}
+import useSelect from '../../../hooks/useSelect';
+import useInput from '../../../hooks/useInput'
+import useSelectDate from '../../../hooks/useSelectDate'
+import DropBox from '../../../components/DropBox';
 
 const useStyles = makeStyles((theme) => ({
-  paper: {
-    position: 'absolute',
-    width: "70%",
-    height: "90%",
-    backgroundColor: theme.palette.background.paper,
-    border: '1px solid #000',
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
-    overflow: "auto"
-  },
   section1: {
     margin: theme.spacing(1, 0),
   },
@@ -62,11 +39,10 @@ const useStyles = makeStyles((theme) => ({
 
 const changFieldData = (data) => (data.map((el,idx)=> ({value: idx, label:el})))
 
-function ItemAddModal(props) {
+function ItemAdd(props) {
   const {fieldData, insertTableData} = props;
   const classes = useStyles();
-  const [modalStyle] = useState(getModalStyle);
-
+console.log(props);
 
   //dropbox
   const [progress, onChangeProgress ] = useSelect('');
@@ -114,7 +90,7 @@ function ItemAddModal(props) {
 
   
   const body = (
-    <div style={modalStyle} className={classes.paper}>
+    <React.Fragment>
       <h2 id="simple-modal-title">아이템 추가</h2>
         <Grid container className={classes.section1}>
           <Grid item lg={2} md={4} sm={4} xl={2} xs={12} container>
@@ -174,21 +150,11 @@ function ItemAddModal(props) {
           </Button>
         </Grid>
 
-    </div>
+    </React.Fragment>
   );
 
-  return (
-    <Modal
-      open={props.open}
-      onClose={props.handleClose}
-      aria-labelledby="simple-modal-title"
-      aria-describedby="simple-modal-description"
-      >
-    {body}
-    </Modal>
-  );
+  return (body);
 }
-
 
 const mapStateToProps = state => ({
   selectSheetId: state.sheetInfo.selectSheetId
@@ -198,4 +164,4 @@ const mapDispatchToProps = dispatch => ({
 })
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(ItemAddModal)
+export default connect(mapStateToProps, mapDispatchToProps)(ItemAdd)

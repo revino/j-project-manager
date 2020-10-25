@@ -19,6 +19,9 @@ import DropBox from '../DropBox'
 import useSelect from '../../hooks/useSelect'
 import useFirebaseOnceCollection from '../../hooks/useFirebaseOnceCollection';
 
+
+import { getMyWorkListQuery } from './query';
+
 //Time
 import moment from 'moment'
 
@@ -73,16 +76,8 @@ function createMemo(uid, owner, updateDate, createdDate, title, content, linkId)
   else         return {uid, owner, updateDate, createdDate, title, content};
 }
 
-
-const talbeConverter = {
-  fromFirestore:(snapshot,options) => {
-    const data = snapshot.data(options);
-    return {value:snapshot.id,label:data.project_name};
-  }
-};
-
 function MemoAddModal(props) {
-  const {onUpdate, userName} = props;
+  const {onUpdate, userName, selectSheetId} = props;
 
   const {enqueueSnackbar} = useSnackbar();
 
@@ -94,7 +89,7 @@ function MemoAddModal(props) {
   const [title, setTitle]             = useState("");
   const [useLinkItme, setUseLinkItem] = useState(false);
 
-  const {data} = useFirebaseOnceCollection(db.collection(`tables`).doc('HYNIX').collection(`items`).where('pic','==',userName).withConverter(talbeConverter));
+  const {data} = useFirebaseOnceCollection(getMyWorkListQuery(selectSheetId,userName));
 
   const [linkItem, onChangelinkItem]  = useSelect('');
 

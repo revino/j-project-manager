@@ -6,7 +6,7 @@ import {Edit} from '@material-ui/icons';
 import {TextareaAutosize, Button, Typography} from '@material-ui/core';
 import {makeStyles} from '@material-ui/core';
 
-import LineImageList from '../../components/LineImageList'
+import LineImageList from '../../../components/LineImageList'
 
 import moment from 'moment'
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { requestSheetInfo, updateSheetInfo } from '../../reducers/modules/sheetInfo'
 
@@ -9,11 +9,14 @@ import { AddCircleOutline} from '@material-ui/icons';
 import { useSnackbar } from 'notistack';
 
 //View
-import FormRadio from '../../components/FormRadio';
 
 //hooks
 import useSelect from '../../hooks/useSelect';
 import useInput from '../../hooks/useInput';
+import AddModal from '../../components/AddModal';
+import TableAdd from './TableAdd'
+import CardButton from '../../components/Card/CardButton';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -54,9 +57,7 @@ const useStyles = makeStyles(theme => ({
     },
   },
   settingBody:{
-
     display: 'flex'
-    
   },
   settingHeader:{
 
@@ -68,6 +69,7 @@ const useStyles = makeStyles(theme => ({
     borderLeft: `2px solid ${theme.palette.divider}`,
     padding: theme.spacing(1, 2),
     display: 'block',
+    minWidth: 300,
     minHeight: 90,
   },
   sheetInputLabel:{
@@ -82,6 +84,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(0,2,0,0),
   },
   sheetInputForm:{
+    display: 'block',
     alignItems: 'center'
   }
 }));
@@ -90,25 +93,24 @@ const useStyles = makeStyles(theme => ({
 
 function Settings(props) {
     const classes = useStyles();
+    const history = useHistory();
     const {enqueueSnackbar} = useSnackbar();
     const {sheetList, selectSheetId, isListOk, isFetching, updateSheetInfo, requestSheetInfo} = props;
 
     const [viewSheetList, setViewSheetList] = useState(sheetList);
-    
-    const [showSnackbar,setSnackbar ]  = useState(false); 
-    const settings = useRef({ selectSheetId:selectSheetId, sheetList:sheetList}); 
+    const [modalOpen, setModalOpen        ]  = useState(false);
+    const [showSnackbar,setSnackbar       ]  = useState(false); 
 
-    const [sheetId,onChnageSheetId  ]  = useSelect(selectSheetId);
+
+    const [sheetId,onChnageSheetId  ]  = useState(selectSheetId);
     const [addView,onChnageAddView  ]  = useSelect(false,"checkbox");
 
     const [newLabel,onChnageNewLabel]  = useInput({initialValue:''});
     const [newLink,onChnageNewLink  ]  = useInput({initialValue:''});
 
-    const handleRefreshClick = (e) => { requestSheetInfo();};
+    //const handleRefreshClick = (e) => { requestSheetInfo();};
     const handleUpdateClick  = (e) => { 
-      settings.current.selectSheetId = sheetId;
-      settings.current.sheetList     = viewSheetList;
-      updateSheetInfo(settings.current); 
+      updateSheetInfo({selectSheetId:sheetId, sheetList:viewSheetList}); 
       setSnackbar(true)
     };
 
@@ -117,6 +119,25 @@ function Settings(props) {
         const addDate = [...viewSheetList,{label:newLabel,link:newLink}];
         setViewSheetList(addDate);
       }
+    }
+
+    const handleAddClick = () => {setModalOpen(true);}
+    const handleClose = () => { setModalOpen(false); requestSheetInfo();}
+
+    const handleCardClick = (idx) =>{
+      onChnageSheetId(viewSheetList[idx].link);
+      updateSheetInfo({selectSheetId:viewSheetList[idx].link, sheetList:sheetList}); 
+      setSnackbar(true)
+    }
+
+    const handleDeleteClick = (idx) =>{
+      const list = viewSheetList.slice();
+      if (idx > -1) list.splice(idx, 1)
+      setViewSheetList(list);
+    }
+
+    const handleEditClick = (idx) =>{
+      history.push('/settings/table/'+viewSheetList[idx].link);
     }
 
     useEffect(() =>{
@@ -131,14 +152,16 @@ function Settings(props) {
     },[sheetList]);
 
 
-
     return (
+      <React.Fragment>
+      { modalOpen && <AddModal Body={TableAdd} open={modalOpen} handleClose={handleClose}/>}
       <Grid container spacing={2} className={classes.root}>
         <Grid item lg={1} md ={1} sm={1} xl={1} xs={12} container>
-          <Button className={classes.refreshButton} size="large" color = "primary" variant="outlined" onClick={handleRefreshClick}> 갱신</Button>
-        </Grid>
-        <Grid item lg={1} md ={1} sm={1} xl={1} xs={12} container>
           <Button className={classes.refreshButton} size="large" color = "primary" variant="outlined" onClick={handleUpdateClick}> 적용</Button>
+        </Grid>  
+
+        <Grid item lg={1} md ={1} sm={1} xl={1} xs={12} container>
+          <Button className={classes.refreshButton} size="large" color = "primary" variant="outlined" onClick={handleAddClick}> 추가</Button>
         </Grid>  
 
         <Grid item lg={12} sm={12} xl={12} xs={12}>
@@ -154,7 +177,11 @@ function Settings(props) {
               />
             </div>
             <div className={classes.settingContent}>
-              <FormRadio componentKey="sheetid" list={viewSheetList} label="sheetid" value={sheetId} onChange={onChnageSheetId} />
+              {!!viewSheetList && viewSheetList.map( (el,idx) =>{
+                return(<CardButton onClick={handleCardClick.bind(handleCardClick,idx)} key={idx} highlight={el.link===sheetId} 
+                title={el.label} body={el.link} primaryLabel="수정" secondaryLabel="삭제" 
+                primaryAction={handleEditClick.bind(handleEditClick,idx)} secondaryAction={handleDeleteClick.bind(handleDeleteClick,idx)} />)
+              })}
               {!!addView && 
                 <form className={classes.sheetInputForm} noValidate autoComplete="off">
                   <TextField className={classes.sheetInputLabel} id="addsheetlabel" label="이름" variant="outlined" onChange={onChnageNewLabel}/>
@@ -171,10 +198,15 @@ function Settings(props) {
         </Grid>
 
       </Grid>
-
+      </React.Fragment>
     );
 
 }
+
+/*
+<FormRadio componentKey="sheetid" list={viewSheetList.map((el)=> ({label:el.label +'/ ' +el.link, link:el.link}))} 
+label="sheetid" value={sheetId} onChange={onChnageSheetId} />
+*/
 
 const mapStateToProps = state => ({
   sheetList: state.sheetInfo.sheetList,

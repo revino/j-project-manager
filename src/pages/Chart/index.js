@@ -54,10 +54,7 @@ function Chart(props) {
   const [yAxisValue, onChangeYAxis]         = useSelect(defaultYAxis);
   const [startDateValue, onChangeStartDate] = useSelectDate(defaultStart);
   const [endDateValue, onChangeEndDate]     = useSelectDate(defaultEnd); 
-  const tableQuery = db.collection(`tables`).doc('HYNIX').collection(`items`)
-  .where("end_date", ">=",new Date(startDateValue))
-//  .orderBy('pic', "desc")
-                      
+  const tableQuery = db.collection(`tables`).doc('HYNIX').collection(`items`).where("end_date", ">=",new Date(startDateValue))
 
 //                       .where("start_date", "<=", new Date(endDateValue))
   const {data, setRef}   = useFirebaseListenCollection(tableQuery);

@@ -1,4 +1,4 @@
-import {db, Timestamp} from '../../firebase'
+import {db, Timestamp} from '../../../firebase'
 
 import moment from 'moment';
 
@@ -20,8 +20,8 @@ const talbeConverter = {
   }
 };
 
-export const headQuery   = db.collection(`tables`).doc('HYNIX').collection(`props`);
-export const tableQuery  = db.collection(`tables`).doc('HYNIX').collection(`items`).withConverter(talbeConverter);
+export const headQuery   = (sheetId) => db.collection(`tables`).doc(sheetId).collection(`props`);
+export const tableQuery  = (sheetId) => db.collection(`tables`).doc(sheetId).collection(`items`).withConverter(talbeConverter);
 
 export const tableAdd = async(ref, newData)=>{
 

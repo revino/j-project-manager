@@ -3,7 +3,7 @@ import { Route, Redirect } from 'react-router-dom';
 import {auth} from '../../firebase/index'
 import { SnackbarProvider } from 'notistack';
 import { connect } from 'react-redux';
-import { successLogin} from '../../reducers/modules/auth'
+import { refreshLogin} from '../../reducers/modules/auth'
 
 import { makeStyles } from '@material-ui/styles';
 import {Backdrop, CircularProgress } from '@material-ui/core';
@@ -38,14 +38,15 @@ function WrapRoute(props) {
 
     useEffect(()=>{
         if(!!user && !loading){
+            /*
             const userInfo = {user:{
                 id: user.uid,
                 name: user.displayName,
                 accessToken:localStorage.getItem('ACCESS_TOKEN'),
                 photo:user.photoURL,
                 expire:localStorage.getItem('EXPIRE_TOKEN'),
-              }}
-            setLoginData(userInfo);
+              }}*/
+            setLoginData();
         }
     },[loading,setLoginData,user])
 
@@ -76,7 +77,7 @@ const mapStateToProps = state => ({
   })
   
 const mapDispatchToProps = dispatch => ({
-    setLoginData: (payload) => dispatch(successLogin(payload))
+    setLoginData: () => dispatch(refreshLogin())
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(WrapRoute)

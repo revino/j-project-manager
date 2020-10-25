@@ -1,21 +1,24 @@
 import React, {useState, useEffect, useCallback} from 'react';
 
+import { connect } from 'react-redux';
+
 //Material
 import { Grid,FormLabel,FormControl,FormGroup,Checkbox,Button,FormControlLabel, LinearProgress} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
 //View
-import ItemAddModal from '../../components/ItemAddModal'
-import Table from '../../components/Table'
+import AddModal from '../../../components/AddModal'
+import Table from '../../../components/Table'
 import DetailContent from './DetailContent'
+import ItemAdd from './ItemAdd'
 
 //API
-import {storage} from '../../firebase'
+import {storage} from '../../../firebase'
 
 //hook
-import useFirebaseOnceCollection from '../../hooks/useFirebaseOnceCollection';
-import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
-import useWrapSnackBar from '../../hooks/useWrapSnackbar';
+import useFirebaseOnceCollection from '../../../hooks/useFirebaseOnceCollection';
+import useFirebaseListenCollection from '../../../hooks/useFirebaseListenCollection';
+import useWrapSnackBar from '../../../hooks/useWrapSnackbar';
 
 import { headQuery, tableQuery, tableUpdate, tableDelete, tableAdd} from './query';
 
@@ -43,8 +46,8 @@ const headParsing = (headData) =>{
   if(!!headData){
     headData.docs.forEach( doc=>{
       const data = doc.data();
-      if(doc.id === 'progress' || doc.id === 'company' ) result[doc.id]=Object.keys(data.fieldList);
-      else result[doc.id]=data.list;
+      result[doc.id]=Object.keys(data.fieldList);
+      //else result[doc.id]=data.list;
     })
   }
   else result = null;
@@ -57,6 +60,7 @@ const checkBoxDefault2 = { cb1: false, cb2: false, cb3: false, cb4: false, cb5: 
 
 function ItemTable(props) {
   const classes = useStyles();
+  const {selectSheetId} = props;
 
   //State
   const [fieldData,setFieldData]   = useState(null);
@@ -64,8 +68,8 @@ function ItemTable(props) {
   const [cbState, setCbState]      = useState(checkBoxDefault2);
   const [modalOpen, setModalOpen]  = useState(false);
 
-  const {data:headData}            = useFirebaseOnceCollection(headQuery);
-  const {data:tableData, setRef}   = useFirebaseListenCollection(tableQuery.orderBy("created_at", "desc"));
+  const {data:headData}            = useFirebaseOnceCollection(headQuery(selectSheetId));
+  const {data:tableData, setRef}   = useFirebaseListenCollection(tableQuery(selectSheetId).orderBy("created_at", "desc"));
   const [WrapSnackBar]             = useWrapSnackBar();
 
   const checkBoxerror = Object.values(cbState).filter((v) => v).length < 1;
@@ -78,19 +82,19 @@ function ItemTable(props) {
 
   //table data handle
   const insertTableData = useCallback(async(insertItem)=>{
-    const addfunc = async() => await tableAdd(tableQuery,insertItem);
+    const addfunc = async() => await tableAdd(tableQuery(selectSheetId),insertItem);
     WrapSnackBar({event:addfunc,successMessage:'추가 성공',failMessage:'추가 실패 다시 시도 해주세요',redirectUrl:'/login'})
-  },[WrapSnackBar]);
+  },[WrapSnackBar,selectSheetId]);
 
   const updateTableData = useCallback(async(newData, oldData) =>{
-    const updatefunc = async() => await tableUpdate(tableQuery.doc(newData.id),newData,oldData)
+    const updatefunc = async() => await tableUpdate(tableQuery(selectSheetId).doc(newData.id),newData,oldData)
     WrapSnackBar({event:updatefunc,successMessage:'업데이트 성공',failMessage:'업데이트 실패 다시 시도 해주세요',redirectUrl:'/login'})
-  },[WrapSnackBar]);
+  },[WrapSnackBar,selectSheetId]);
 
   const deleteTableData = useCallback(async(oldData) =>{
-    const deletefunc = async() => await tableDelete(tableQuery.doc(oldData.id),oldData);
+    const deletefunc = async() => await tableDelete(tableQuery(selectSheetId).doc(oldData.id),oldData);
     WrapSnackBar({event:deletefunc,successMessage:'삭제 성공',failMessage:'삭제 실패 다시 시도 해주세요',redirectUrl:'/login'})
-  },[WrapSnackBar]);
+  },[WrapSnackBar,selectSheetId]);
 
   //image data handle
   const uploadImage = useCallback( async({path,files}) =>{
@@ -116,14 +120,14 @@ function ItemTable(props) {
     const valid = Object.values(checkbox).filter((v) => v).length < 1;
     if(valid) return;
     const checkBoxConArray = !!fieldData ? fieldData.progress.filter((el,idx) => Object.values(checkbox)[idx] === true):[''];
-    const Query = tableQuery.where('progress','in',checkBoxConArray);
+    const Query = tableQuery(selectSheetId).where('progress','in',checkBoxConArray);
 
     setRef(Query);
   }
   const handleCheckDisabled = () => {
     if(cbState === checkBoxDefault) setCbState(checkBoxDefault2); 
     else setCbState(checkBoxDefault); 
-    setRef(tableQuery);
+    setRef(tableQuery(selectSheetId));
   }
   
   const handleAddModal = () => { setModalOpen(true); }
@@ -135,7 +139,7 @@ function ItemTable(props) {
 
   return (
   <div className={classes.root}>
-    { modalOpen && <ItemAddModal open={modalOpen} handleClose={handleClose} fieldData={fieldData} insertTableData={insertTableData}/>}
+    { modalOpen && <AddModal Body={ItemAdd} fieldData={fieldData} insertTableData={insertTableData} open={modalOpen} handleClose={handleClose}/>}
 
     <Grid container spacing={2}>
       <Grid item lg={1} md={2} sm={2} xl={1} xs={3} container justify="center">
@@ -183,4 +187,12 @@ function ItemTable(props) {
   );
 }
 
-export default ItemTable
+const mapStateToProps = state => ({
+  selectSheetId: state.sheetInfo.selectSheetId
+})
+
+const mapDispatchToProps = dispatch => ({
+})
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(ItemTable)
