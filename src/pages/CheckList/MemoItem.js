@@ -129,7 +129,7 @@ const talbeConverter = {
 
 function MemoItem(props) {
   const {enqueueSnackbar} = useSnackbar();
-  let {item, skeleton} = props;
+  let {item, skeleton, selectSheetId} = props;
   const classes = useStyles();
 
   const [editable,setEditable] = useState(false);
@@ -183,7 +183,7 @@ function MemoItem(props) {
   const handleExpendCahnge = (e,expanded) => {
     if(!expanded) setEditable(false);
     else if(expanded && !!item.linkId){
-      db.collection(`tables`).doc('HYNIX').collection(`items`).doc(item.linkId).withConverter(talbeConverter).get().then( el => {
+      db.collection(`tables`).doc(selectSheetId).collection(`items`).doc(item.linkId).withConverter(talbeConverter).get().then( el => {
         
         setSheetData(el.data());
       }).catch((error) => {

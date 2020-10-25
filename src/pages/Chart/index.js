@@ -19,6 +19,7 @@ import useSelectDate from '../../hooks/useSelectDate'
 import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
 
 import {db} from '../../firebase'
+import { connect } from 'react-redux';
 
 
 //Style
@@ -47,14 +48,14 @@ function Chart(props) {
   //props
 
   const classes = useStyles();
-
+  const {selectSheetId} = props;
   
   //Select Box
   const [sortValue, onChangeSort]           = useSelect(defaultSort);
   const [yAxisValue, onChangeYAxis]         = useSelect(defaultYAxis);
   const [startDateValue, onChangeStartDate] = useSelectDate(defaultStart);
   const [endDateValue, onChangeEndDate]     = useSelectDate(defaultEnd); 
-  const tableQuery = db.collection(`tables`).doc('HYNIX').collection(`items`).where("end_date", ">=",new Date(startDateValue))
+  const tableQuery = db.collection(`tables`).doc(selectSheetId).collection(`items`).where("end_date", ">=",new Date(startDateValue))
 
 //                       .where("start_date", "<=", new Date(endDateValue))
   const {data, setRef}   = useFirebaseListenCollection(tableQuery);
@@ -82,7 +83,7 @@ function Chart(props) {
     onChangeEndDate(date);
   }
   const handleStartDate = (date)=>{
-    setRef(db.collection(`tables`).doc('HYNIX').collection(`items`).where("end_date", ">=",new Date(date)));
+    setRef(db.collection(`tables`).doc(selectSheetId).collection(`items`).where("end_date", ">=",new Date(date)));
     onChangeStartDate(date);
   }
 
@@ -117,4 +118,12 @@ function Chart(props) {
   );
 }
 
-export default Chart;
+const mapStateToProps = state => ({
+  selectSheetId: state.sheetInfo.selectSheetId
+})
+
+const mapDispatchToProps = dispatch => ({
+})
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Chart)
