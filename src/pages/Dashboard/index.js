@@ -7,13 +7,7 @@ import { Grid } from '@material-ui/core';
 //View
 import CardStatus from './CardStatus';
 import CardCompany from './CardCompany';
-import CardChart from './CardChart'
 import CardTable from './CardTable'
-
-
-const defaultSort = "F";
-const defaultYAxis = 2;
-const defaultEndTime = 7;
 
 const useStyles = makeStyles(theme => ({
     root: {
