@@ -18,8 +18,9 @@ import useSelect from '../../hooks/useSelect'
 import useSelectDate from '../../hooks/useSelectDate'
 import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
 
-import {db} from '../../firebase'
+import { db } from '../../firebase'
 import { connect } from 'react-redux';
+import { chartQuery } from './query';
 
 
 //Style
@@ -40,6 +41,7 @@ const defaultYAxis = 1;
 const defaultDuration = 20;
 const defaultStart= moment().format("YYYY-MM-DD");
 const defaultEnd  = moment().add(defaultDuration, 'days').format("YYYY-MM-DD")
+
 const sortGroup = [{ value:"created_at", label: "ID"}, {value:"pic", label:"담당자"}, {value:"project_name", label:"PJT 이름"}, {value:"company", label:"사이트"}, {value:"project_no", label:"PJT No"}]
 const yAxisGroup = [{ value:0, label: "PJT 이름"}, {value:1, label:"담당자"}, {value:2, label:"사이트"}]
 
@@ -49,34 +51,48 @@ function Chart(props) {
 
   const classes = useStyles();
   const {selectSheetId} = props;
-  
+
   //Select Box
   const [sortValue, onChangeSort]           = useSelect(defaultSort);
   const [yAxisValue, onChangeYAxis]         = useSelect(defaultYAxis);
   const [startDateValue, onChangeStartDate] = useSelectDate(defaultStart);
-  const [endDateValue, onChangeEndDate]     = useSelectDate(defaultEnd); 
-  const tableQuery = db.collection(`tables`).doc(selectSheetId).collection(`items`).where("end_date", ">=",new Date(startDateValue))
+  const [endDateValue, onChangeEndDate]     = useSelectDate(defaultEnd);
 
-//                       .where("start_date", "<=", new Date(endDateValue))
-  const {data, setRef}   = useFirebaseListenCollection(tableQuery);
-  
+  const {data, setRef}   = useFirebaseListenCollection(chartQuery(selectSheetId,startDateValue,endDateValue));
 
 //!!data?data.docs.map(doc=>doc.data()):[]
-  const AxisConvert = (docs) =>(docs.map((doc, idx)=>{
-    const data = doc.data();
-    const start = moment(data.start_date.toDate()).format("YYYY-MM-DD")
-    const end  = moment(data.end_date.toDate()).format("YYYY-MM-DD")
-    let yCategory = data.pic + ":" + idx;
-    let startdate = start
-    let enddate   = end
+  const AxisConvert = (docs) =>{
 
-          if(yAxisValue === 0)  yCategory=data.project_name;
-    else if(yAxisValue === 1)  yCategory=data.pic + ":" + idx;
-    else if(yAxisValue === 2)  yCategory=data.company + ":" + data.pic + idx;
-    if(moment(startdate) < moment(startDateValue)) startdate = moment(startDateValue).format("YYYY-MM-DD");
-    if(moment(enddate  ) > moment(endDateValue  )) enddate   = moment(endDateValue).format("YYYY-MM-DD");
-    return {...data, category:yCategory, start:startdate, end:enddate,tipStart:start,tipEnd:end};
-  }))
+    const data = docs.map((doc, idx)=>{
+      const data = doc.data();
+
+      if(!data) return {}
+      const start = moment(data.start_date.toDate()).format("YYYY-MM-DD")
+      const end  = moment(data.end_date.toDate()).format("YYYY-MM-DD")
+      if(moment(endDateValue) < moment(data.start_date.toDate())) return {};
+
+      let yCategory = data.pic + ":" + idx;
+      let startdate = start
+      let enddate   = end
+
+           if(yAxisValue === 0) yCategory=data.project_name;
+      else if(yAxisValue === 1) yCategory=data.pic + ":" + idx;
+      else if(yAxisValue === 2) yCategory=data.company + ":" + data.pic + idx;
+
+      if(moment(startdate) < moment(startDateValue)) startdate = moment(startDateValue).format("YYYY-MM-DD");
+      if(moment(enddate  ) > moment(endDateValue  )) enddate   = moment(endDateValue).format("YYYY-MM-DD");
+      return {...data, category:yCategory, start:startdate, end:enddate,tipStart:start,tipEnd:end};
+    });
+    data.sort((a,b)=>{
+      var nameA = a.pic.toUpperCase(); // ignore upper and lowercase
+      var nameB = b.pic.toUpperCase(); // ignore upper and lowercase
+      if (nameA < nameB) return -1;
+      if (nameA > nameB) return 1;
+      // 이름이 같을 경우
+      return 0;
+    });
+    return data;
+}
 
   const handleEndDate = (date)=>{
 
@@ -90,7 +106,7 @@ function Chart(props) {
 
   return (
   <div className={classes.root}>
-    <Grid container spacing={2}> 
+    <Grid container spacing={2}>
 
       <Grid item container lg={2} md={2} sm={4} xl={1} xs={6}>
         <DropBox componentKey="sort" list={sortGroup}  label={"정렬"} value={sortValue} onChange={onChangeSort}/>
@@ -103,7 +119,7 @@ function Chart(props) {
       <Grid item container lg={2} md={2} sm={4} xl={2} xs={6}>
         <DatePicker componentKey="start" label={"시작일"} value={startDateValue} onChange={handleStartDate}/>
       </Grid>
-      
+
       <Grid item container lg={2} md={2} sm={4} xl={2} xs={6}>
         <DatePicker componentKey="end" label={"종료일"} value={endDateValue} onChange={handleEndDate}/>
       </Grid>

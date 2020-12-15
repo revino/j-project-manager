@@ -4,6 +4,7 @@ import React, {useLayoutEffect, useEffect,useRef, useCallback} from 'react';
 //Material UI
 import { makeStyles } from '@material-ui/styles';
 
+
 //Am Chart
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
@@ -15,8 +16,7 @@ import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 const useStyles = makeStyles(theme => ({
     root: {
       width: "100%",
-      height: "60px",
-      display: 'flex'
+      height: "250px",
     },
     formControl: {
       margin: theme.spacing(1),
@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
   }));
 
 
-const tooltip = "[bold]기간: [/]{tipStart} ~ [/]{tipEnd}\n[bold]상태: [/]{progress}\n[bold]사이트: [/]{company} {line}\n[bold]이름: [/]{pjtName}\n[bold]No: [/]{pjtno}\n[bold]담당자: [/]{pic}";
+const tooltip = "[bold]기간: [/]{tipStart} ~ [/]{tipEnd}\n[bold]상태: [/]{progress}\n[bold]사이트: [/]{company} {line}\n[bold]이름: [/]{project_name}\n[bold]No: [/]{project_no}\n[bold]담당자: [/]{pic}";
 
 am4core.useTheme(am4themes_material);
 am4core.useTheme(am4themes_animated);
@@ -77,10 +77,13 @@ function GanttChart(props) {
     dateAxis.baseInterval = { count: 1, timeUnit: "day" };
     dateAxis.dateFormats.setKey("day", "MM/dd");
     dateAxis.renderer.tooltipLocation = 0;
+    dateAxis.renderer.grid.template.location = 0;
+    dateAxis.renderer.minGridDistance = 50;
 
     let series1 = x.series.push(new am4charts.ColumnSeries());
     series1.columns.template.height = am4core.percent(60);
     series1.columns.template.tooltipText = tooltip;
+    
 
     series1.dataFields.openDateX = "start";
     series1.dataFields.dateX = "end";
@@ -89,6 +92,15 @@ function GanttChart(props) {
     series1.columns.template.propertyFields.fill = "color";
     series1.columns.template.propertyFields.stroke = "color";
     series1.columns.template.strokeOpacity = 1;
+
+    series1.tooltip.animationDuration = 500
+    /* Add chart cursor */
+    x.cursor = new am4charts.XYCursor();
+    x.cursor.xAxis = categoryAxis;
+    x.cursor.fullWidthLineX = true;
+
+  
+    x.colors.step = 2;
 
     // Sell Auto Adjust
     let cellSize = 50;
@@ -102,7 +114,7 @@ function GanttChart(props) {
       // Calculate how we need to adjust chart height
       let adjustHeight = CategoryArray.length * cellSize - categoryAxis.pixelHeight;
       let targetHeight = chart.pixelHeight + adjustHeight;
-    
+      console.log(CategoryArray.length ,categoryAxis.pixelHeight,targetHeight);
       // Set it on chart's container
       chart.svgContainer.htmlElement.style.height = targetHeight + "px";
     });

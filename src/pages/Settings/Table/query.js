@@ -115,7 +115,6 @@ export const tableAdd = async({table_name, table_id})=>{
   const newSheet = {label:table_name,link:table_id}
   sheetList.push(newSheet);
   await db.collection(`users`).doc(getUid()).update({sheetList});
-    
 
 }
 
