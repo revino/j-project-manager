@@ -3,26 +3,20 @@ import {Route, Switch, Redirect} from "react-router-dom";
 
 import WrapRoute from './components/WrapRoute'
 
-import { 
+import {
     Main as MainLayout
 } from './layouts';
-/*
-import { 
-    Main as MainLayout,
-    Minimal as MinimalLayout 
-} from './layouts';
-*/
 
-import {
-    Dashboard      as DashboardView,
-    ItemTable      as TableView,
-    Chart          as ChartView,
-    CheckList      as CheckListView,
-    TableAdd       as TableAddView,
-    Settings       as SettingsView,
-    Login          as LoginView,
-    OAuth2Redirect as GoogleRedirectView
-} from './pages';
+import asyncRoute from './lib/asyncRoute';
+
+export const DashboardView      = asyncRoute(() => import('./pages/Dashboard'));
+export const TableView          = asyncRoute(() => import('./pages/ItemTable/List'));
+export const ChartView          = asyncRoute(() => import('./pages/Chart'));
+export const CheckListView      = asyncRoute(() => import('./pages/CheckList'));
+export const TableAddView       = asyncRoute(() => import('./pages/Settings/Table'));
+export const SettingsView       = asyncRoute(() => import('./pages/Settings'));
+export const LoginView          = asyncRoute(() => import('./pages/Login'));
+export const GoogleRedirectView = asyncRoute(() => import('./pages/Oauth2/OAuth2Redirect'));
 
 export default function Routes(props) {
 
