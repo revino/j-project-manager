@@ -36,7 +36,7 @@ export default function CheckList() {
     try{
       const memosRef    = db.collection(`users`).doc(getUid()).collection(`memos`);
       const memosOrder  = memosRef.orderBy("updateDate", "desc");
-      
+
       const response = await memosOrder.get();
 
       const data = response.docs.map((doc) => {
@@ -44,7 +44,7 @@ export default function CheckList() {
         d.docId= doc.id;
         return d;
       });
-      
+
       setMemoList(data);
     }catch(err){
       console.log(err);

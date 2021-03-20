@@ -25,7 +25,7 @@ function CardButton(props) {
   const classes = useStyles();
 
   const {body, title, primaryAction, primaryLabel, secondaryLabel, secondaryAction, highlight} = props;
-  
+
   return (
     <Card className={!!highlight? classes.highlight:classes.root} raised={!highlight} >
       <CardActionArea onClick={props.onClick} >

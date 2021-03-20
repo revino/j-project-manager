@@ -41,7 +41,7 @@ function Profile(props) {
         src={ !!user?user.photo:''}
         to="/settings"
       />}
-      
+
       <Typography
         className={classes.name}
         variant="h4"

@@ -69,7 +69,8 @@ const useStyles = makeStyles(theme => ({
     borderLeft: `2px solid ${theme.palette.divider}`,
     padding: theme.spacing(1, 2),
     display: 'block',
-    minWidth: 300,
+    width:"100%",
+    minWidth: 150,
     minHeight: 90,
   },
   sheetInputLabel:{
@@ -156,13 +157,13 @@ function Settings(props) {
       <React.Fragment>
       { modalOpen && <AddModal Body={TableAdd} open={modalOpen} handleClose={handleClose}/>}
       <Grid container spacing={2} className={classes.root}>
-        <Grid item lg={1} md ={1} sm={1} xl={1} xs={12} container>
+        <Grid item lg={1} md ={1} sm={1} xl={1} xs={6} container>
           <Button className={classes.refreshButton} size="large" color = "primary" variant="outlined" onClick={handleUpdateClick}> 적용</Button>
-        </Grid>  
+        </Grid>
 
-        <Grid item lg={1} md ={1} sm={1} xl={1} xs={12} container>
+        <Grid item lg={1} md ={1} sm={1} xl={1} xs={6} container>
           <Button className={classes.refreshButton} size="large" color = "primary" variant="outlined" onClick={handleAddClick}> 추가</Button>
-        </Grid>  
+        </Grid>
 
         <Grid item lg={12} sm={12} xl={12} xs={12}>
           <div className={classes.settingBody}>

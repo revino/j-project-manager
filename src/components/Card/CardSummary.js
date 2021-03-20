@@ -71,9 +71,9 @@ function CardSummary(props) {
   const classes = useStyles();
   const handelSnackbar = useApiErrorSnackbar();
   const avatarColor =[classes.indigo,classes.orange, classes.blueGrey, classes.teal ,classes.brown,classes.indigo,classes.orange];
-  
+
   const {data, title, error} = props;
-  
+
   //Error
   useEffect(() =>{ handelSnackbar(error);}, [handelSnackbar, error]);
 

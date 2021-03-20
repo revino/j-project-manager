@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
 import { Divider, Drawer } from '@material-ui/core';
 
-import {Dashboard, SpeakerNotes, InsertChart, TableChart, SettingsApplications } from '@material-ui/icons';
+import {Dashboard, SpeakerNotes, InsertChart, TableChart, SettingsApplications, Timer } from '@material-ui/icons';
 
 import Profile     from './Profile';
 import SidebarNav  from './SidebarNav';
@@ -46,6 +46,11 @@ export default function Sidebar(props) {
       icon: <Dashboard />
     },
     {
+      title: '작업시간',
+      href: '/worktime',
+      icon: <Timer />
+    },
+    {
       title: '그래프',
       href: '/chart',
       icon: <InsertChart />
@@ -63,6 +68,11 @@ export default function Sidebar(props) {
     {
       title: '설정',
       href: '/settings',
+      icon: <SettingsApplications />
+    },
+    {
+      title: '로그아웃',
+      href: '/login',
       icon: <SettingsApplications />
     }
   ];
@@ -84,6 +94,7 @@ export default function Sidebar(props) {
         <SidebarNav
           className={classes.nav}
           pages={pages}
+          onClose={onClose}
         />
         <UpgradePlan />
       </div>
