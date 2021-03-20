@@ -20,12 +20,12 @@ const useStyles = makeStyles((theme) => ({
 
 
 function MemoList(props) {
- const {data} = props;
+ const {data, isShare} = props;
  const classes = useStyles();
   return (
     <div className={classes.root}>
       { !data && <LinearProgress />}
-      { !!data && data.length>0 ? data.map( (el,idx) => <MemoItem item={el} idx={idx} key={idx}/>):
+      { !!data && data.length>0 ? data.map( (el,idx) => <MemoItem item={el} idx={idx} key={idx} isShare={isShare}/>):
         [<MemoItem key='date' skeleton={true}/>,<MemoItem key='Head' skeleton={true}/>]
       }
     </div>

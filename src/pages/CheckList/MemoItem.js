@@ -129,7 +129,7 @@ const talbeConverter = {
 
 function MemoItem(props) {
   const {enqueueSnackbar} = useSnackbar();
-  let {item, skeleton, selectSheetId} = props;
+  let {item, skeleton, selectSheetId, isShare} = props;
   const classes = useStyles();
 
   const [editable,setEditable] = useState(false);
@@ -157,7 +157,7 @@ function MemoItem(props) {
   const handleEditSave = async(e) => {
     try{
       const memoData = createMemo(memoTitle, memoContent, moment().format());
-      const memosRef = db.collection(`users`).doc(getUid()).collection(`memos`).doc(item.docId);
+      const memosRef = isShare? db.collection(`tables`).doc(selectSheetId).collection(`memos`).doc(item.docId) :db.collection(`users`).doc(getUid()).collection(`memos`).doc(item.docId);
       await memosRef.update(memoData);
       item.title= memoTitle;
       item.content=memoContent;
@@ -171,7 +171,8 @@ function MemoItem(props) {
 
   const handleMemoRemove  = async(e) => {
     try{
-      const memosRef = db.collection(`users`).doc(getUid()).collection(`memos`).doc(item.docId);
+
+      const memosRef = isShare? db.collection(`tables`).doc(selectSheetId).collection(`memos`).doc(item.docId) :db.collection(`users`).doc(getUid()).collection(`memos`).doc(item.docId);
       await memosRef.delete();
       enqueueSnackbar('삭제 성공', { variant: 'success' } );
     }catch(err){
@@ -184,7 +185,7 @@ function MemoItem(props) {
     if(!expanded) setEditable(false);
     else if(expanded && !!item.linkId){
       db.collection(`tables`).doc(selectSheetId).collection(`items`).doc(item.linkId).withConverter(talbeConverter).get().then( el => {
-        
+
         setSheetData(el.data());
       }).catch((error) => {
         console.log("Error getting documents: ", error);
@@ -219,7 +220,7 @@ function MemoItem(props) {
 
         <React.Fragment>
         <div className={classes.detailsTitle}>
-          { editable? 
+          { editable?
           <FormControl fullWidth className={classes.margin}>
             <Input
               id="standard-adornment-amount"
@@ -249,13 +250,13 @@ function MemoItem(props) {
                 }}
               >
                 <div className={classes.popover}>
-  
+
                     {!!sheetData.content &&
                       <div className={classes.typography} dangerouslySetInnerHTML={ {__html: sheetData.content.replace(/(\n|\r\n)/g, '<br>')} }></div>}
                     {/*sheetData.content.split('\n').map( (line,idx) => {
                         return (<span key={idx}>{line}<br/></span>)
                     })*/}
-    
+
                 </div>
               </Popover>
             </React.Fragment>
@@ -268,9 +269,9 @@ function MemoItem(props) {
               <Typography className={classes.detailsHeader }>생성일</Typography>
               <Typography className={classes.detailsContent}>{moment(item.createdDate).fromNow()}</Typography>
             </div>
-            
+
             <div className={clsx(classes.detailsContentColumn, classes.helper)}>
-              { editable? 
+              { editable?
                 <TextareaAutosize className={classes.textarea} aria-label="minimum height" rowsMax={40} rowsMin={5} placeholder="내용 입력" defaultValue={item.content} onChange={handleContentChange}/>:
                 <Typography variant="caption">
                   {!!item.content &&
@@ -282,11 +283,11 @@ function MemoItem(props) {
         </React.Fragment>
       </AccordionDetails>
       <AccordionActions className={classes.AccordionActions}>
-        { editable? 
+        { editable?
           <Button variant="contained" size="large" color="primary" onClick={handleEditSave}   startIcon={<Save />}>저장</Button>:
           <Button variant="outlined" size="large" color="primary"  onClick={handleEditChange} startIcon={<Edit />}>수정</Button>
-        } 
-        { editable?  
+        }
+        { editable?
           <Button variant="outlined" size="large" color="secondary" onClick={handleEditChange} startIcon={<Cancel />} >취소</Button>:
           <Button variant="outlined" size="large" color="secondary" onClick={handleMemoRemove} startIcon={<Delete />} >삭제</Button>
         }
@@ -296,7 +297,6 @@ function MemoItem(props) {
     </Accordion>
     }
     </div>
-    
   )
 }
 const mapStateToProps = state => ({

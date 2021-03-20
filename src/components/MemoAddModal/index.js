@@ -71,7 +71,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function createMemo(uid, owner, updateDate, createdDate, title, content, linkId) {
-  
   if(!!linkId) return {uid, owner, updateDate, createdDate, title, content, linkId};
   else         return {uid, owner, updateDate, createdDate, title, content};
 }
@@ -87,7 +86,8 @@ function MemoAddModal(props) {
   //data
   const [content, setContent]         = useState("");
   const [title, setTitle]             = useState("");
-  const [useLinkItme, setUseLinkItem] = useState(false);
+  const [useLinkItme , setUseLinkItem ] = useState(false);
+  const [useShareItem, setUseShareItem] = useState(false);
 
   const {data} = useFirebaseOnceCollection(getMyWorkListQuery(selectSheetId,userName));
 
@@ -103,7 +103,12 @@ function MemoAddModal(props) {
   const addMemo = async() =>{
     try{
       const memoData = await createMemo(getUid(), userName, moment().format(), moment().format(), title, content, useLinkItme?linkItem:null);
-      await db.collection(`users`).doc(getUid()).collection(`memos`).add(memoData);
+      if(!useShareItem){
+        await db.collection(`users`).doc(getUid()).collection(`memos`).add(memoData);
+      }
+      else{
+        await db.collection(`tables`).doc(selectSheetId).collection(`memos`).add(memoData);
+      }
       onUpdate();
       enqueueSnackbar('추가 성공', { variant: 'success' } );
     }catch(err){
@@ -117,7 +122,8 @@ function MemoAddModal(props) {
       props.handleClose();
   }
 
-  const handleLinkChecked = (e) => { setUseLinkItem(e.target.checked);};
+  const handleLinkChecked  = (e) => { setUseLinkItem(e.target.checked);};
+  const handleShareChecked = (e) => { setUseShareItem(e.target.checked);};
 
   const body = (
     <div style={modalStyle} className={classes.paper}>
@@ -142,7 +148,22 @@ function MemoAddModal(props) {
             />
           </Grid>
 
-          { useLinkItme && 
+          <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+            <FormControlLabel className={classes.checkbox}
+              control={
+                <Checkbox
+                  checked={useShareItem}
+                  onChange={handleShareChecked}
+                  name="checkedShare"
+                  color="primary"
+                />
+              }
+              label="공유 사용"
+              disabled={!data}
+            />
+          </Grid>
+
+          { useLinkItme &&
             <DropBox componentKey="itemlist" list={!!data?data.docs.map(doc=>doc.data()):[]}  label={"아이템"} value={linkItem} onChange={onChangelinkItem} helperText={"담당자인 아이템이 표시됩니다."}/>
           }
           <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
