@@ -8,6 +8,7 @@ import { Grid } from '@material-ui/core';
 import CardStatus from './CardStatus';
 import CardCompany from './CardCompany';
 import CardTable from './CardTable'
+import CardFavorite from './CardFavorite'
 
 //view
 
@@ -23,6 +24,7 @@ export default function DashBoard(props) {
     return (
       <div className={classes.root}>
       <Grid container spacing={4}>
+        <Grid item lg={12} sm={12} xl={12} xs={12}> <CardFavorite/> </Grid>
         <Grid item lg={6}  sm={6}  xl={6}  xs={12}> <CardStatus/> </Grid>
         <Grid item lg={6}  sm={6}  xl={6}  xs={12}> <CardCompany/> </Grid>
         <Grid item lg={12} sm={12} xl={12} xs={12}> <CardTable/> </Grid>
