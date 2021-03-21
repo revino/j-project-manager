@@ -9,6 +9,9 @@ import CardStatus from './CardStatus';
 import CardCompany from './CardCompany';
 import CardTable from './CardTable'
 
+//view
+
+
 const useStyles = makeStyles(theme => ({
     root: {
       padding: theme.spacing(2)
@@ -16,6 +19,7 @@ const useStyles = makeStyles(theme => ({
   }));
 export default function DashBoard(props) {
     const classes = useStyles();
+
     return (
       <div className={classes.root}>
       <Grid container spacing={4}>

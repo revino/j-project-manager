@@ -41,13 +41,11 @@ export default function Main(props){
       setOpenSidebar(true);
     };
 
-    
     const handleSidebarClose = () => {setOpenSidebar(false);};
 
     const shouldOpenSidebar = isDesktop ? true : openSidebar;
 
     return (
-      
         <div
           className={clsx({
             [classes.root]: true,

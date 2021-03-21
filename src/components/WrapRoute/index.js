@@ -59,9 +59,9 @@ function WrapRoute(props) {
                 <Backdrop className={classes.backdrop} open={true}>
                     <CircularProgress color="inherit" />
                 </Backdrop>
-                ) 
-            
-                return (RouteCon)? 
+                )
+
+                return (RouteCon)?
                 <Wrap><SnackbarProvider maxSnack={5} preventDuplicate><Component {...matchProps} /></SnackbarProvider></Wrap>
                 :
                 <Redirect to={{ pathname: '/login', state: { from: props.location } }} />

@@ -5,6 +5,7 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 import '@firebase/storage';
 import 'firebase/auth';
+import 'firebase/messaging';
 
 var firebaseConfig = {
   apiKey: process.env.REACT_APP_FIRE_BASE_API_KEY,
@@ -24,9 +25,7 @@ export const storage = firebase.storage();
 export const Timestamp = firebase.firestore.Timestamp;
 
 
-
 export const signInWithGoogle = async() => {
-
   let provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({prompt: 'select_account'});
 
