@@ -42,7 +42,7 @@ function Cells (props) {
                 value={workTimes[formattedDate-1]}
                 onChange={setWorkTimes}
                 id={formattedDate}
-                label="초과 시간"
+                label="시간"
                 variant="outlined"
                 className={` ${isSameDay(day, selectedDate) ? classes.input_selected : classes.margin }`}
                 step={0.5}

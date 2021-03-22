@@ -30,9 +30,16 @@ export const useStyles = makeStyles((theme) => ({
 
   },
   margin:{
-    margin: theme.spacing(1,4),
+    margin: theme.spacing(1,1),
+  },
+  OverTimeInput:{
+    alignItems: "flex-start"
   },
 
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 80,
+  },
 
   icon: {
     color: theme.palette.icon,
@@ -80,7 +87,7 @@ export const useStyles = makeStyles((theme) => ({
       color: `${main_color}`
     },
     '& .overtime':{
-      flexGrow:4
+      flexGrow:6
     }
   },
   calendar_header:{
@@ -174,7 +181,7 @@ export const useStyles = makeStyles((theme) => ({
       borderBottom: "none"
     },
     '& .overtime':{
-      flexGrow:4
+      flexGrow:6
     },
 },
   cell:{

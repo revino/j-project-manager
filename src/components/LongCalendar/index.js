@@ -15,7 +15,7 @@ function LongCalendar(props) {
 
   const classes = useStyles();
 
-  const { workTimes, setWorkTimes, Month, setMonth } = props;
+  const { workTimes, setWorkTimes, Month, setMonth, directList, setDriects } = props;
 
   const onDateClick = useCallback(
     day => {
@@ -50,7 +50,7 @@ function LongCalendar(props) {
       <Cells
         onDateClick={onDateClick} prevMonth={prevMonth}
         currentMonth={Month.currentMonth} selectedDate={Month.selectedDate} classes={classes}
-        workTimes={workTimes} setWorkTimes={setWorkTimes}
+        workTimes={workTimes} setWorkTimes={setWorkTimes} directList = {directList} setDriects={setDriects}
       />
     </div>
   );

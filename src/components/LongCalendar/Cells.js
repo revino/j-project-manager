@@ -2,14 +2,14 @@
 import React from 'react';
 
 //Material UI
-import {  } from '@material-ui/core';
+import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 
 //
 import { format, startOfMonth, endOfMonth, isSameDay, isSaturday, isSunday, addDays} from "date-fns";
 import {RedditTextField} from './style'
 
 function Cells (props) {
-  const {currentMonth, selectedDate, workTimes , setWorkTimes, onDateClick, classes } = props;
+  const {classes, currentMonth, selectedDate, workTimes , setWorkTimes, onDateClick, setDriects, directList } = props;
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd   = endOfMonth  (monthStart);
@@ -52,11 +52,44 @@ function Cells (props) {
           value={workTimes[formattedDate-1]}
           onChange={setWorkTimes}
           id={formattedDate}
-          label="초과 시간"
+          label="시간"
           variant="outlined"
-          className={`${classes.margin}`}
+          className={`${classes.margin} ${classes.OverTimeInput}`}
           step={0.5}
         />
+        <FormControl variant="outlined" className={classes.formControl}>
+          <InputLabel id="direct-checkin-select-outlined-label">출근</InputLabel>
+          <Select
+            labelId="direct-checkin"
+            id={formattedDate}
+            value={directList[formattedDate-1].checkin}
+            onChange={setDriects}
+            label="출근"
+            name={`checkin,${formattedDate}`}
+            key={formattedDate}
+          >
+            <MenuItem value={""}><em>None</em></MenuItem>
+            <MenuItem value={"이천"}>이천</MenuItem>
+            <MenuItem value={"청주"}>청주</MenuItem>
+            <MenuItem value={"음성"}>음성</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl variant="outlined" className={classes.formControl}>
+          <InputLabel id="direct-checkout-select-outlined-label">퇴근</InputLabel>
+          <Select
+            labelId="direct-checkout"
+            id={formattedDate}
+            value={directList[formattedDate-1].checkout}
+            onChange={setDriects}
+            label="퇴근"
+            name={`checkout,${formattedDate}`}
+          >
+            <MenuItem value={""}><em>None</em></MenuItem>
+            <MenuItem value={"이천"}>이천</MenuItem>
+            <MenuItem value={"청주"}>청주</MenuItem>
+            <MenuItem value={"음성"}>음성</MenuItem>
+          </Select>
+        </FormControl>
       </div>
 
     );

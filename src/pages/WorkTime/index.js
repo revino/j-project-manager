@@ -105,24 +105,15 @@ function a11yProps(index) {
   };
 }
 
-const workTimeQuery = (month)=> db.collection(`users`).doc(getUid()).collection(`workOverTimes`).doc(format(month, 'yyyy-MM'));
-
-const defaulttime = [
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0
-]
-
+const workTimeQuery   = (month)=> db.collection(`users`).doc(getUid()).collection(`workOverTimes`).doc(format(month, 'yyyy-MM'));
+const directListQuery = (month)=> db.collection(`users`).doc(getUid()).collection(`workDirect`).doc(format(month, 'yyyy-MM'));
 const getHolydays = (month)=>{
 
   const monthStart = startOfMonth(month);
   const monthEnd   = endOfMonth  (monthStart);
   const endDate    = endOfWeek   (monthEnd);
-
-  let day = monthStart;
-
-  let   holidays = [];
+  let day      = monthStart;
+  let holidays = [];
 
   while (day <= endDate) {
     holidays.push(isSunday(day)? 1 : 0);
@@ -139,16 +130,18 @@ function WorkTime(props) {
 
     const classes = useStyles();
 
-    const [value    , setValue    ] = useState(0);
-    const [totalTime, setTotalTime] = useState(0);
-    const [fixedPay , setFixedPay ] = useState(0);
-    const [Month    , setMonth    ] = useState({currentMonth: new Date(),selectedDate: new Date()});
-    const [workTimes, setWorkTimes] = useState(defaulttime);
-    const [holidays , setHolidays ] = useState(getHolydays(new Date()))
-   
+    const [value      , setValue      ] = useState(0);
+    const [totalTime  , setTotalTime  ] = useState(0);
+    const [fixedPay   , setFixedPay   ] = useState(0);
+    const [Month      , setMonth      ] = useState({currentMonth: new Date(),selectedDate: new Date()});
+    const [workTimes  , setWorkTimes  ] = useState(Array.from({length: 31}, () => 0));
+    const [holidays   , setHolidays   ] = useState(getHolydays(new Date()))
+    const [directList , setDirectList ] = useState(Array.from({length: 31}, () => {return {checkin:"", checkout:""};}))
+
     //custom Hook
-    const {data         , setRef} = useFirebaseListenCollection(workTimeQuery(Month.currentMonth));
-    const {data:userdata        } = useFirebaseOnceCollection  (db.collection(`users`).doc(getUid()));
+    const {data           , setRef             } = useFirebaseListenCollection(workTimeQuery(Month.currentMonth));
+    const {data:directData, setRef:setDirectRef} = useFirebaseListenCollection(directListQuery(Month.currentMonth));
+    const {data:userdata                       } = useFirebaseOnceCollection  (db.collection(`users`).doc(getUid()));
 
     //Data request
     const updateWorkTimes = useCallback(async(worktime) =>{
@@ -198,11 +191,50 @@ function WorkTime(props) {
       setWorkTimes(timeArray);
     }, []);
 
+    const clearDirectList = useCallback(e => {
+      let array = Array.from({length: 31}, () => {return {checkin:"", checkout:""}});
+      setDirectList(array);
+    }, []);
+
     const changeMonth = (changeMonth)=>{
       setMonth(changeMonth);
       setHolidays(getHolydays(changeMonth.currentMonth));
       setRef(workTimeQuery(changeMonth.currentMonth));
+      setDirectRef(directListQuery(changeMonth.currentMonth));
     }
+
+    const updateDirectist = useCallback(async(list) =>{
+
+      try{
+        const memosRef = db.collection(`users`).doc(getUid()).collection(`workDirect`).doc(format(Month.currentMonth, 'yyyy-MM'));
+
+        await memosRef.set({list:list});
+      }catch(err){
+        console.log(err);
+      }
+    },[Month])
+
+    const onChangeDirect = useCallback(e => {
+      e.preventDefault();
+      const {value, name} = e.target;
+      const data = name.split(",");
+      const list = [...directList];
+      const id = Number(data[1]) - 1;
+      if(data[1]<0 || data[1]>31) return;
+
+      if(data[0] === "checkout"){
+        list[id].checkout = value;
+      }
+      else if(data[0] ==="checkin" ){
+        list[id].checkin = value;
+      }
+      else return;
+
+      setDirectList(list);
+      updateDirectist(list);
+
+
+    }, [directList, setDirectList,updateDirectist]);
 
     //UseEffect
     useEffect(() =>{
@@ -239,6 +271,28 @@ function WorkTime(props) {
     },[data,clearWorkTimes])
 
     useEffect(()=>{
+      try{
+        if(!!directData){
+          const d = directData.data()
+          if(!!d) {
+            let array = new Array(31).fill(0);
+
+            d.list.forEach((el,id) => {
+              array[id]= el
+            });
+            setDirectList(array);
+          }
+          else{
+            clearDirectList();
+          }
+        }
+      }catch(err){
+        console.log(err);
+        clearDirectList();
+      }
+    },[directData,clearDirectList])
+
+    useEffect(()=>{
       if(!!userdata && !!userdata.data()){
         setFixedPay(userdata.data().fixedPay)
       }
@@ -261,10 +315,8 @@ function WorkTime(props) {
         <TabPanel value={value} index={0}>
           <Grid container spacing={1}>
             <Grid item lg={4}  sm={4}  xl={3}  xs={12}> <CardOverTime  className={`${classes.container_card}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime}/> </Grid>
-
-  <Grid item lg={4}  sm={4}  xl={3}  xs={12}> <CardBasicTime className={`${classes.container_card}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays}totalTime={totalTime} fixedPay={fixedPay} updateFixedPay={setFixedPay}/> </Grid>
-
-            <Grid item lg={12} sm={12} xl={12} xs={12}>7
+            <Grid item lg={4}  sm={4}  xl={3}  xs={12}> <CardBasicTime className={`${classes.container_card}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime} fixedPay={fixedPay} updateFixedPay={setFixedPay}/> </Grid>
+            <Grid item lg={12} sm={12} xl={12} xs={12}>
               <Card className={`${classes.container_calendar}`} >
                 <Calendar workTimes={workTimes} setWorkTimes={onChangeWorkTime} Month={Month} setMonth={changeMonth}/>
               </Card>
@@ -273,13 +325,14 @@ function WorkTime(props) {
         </TabPanel>
         <TabPanel value={value} index={1}>
           <Grid container spacing={1}>
-            <Grid item lg={4} sm={12} xl={4} xs={12}> <CardOverTime  mini className={`${classes.container_card_mini}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime}/> </Grid>
-            
-              <Grid item lg={4} sm={12} xl={4} xs={12}> <CardBasicTime mini className={`${classes.container_card_mini}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime} fixedPay={fixedPay} updateFixedPay={setFixedPay}/> </Grid>
-
+            <Grid item lg={4} sm={12} xl={4} xs={12}> <CardOverTime  mini className={`${classes.container_card_mini}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime} directList = {directList}/> </Grid>
+            <Grid item lg={4} sm={12} xl={4} xs={12}> <CardBasicTime mini className={`${classes.container_card_mini}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime} directList = {directList} fixedPay={fixedPay} updateFixedPay={setFixedPay}/> </Grid>
             <Grid item lg={12} sm={12} xl={12} xs={12}>
               <Card className={`${classes.container_calendar_mini}`} >
-                <LongCalendar workTimes={workTimes} setWorkTimes={onChangeWorkTime} Month={Month} setMonth={changeMonth}/>
+                <LongCalendar
+                  workTimes={workTimes} setWorkTimes={onChangeWorkTime}
+                  directList = {directList} setDriects={onChangeDirect}
+                  Month={Month} setMonth={changeMonth}/>
               </Card>
             </Grid>
           </Grid>
