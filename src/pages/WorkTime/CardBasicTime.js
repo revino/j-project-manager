@@ -77,6 +77,7 @@ function NumberFormatCustom(props) {
     />
   );
 }
+/*
 
 const calcPay = (fixPay, workTimes, totalTime)=>{
   const hourPay = fixPay / 20;
@@ -84,28 +85,56 @@ const calcPay = (fixPay, workTimes, totalTime)=>{
   const moneyTime =  (workTime > 20)? workTime - 20 : 0;
   return Math.ceil(hourPay * moneyTime);
 }
+*/
+const calcPay2 = (fixedPay,  workTimes, holidays,maxOverTime) => {
+  if(holidays === null || holidays.length ===0) return 0;
+  if(workTimes === null || workTimes.length === 0) return 0;
+  console.log(holidays, "log")
+       const hourPay = fixedPay/20; 
+  
+        const maxMoneyTime = maxOverTime-20; 
+  
+      const holidayTime = workTimes.reduce((acc,cur,idx)=>acc+(holidays[idx]===1? cur: 0 ),0); 
+  
+       const totalTime = workTimes.reduce((acc,cur)=> acc+ cur); 
+  
+       let moneyTime=0; 
+  
+       moneyTime += holidayTime ;
+       if(totalTime > maxOverTime-20){
+           moneyTime += (maxMoneyTime-holidayTime) ;
+       }
+       else if(totalTime>20){
+            moneyTime += totalTime;
+        }
+
+       return moneyTime * hourPay;
+  }
+  
+
+
 
 function CardBasicTime(props) {
   const classe = useStyles();
-  const {className, workTimes, totalTime, fixedPay, updateFixedPay} = props;
-  const [extraPay, setExtraPay] = useState(calcPay(fixedPay,workTimes, totalTime));
+  const {className, workTimes, totalTime, fixedPay, updateFixedPay, holidays} = props;
+  const [extraPay, setExtraPay] = useState(calcPay2(fixedPay,workTimes,holidays, totalTime));
   const handleChange = (event) => {
-    const extraPay = calcPay(event.target.value,workTimes,totalTime);
+    const extraPay = calcPay2(event.target.value,workTimes,holidays,totalTime);
     updateFixedPay(event.target.value);
     setExtraPay(extraPay);
   };
 
   useEffect(()=>{
-    const extraPay = calcPay(fixedPay,workTimes,totalTime);
+    const extraPay = calcPay2(fixedPay,workTimes,holidays,totalTime);
     setExtraPay(extraPay);
-  },[workTimes, totalTime, fixedPay])
+  },[workTimes, totalTime, fixedPay,holidays])
 
 
   return (
     <Card className={className}>
     <CardContent>
       <Grid
-        container
+        container3
         direction="row"
         justify="center"
         alignItems="center"

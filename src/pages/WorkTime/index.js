@@ -14,7 +14,7 @@ import CardOverTime from './CardOverTime'
 import CardBasicTime from './CardBasicTime'
 import BackToTop from '../../components/BackToTop'
 
-import { format, differenceInCalendarDays, addMonths} from "date-fns";
+import { format, differenceInCalendarDays, addMonths, startOfMonth, addDays, endOfMonth, endOfWeek} from "date-fns";
 
 //hooks
 import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection';
@@ -23,6 +23,7 @@ import useFirebaseListenCollection from '../../hooks/useFirebaseListenCollection
 import {db} from '../../firebase'
 import {getUid} from '../../firebase/auth'
 import useFirebaseOnceCollection from '../../hooks/useFirebaseOnceCollection';
+import isSunday from 'date-fns/isSunday';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -113,6 +114,25 @@ const defaulttime = [
   0
 ]
 
+const getHolydays = (month)=>{
+
+  const monthStart = startOfMonth(month);
+  const monthEnd   = endOfMonth  (monthStart);
+  const endDate    = endOfWeek   (monthEnd);
+
+  let day = monthStart;
+
+  let   holidays = [];
+
+  while (day <= endDate) {
+    holidays.push(isSunday(day)? 1 : 0);
+    day = addDays(day, 1);
+  }
+
+  return holidays;
+};
+
+
 function WorkTime(props) {
 
     const {width} = props;
@@ -124,7 +144,8 @@ function WorkTime(props) {
     const [fixedPay , setFixedPay ] = useState(0);
     const [Month    , setMonth    ] = useState({currentMonth: new Date(),selectedDate: new Date()});
     const [workTimes, setWorkTimes] = useState(defaulttime);
-
+    const [holidays , setHolidays ] = useState(getHolydays(new Date()))
+   
     //custom Hook
     const {data         , setRef} = useFirebaseListenCollection(workTimeQuery(Month.currentMonth));
     const {data:userdata        } = useFirebaseOnceCollection  (db.collection(`users`).doc(getUid()));
@@ -179,6 +200,7 @@ function WorkTime(props) {
 
     const changeMonth = (changeMonth)=>{
       setMonth(changeMonth);
+      setHolidays(getHolydays(changeMonth.currentMonth));
       setRef(workTimeQuery(changeMonth.currentMonth));
     }
 
@@ -190,7 +212,8 @@ function WorkTime(props) {
     }, [width]);
 
     useEffect(()=>{
-      setTotalTime(Math.ceil(differenceInCalendarDays(addMonths(Month.currentMonth,1),Month.currentMonth) * 12 / 7));
+      setTotalTime(Math.floor(differenceInCalendarDays(addMonths(Month.currentMonth,1),Month.currentMonth) * 12 / 7));
+      //setHolidays(getHolydays(Month.currentMonth))
     },[Month])
 
     useEffect(()=>{
@@ -237,9 +260,11 @@ function WorkTime(props) {
         </AppBar>
         <TabPanel value={value} index={0}>
           <Grid container spacing={1}>
-            <Grid item lg={4}  sm={4}  xl={3}  xs={12}> <CardOverTime  className={`${classes.container_card}`} Month={Month.currentMonth} workTimes={workTimes} totalTime={totalTime}/> </Grid>
-            <Grid item lg={4}  sm={4}  xl={3}  xs={12}> <CardBasicTime className={`${classes.container_card}`} Month={Month.currentMonth} workTimes={workTimes} totalTime={totalTime} fixedPay={fixedPay} updateFixedPay={setFixedPay}/> </Grid>
-            <Grid item lg={12} sm={12} xl={12} xs={12}>
+            <Grid item lg={4}  sm={4}  xl={3}  xs={12}> <CardOverTime  className={`${classes.container_card}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime}/> </Grid>
+
+  <Grid item lg={4}  sm={4}  xl={3}  xs={12}> <CardBasicTime className={`${classes.container_card}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays}totalTime={totalTime} fixedPay={fixedPay} updateFixedPay={setFixedPay}/> </Grid>
+
+            <Grid item lg={12} sm={12} xl={12} xs={12}>7
               <Card className={`${classes.container_calendar}`} >
                 <Calendar workTimes={workTimes} setWorkTimes={onChangeWorkTime} Month={Month} setMonth={changeMonth}/>
               </Card>
@@ -248,8 +273,10 @@ function WorkTime(props) {
         </TabPanel>
         <TabPanel value={value} index={1}>
           <Grid container spacing={1}>
-            <Grid item lg={4} sm={12} xl={4} xs={12}> <CardOverTime  mini className={`${classes.container_card_mini}`} Month={Month.currentMonth} workTimes={workTimes} totalTime={totalTime}/> </Grid>
-            <Grid item lg={4} sm={12} xl={4} xs={12}> <CardBasicTime mini className={`${classes.container_card_mini}`} Month={Month.currentMonth} workTimes={workTimes} totalTime={totalTime} fixedPay={fixedPay} updateFixedPay={setFixedPay}/> </Grid>
+            <Grid item lg={4} sm={12} xl={4} xs={12}> <CardOverTime  mini className={`${classes.container_card_mini}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime}/> </Grid>
+            
+              <Grid item lg={4} sm={12} xl={4} xs={12}> <CardBasicTime mini className={`${classes.container_card_mini}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime} fixedPay={fixedPay} updateFixedPay={setFixedPay}/> </Grid>
+
             <Grid item lg={12} sm={12} xl={12} xs={12}>
               <Card className={`${classes.container_calendar_mini}`} >
                 <LongCalendar workTimes={workTimes} setWorkTimes={onChangeWorkTime} Month={Month} setMonth={changeMonth}/>
