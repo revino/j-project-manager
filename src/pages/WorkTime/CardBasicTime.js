@@ -105,7 +105,7 @@ const calcPay2 = (fixedPay,  workTimes, holidays,maxOverTime) => {
            moneyTime += (maxMoneyTime-holidayTime) ;
        }
        else if(totalTime>20){
-            moneyTime += totalTime;
+            moneyTime += totalTime-20;
         }
 
        return moneyTime * hourPay;
