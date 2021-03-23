@@ -72,6 +72,7 @@ function Cells (props) {
             <MenuItem value={"이천"}>이천</MenuItem>
             <MenuItem value={"청주"}>청주</MenuItem>
             <MenuItem value={"음성"}>음성</MenuItem>
+            <MenuItem value={"안성"}>안성</MenuItem>
           </Select>
         </FormControl>
         <FormControl variant="outlined" className={classes.formControl}>
@@ -88,6 +89,7 @@ function Cells (props) {
             <MenuItem value={"이천"}>이천</MenuItem>
             <MenuItem value={"청주"}>청주</MenuItem>
             <MenuItem value={"음성"}>음성</MenuItem>
+            <MenuItem value={"안성"}>안성</MenuItem>
           </Select>
         </FormControl>
       </div>

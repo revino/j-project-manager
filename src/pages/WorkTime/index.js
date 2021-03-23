@@ -30,8 +30,6 @@ const useStyles = makeStyles(theme => ({
       padding: theme.spacing(1)
     },
     container_calendar:{
-      minWidth: "65em",
-      maxWidth: "70em",
       display: "block",
       margin: ".5em",
       marginTop: 0,
@@ -314,11 +312,15 @@ function WorkTime(props) {
         </AppBar>
         <TabPanel value={value} index={0}>
           <Grid container spacing={1}>
-            <Grid item lg={4}  sm={4}  xl={3}  xs={12}> <CardOverTime  className={`${classes.container_card}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime}/> </Grid>
-            <Grid item lg={4}  sm={4}  xl={3}  xs={12}> <CardBasicTime className={`${classes.container_card}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime} fixedPay={fixedPay} updateFixedPay={setFixedPay}/> </Grid>
+            <Grid item lg={4}  sm={4}  xl={3}  xs={12}> <CardOverTime  className={`${classes.container_card}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime} directList = {directList}/> </Grid>
+            <Grid item lg={4}  sm={4}  xl={3}  xs={12}> <CardBasicTime className={`${classes.container_card}`} Month={Month.currentMonth} workTimes={workTimes} holidays={holidays} totalTime={totalTime} directList = {directList} fixedPay={fixedPay} updateFixedPay={setFixedPay}/> </Grid>
             <Grid item lg={12} sm={12} xl={12} xs={12}>
               <Card className={`${classes.container_calendar}`} >
-                <Calendar workTimes={workTimes} setWorkTimes={onChangeWorkTime} Month={Month} setMonth={changeMonth}/>
+                <Calendar
+                  workTimes={workTimes} setWorkTimes={onChangeWorkTime}
+                  Month={Month} setMonth={changeMonth}
+                  directList = {directList} setDriects={onChangeDirect}
+                />
               </Card>
             </Grid>
           </Grid>
