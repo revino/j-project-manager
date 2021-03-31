@@ -242,7 +242,9 @@ function WorkTime(props) {
     }, [width]);
 
     useEffect(()=>{
-      setTotalTime(Math.floor(differenceInCalendarDays(addMonths(Month.currentMonth,1),Month.currentMonth) * 12 / 7));
+      const start = startOfMonth(Month.currentMonth);
+      const end   = addMonths(start,1);
+      setTotalTime(Math.floor( differenceInCalendarDays(end,start) * 12 / 7));
       //setHolidays(getHolydays(Month.currentMonth))
     },[Month])
 
